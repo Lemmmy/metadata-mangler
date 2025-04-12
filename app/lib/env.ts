@@ -11,6 +11,8 @@ export const env = z
 
     MUSIC_LIBRARY_PATH: z.string(),
     TEST_ALBUM_PATH: z.string(),
+    // Allow accessing paths outside of the music library
+    ALLOW_TRAVERSAL: z.boolean().default(false),
 
     VGMDB_API_URL: z.string().optional(),
     VGMDB_API_USERNAME: z.string().optional(),

@@ -1,6 +1,7 @@
 import * as fsp from "fs/promises";
 import * as path from "path";
 import { parseFile } from "music-metadata";
+import { stripLibraryPath } from "../paths";
 
 /**
  * Represents a music track with metadata
@@ -206,5 +207,8 @@ export const getCoverArtUrl = (coverArt: Uint8Array): string =>
 
 export function cleanTrackForWeb(track: FileTrack): WebTrack {
   const { coverArt, ...rest } = track;
-  return rest;
+  return {
+    ...rest,
+    directory: stripLibraryPath(rest.directory),
+  };
 }

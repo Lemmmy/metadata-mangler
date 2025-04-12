@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router } from "~/api/trpc";
+import { rebasePath, stripLibraryPath } from "~/lib/paths";
 import {
   readTracksFromDirectory,
   getAlbumName,
@@ -34,7 +35,7 @@ export const album = router({
     .query(async ({ input }) => {
       try {
         // Read tracks from the directory with original metadata
-        const tracks = await readTracksFromDirectory(input.path);
+        const tracks = await readTracksFromDirectory(rebasePath(input.path));
 
         const albumName = getAlbumName(tracks);
         const albumArtist = getAlbumArtist(tracks);
@@ -45,7 +46,7 @@ export const album = router({
             name: albumName || "Unknown Album",
             artist: albumArtist || "Unknown Artist",
             coverArt: coverArt ? getCoverArtUrl(coverArt) : null,
-            directory: input.path,
+            directory: stripLibraryPath(input.path),
           },
           tracks: tracks.map(cleanTrackForWeb),
         };
@@ -54,37 +55,42 @@ export const album = router({
         throw new Error("Failed to load album metadata");
       }
     }),
-    
+
   // Write metadata to album tracks
   writeTracks: publicProcedure
     .input(
       z.object({
         tracks: z.array(trackMetadataSchema),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       try {
         // Extract file paths and tags from input tracks
         const filePaths: string[] = [];
         const tagsList: Partial<WritableTags>[] = [];
-        
-        input.tracks.forEach(track => {
+
+        input.tracks.forEach((track) => {
           const { filePath, ...tags } = track;
-          filePaths.push(filePath);
+          filePaths.push(rebasePath(filePath));
           tagsList.push(tags as Partial<WritableTags>);
         });
-        
+
         // Write the metadata to the files
         const results = await writeTagsToFiles(filePaths, tagsList);
-        
+
         // Check if all writes were successful
-        const allSuccessful = results.every((result: WriteResult) => result.success);
-        
+        const allSuccessful = results.every(
+          (result: WriteResult) => result.success,
+        );
+
         // Get any error messages
         const errors = results
           .filter((result: WriteResult) => !result.success && result.error)
-          .map((result: WriteResult) => `${result.filePath}: ${result.error}`);
-          
+          .map(
+            (result: WriteResult) =>
+              `${stripLibraryPath(result.filePath)}: ${result.error}`,
+          );
+
         return {
           success: allSuccessful,
           results,

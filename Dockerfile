@@ -28,9 +28,4 @@ COPY --from=build-env /app/build /app/build
 WORKDIR /app
 
 ENV NODE_ENV=production
-
-ENV METAFLAC_PATH=/usr/bin/metaflac
-ENV MID3V2_PATH=/usr/bin/mid3v2
-ENV VORBISCOMMENT_PATH=/usr/bin/vorbiscomment
-
 CMD ["pnpm", "run", "start"]

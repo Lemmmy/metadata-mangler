@@ -1,10 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/lib/trpc";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { SaveIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMetadataStore } from "~/components/useMetadataStore";
+import { useMetadataStore } from "~/components/album/useMetadataStore";
 import type { StoreAlbum } from "./useMetadataStore";
 import { cn } from "~/lib/utils";
 import { useShallow } from "zustand/react/shallow";

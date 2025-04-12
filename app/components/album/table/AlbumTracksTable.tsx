@@ -13,7 +13,7 @@ import {
   type SetStateAction,
 } from "react";
 import isEqual from "react-fast-compare";
-import { type StoreTrack } from "~/components/useMetadataStore";
+import { type StoreTrack } from "~/components/album/useMetadataStore";
 import { noop } from "~/lib/noop";
 import { cn } from "~/lib/utils";
 import { albumTableColumns } from "./useAlbumTableColumns";

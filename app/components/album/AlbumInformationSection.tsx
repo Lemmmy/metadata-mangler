@@ -1,7 +1,7 @@
 import {
   useMetadataStore,
   type StoreAlbum,
-} from "~/components/useMetadataStore";
+} from "~/components/album/useMetadataStore";
 import { useShallow } from "zustand/react/shallow";
 import { cn } from "~/lib/utils";
 

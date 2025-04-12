@@ -2,7 +2,7 @@ import { useShallow } from "zustand/react/shallow";
 import {
   useMetadataStore,
   type StoreTrackUpdatable,
-} from "~/components/useMetadataStore";
+} from "~/components/album/useMetadataStore";
 import { cn } from "~/lib/utils";
 
 interface EditableCellProps {

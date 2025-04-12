@@ -9,7 +9,7 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { formatDuration } from "~/lib/duration";
 import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
 import { EditableCell } from "./EditableCell";
-import { type StoreTrack, type StoreTrackUpdatable } from "./useMetadataStore";
+import { type StoreTrack, type StoreTrackUpdatable } from "../useMetadataStore";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {

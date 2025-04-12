@@ -6,13 +6,13 @@ import { useShallow } from "zustand/react/shallow";
 import {
   useMetadataStore,
   type StoreAlbum,
-} from "~/components/useMetadataStore";
+} from "~/components/album/useMetadataStore";
 import type { PriceUsage } from "~/lib/ai/aiProviders";
 import { useTRPC } from "~/lib/trpc";
-import { ColumnVisibilityDropdown } from "./ColumnVisibilityDropdown";
-import { ModelUsage } from "./ModelEstimate";
-import { Button } from "./ui/button";
-import { useModelPicker } from "./useModelPicker";
+import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
+import { ModelUsage } from "~/components/ModelEstimate";
+import { Button } from "~/components/ui/button";
+import { useModelPicker } from "~/components/useModelPicker";
 
 interface Props {
   album: StoreAlbum | null;
