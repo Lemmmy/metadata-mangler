@@ -136,12 +136,12 @@ export function AlbumLookupSection({
 
   return (
     <div className={className}>
-      <h3 className="text-lg font-medium">Metadata Lookup</h3>
+      <h3 className="text-lg font-medium">Metadata lookup</h3>
       <div className="mt-2 space-y-3">
         <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="text-muted-foreground mb-1 block text-sm font-medium">
-              URL or Supplementary Track Information
+              URL or supplementary track information
             </label>
             <textarea
               value={urlOrData}
@@ -155,7 +155,7 @@ export function AlbumLookupSection({
 
           <div>
             <label className="text-muted-foreground mb-1 block text-sm font-medium">
-              Additional Information
+              Additional information
             </label>
             <textarea
               value={additionalInfo}

@@ -38,11 +38,11 @@ export function AlbumInformationSection({ album }: Props) {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold">Album Information</h2>
+      <h2 className="text-xl font-semibold">Album information</h2>
       <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="text-muted-foreground block text-sm font-medium">
-            Album Name
+            Album name
           </label>
           <div className="relative mb-4">
             <input
@@ -64,7 +64,7 @@ export function AlbumInformationSection({ album }: Props) {
         </div>
         <div>
           <label className="text-muted-foreground block text-sm font-medium">
-            Album Artist
+            Album artist
           </label>
           <div className="relative mb-4">
             <input

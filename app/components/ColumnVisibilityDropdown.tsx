@@ -50,7 +50,7 @@ export function ColumnVisibilityDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
+        <DropdownMenuLabel>Toggle table columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {Object.entries(columnLabels).map(([columnId, label]) => (
           <DropdownMenuCheckboxItem
