@@ -1,3 +1,4 @@
+import { useAsyncThrottler } from "@tanstack/react-pacer";
 import { useMutation } from "@tanstack/react-query";
 import type { VisibilityState } from "@tanstack/react-table";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
@@ -6,13 +7,12 @@ import {
   useMetadataStore,
   type StoreAlbum,
 } from "~/components/useMetadataStore";
+import type { PriceUsage } from "~/lib/ai/aiProviders";
 import { useTRPC } from "~/lib/trpc";
 import { ColumnVisibilityDropdown } from "./ColumnVisibilityDropdown";
-import { useModelPicker } from "./useModelPicker";
-import { Button } from "./ui/button";
-import type { PriceUsage } from "~/lib/aiProviders";
-import { useAsyncThrottler } from "@tanstack/react-pacer";
 import { ModelUsage } from "./ModelEstimate";
+import { Button } from "./ui/button";
+import { useModelPicker } from "./useModelPicker";
 
 interface Props {
   album: StoreAlbum | null;

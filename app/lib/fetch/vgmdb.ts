@@ -1,9 +1,5 @@
 import { env } from "~/lib/env";
 
-/**
- * Interfaces for VGMDB API responses
- */
-
 export interface VgmdbNames {
   en?: string;
   ja?: string;

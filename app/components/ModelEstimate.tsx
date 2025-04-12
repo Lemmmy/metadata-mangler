@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import type { PriceUsage } from "~/lib/aiProviders";
+import type { PriceUsage } from "~/lib/ai/aiProviders";
 
 interface Props {
   usage: Partial<PriceUsage> | null | undefined;

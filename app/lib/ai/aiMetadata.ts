@@ -2,7 +2,7 @@ import { generateObject, type LanguageModelUsage } from "ai";
 import { traceAISDKModel } from "evalite/ai-sdk";
 import { z } from "zod";
 import type { SupportedModel } from "./aiProviders";
-import type { FileTrack } from "./musicMetadata";
+import type { FileTrack } from "../tags/musicMetadata";
 
 export type SupplementalDataSource =
   | "vgmdb"

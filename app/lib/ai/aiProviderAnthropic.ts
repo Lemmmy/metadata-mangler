@@ -1,7 +1,7 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 import type { LanguageModelUsage } from "ai";
 import type { AITrack } from "./aiMetadata";
-import { env } from "./env";
+import { env } from "../env";
 
 const anthropic = env.ANTHROPIC_API_KEY ? new Anthropic() : null;
 

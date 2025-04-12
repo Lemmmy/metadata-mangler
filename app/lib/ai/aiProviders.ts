@@ -4,7 +4,7 @@ import type { LanguageModel, LanguageModelUsage } from "ai";
 import { z } from "zod";
 import type { AITrack } from "./aiMetadata";
 import { estimateAnthropicTokenUsage } from "./aiProviderAnthropic";
-import { env } from "./env";
+import { env } from "../env";
 
 const hasAnthropic = () => !!env.ANTHROPIC_API_KEY;
 const hasOpenRouter = () => !!env.OPENROUTER_API_KEY;

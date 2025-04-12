@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { formatDuration } from "~/lib/duration";
-import { isTagSuspicious } from "~/lib/musicMetadataShared";
+import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
 import { EditableCell } from "./EditableCell";
 import { type StoreTrack, type StoreTrackUpdatable } from "./useMetadataStore";
 

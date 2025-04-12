@@ -1,6 +1,6 @@
 import { publicProcedure, router } from "~/api/trpc";
 import { env } from "~/lib/env";
-import { getWebSupportedModels } from "~/lib/aiProviders";
+import { getWebSupportedModels } from "~/lib/ai/aiProviders";
 
 export const models = router({
   supportedModels: publicProcedure.query(() => ({

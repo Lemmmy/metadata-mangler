@@ -1,8 +1,8 @@
 import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { AITrack } from "../lib/aiMetadata";
-import type { WebTrack } from "~/lib/musicMetadata";
+import type { AITrack } from "../lib/ai/aiMetadata";
+import type { WebTrack } from "~/lib/tags/musicMetadata";
 
 enableMapSet();
 

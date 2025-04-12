@@ -1,20 +1,20 @@
 import path from "path";
 import { z } from "zod";
 import { publicProcedure, router } from "~/api/trpc";
-import type { SupplementalDataSource } from "~/lib/aiMetadata";
+import type { SupplementalDataSource } from "~/lib/ai/aiMetadata";
 import {
   generateImprovedMetadata,
   generateImprovedMetadataPrompt,
-} from "~/lib/aiMetadata";
+} from "~/lib/ai/aiMetadata";
 import {
   supportedModelLut,
   supportedModelValidator,
   usageToPrice,
-} from "~/lib/aiProviders";
+} from "~/lib/ai/aiProviders";
 import {
   fetchCachedSupplementalData,
   parseSupplementalDataSource,
-} from "~/lib/supplementalFetch";
+} from "~/lib/fetch/supplementalFetch";
 
 // Regex patterns for supported URLs
 

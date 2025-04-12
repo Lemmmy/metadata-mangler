@@ -7,10 +7,10 @@ import {
   type ImprovedMetadataResult,
   type SupplementalDataSource,
 } from "./aiMetadata";
-import { env } from "./env";
-import { readTracksFromDirectory } from "./musicMetadata";
-import { containsJapaneseCharacters } from "./utils";
-import { cleanVgmdbAlbum, fetchVgmdbAlbum } from "./vgmdb";
+import { env } from "../env";
+import { readTracksFromDirectory } from "../tags/musicMetadata";
+import { containsJapaneseCharacters } from "../utils";
+import { cleanVgmdbAlbum, fetchVgmdbAlbum } from "../fetch/vgmdb";
 import { JSONDiff } from "autoevals";
 import { supportedModelLut } from "./aiProviders";
 

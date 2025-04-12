@@ -1,6 +1,6 @@
 import { LRUCache } from "lru-cache";
-import type { SupplementalDataSource } from "./aiMetadata";
-import { cleanVgmdbAlbum, fetchVgmdbAlbum } from "./vgmdb";
+import type { SupplementalDataSource } from "../ai/aiMetadata";
+import { cleanVgmdbAlbum, fetchVgmdbAlbum } from "../fetch/vgmdb";
 
 const URL_PATTERNS = {
   vgmdb: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/album\/(\d+)/i,

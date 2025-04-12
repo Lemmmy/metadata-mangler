@@ -7,7 +7,7 @@ import {
   getAlbumCoverArt,
   getCoverArtUrl,
   cleanTrackForWeb,
-} from "~/lib/musicMetadata";
+} from "~/lib/tags/musicMetadata";
 
 // Schema for validating the directory path
 const directorySchema = z.object({
