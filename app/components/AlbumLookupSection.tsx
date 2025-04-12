@@ -52,11 +52,6 @@ export function AlbumLookupSection({
       selectedModel: string,
       album: StoreAlbum | null,
     ) => {
-      console.log("estimateThrottler called with", {
-        urlOrData,
-        selectedModel,
-        album,
-      });
       if (!urlOrData.trim()) return;
 
       try {
@@ -124,7 +119,6 @@ export function AlbumLookupSection({
 
   useEffect(() => {
     if (urlOrData.trim() && album) {
-      console.log("Estimating...");
       estimateThrottler.maybeExecute(
         urlOrData,
         additionalInfo,
@@ -189,7 +183,6 @@ export function AlbumLookupSection({
             usage={(usage || estimateMutation.data) as PriceUsage}
             pending={estimateMutation.isPending}
           />
-
           <ColumnVisibilityDropdown
             columnVisibility={columnVisibility}
             setColumnVisibility={setColumnVisibility}

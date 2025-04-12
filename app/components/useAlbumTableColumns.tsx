@@ -79,6 +79,14 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
       hiddenByDefault: true,
     },
   }),
+  columnHelper.accessor("albumArtist", {
+    header: "Album Artist",
+    id: "albumArtist",
+    cell: createEditableCellRenderer("albumArtist"),
+    meta: {
+      hiddenByDefault: true,
+    },
+  }),
   columnHelper.accessor("duration", {
     header: "Duration",
     id: "duration",

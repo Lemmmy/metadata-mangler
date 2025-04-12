@@ -15,6 +15,11 @@ export const env = z
     VGMDB_API_URL: z.string().optional(),
     VGMDB_API_USERNAME: z.string().optional(),
     VGMDB_API_PASSWORD: z.string().optional(),
+
+    // Tag writing utilities
+    METAFLAC_PATH: z.string().optional(),
+    MID3V2_PATH: z.string().optional(),
+    VORBISCOMMENT_PATH: z.string().optional(),
   })
   // Require at least one API key
   .refine(

@@ -27,6 +27,11 @@ export interface FileTrack {
 
 export type WebTrack = Omit<FileTrack, "coverArt">;
 
+export type WritableTags = Pick<
+  FileTrack,
+  "trackNumber" | "discNumber" | "title" | "artists" | "album" | "albumArtist"
+>;
+
 export const supportedFileTypes = [".flac", ".mp3", ".ogg"];
 export const supportedFileTypesLut = new Set(supportedFileTypes);
 
@@ -35,9 +40,16 @@ export const supportedFileTypesLut = new Set(supportedFileTypes);
  * @param filePath Full path to the music file
  * @returns Promise resolving to a Track object
  */
-export async function readTrackFromFile(filePath: string): Promise<FileTrack> {
+export async function readTrackFromFile(
+  filePath: string,
+  duration: boolean,
+  coverArt: boolean,
+): Promise<FileTrack> {
   try {
-    const metadata = await parseFile(filePath, { duration: true });
+    const metadata = await parseFile(filePath, {
+      duration,
+      skipCovers: !coverArt,
+    });
 
     // Extract directory and filename
     const directory = path.dirname(filePath);
@@ -105,7 +117,7 @@ export async function readTracksFromDirectory(
           await scanDirectory(fullPath); // Recursively scan subdirectories
         } else if (entry.isFile() && isSupportedMusicFile(fullPath)) {
           try {
-            const track = await readTrackFromFile(fullPath);
+            const track = await readTrackFromFile(fullPath, true, true);
             tracks.push(track);
 
             if (tracks.length >= limit) {

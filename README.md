@@ -2,7 +2,7 @@
 
 A personal tool for managing metadata of music libraries.
 
-# WARNING: This doesn't save tracks yet.
+# WARNING: This saves tracks in-place and hasn't been tested extensively yet. Have backups!
 
 ## Overview
 

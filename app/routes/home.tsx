@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useLoaderData } from "react-router";
 import { useShallow } from "zustand/react/shallow";
+import { AlbumHeader } from "~/components/AlbumHeader";
 import { AlbumInformationSection } from "~/components/AlbumInformationSection";
 import { AlbumLookupSection } from "~/components/AlbumLookupSection";
 import { AlbumTracksTable } from "~/components/AlbumTracksTable";
-import { Button } from "~/components/ui/button";
 import { useAlbumTableColumns } from "~/components/useAlbumTableColumns";
 import { useMetadataStore } from "~/components/useMetadataStore";
 import { env } from "~/lib/env";
 import { prefetch } from "~/lib/prefetch";
 import { useTRPC } from "~/lib/trpc";
 import type { Route } from "./+types/home";
-import { useLoaderData } from "react-router";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.svg" },
@@ -45,17 +45,11 @@ export default function Home() {
   const { testDataPath } = useLoaderData<typeof loader>();
 
   // Get state and actions from the metadata store
-  const { album, tracks, initialize, hasUnsavedChanges } = useMetadataStore(
+  const { album, tracks, initialize } = useMetadataStore(
     useShallow((s) => ({
       album: s.album,
       tracks: s.tracks,
-      originalTracks: s.originalTracks,
-      updatedFields: s.updatedFields,
       initialize: s.initialize,
-      updateTrack: s.updateTrack,
-      hasUnsavedChanges: Object.values(s.updatedFields).some(
-        (set) => set.size > 0,
-      ),
     })),
   );
 
@@ -81,12 +75,6 @@ export default function Home() {
   const { columnVisibility, setColumnVisibility } =
     useAlbumTableColumns(originalTracks);
 
-  const handleSaveChanges = () => {
-    // In a real implementation, you would call a mutation to save the changes
-    // const updatedTracks = getTrackData();
-    // trpc.album.updateTracks.mutate({ tracks: updatedTracks });
-  };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -100,6 +88,8 @@ export default function Home() {
 
   return (
     <main className="text-foreground mx-auto box-border min-h-screen p-4">
+      <AlbumHeader album={album} />
+
       {isLoading && (
         <div className="bg-muted mb-4 rounded-md p-4 text-center">
           <p>Loading album metadata...</p>
@@ -144,15 +134,6 @@ export default function Home() {
         columnVisibility={columnVisibility}
         setColumnVisibility={setColumnVisibility}
       />
-
-      {hasUnsavedChanges && (
-        <div className="mt-4">
-          <p className="text-muted-foreground">Changes not saved</p>
-          <Button variant="default" size="sm" onClick={handleSaveChanges}>
-            Save Changes
-          </Button>
-        </div>
-      )}
     </main>
   );
 }

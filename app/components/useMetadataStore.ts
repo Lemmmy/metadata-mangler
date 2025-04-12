@@ -79,6 +79,19 @@ export const useMetadataStore = create<MetadataState>()(
     updateAlbumArtist: (artist) =>
       set((state) => {
         if (state.album) state.album.artist = artist;
+
+        // Update the 'album artist' field in every track, too
+        for (let i = 0; i < state.tracks.length; i++) {
+          const track = state.tracks[i];
+
+          const oldArtist = track.albumArtist;
+          if (oldArtist !== artist) {
+            const set = (state.updatedFields[i] ||= new Set<string>());
+            set.add("albumArtist");
+          }
+
+          track.albumArtist = artist;
+        }
       }),
 
     updateTrack: (index, field, value) =>
