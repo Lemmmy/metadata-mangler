@@ -78,7 +78,7 @@ export default function Home() {
   }, [albumData.data, initialize]);
 
   const originalTracks = useMetadataStore(useShallow((s) => s.originalTracks));
-  const { columnVisibility, setColumnVisibility, columns } =
+  const { columnVisibility, setColumnVisibility } =
     useAlbumTableColumns(originalTracks);
 
   const handleSaveChanges = () => {
@@ -143,7 +143,6 @@ export default function Home() {
         tracks={displayTracks}
         columnVisibility={columnVisibility}
         setColumnVisibility={setColumnVisibility}
-        columns={columns}
       />
 
       {hasUnsavedChanges && (

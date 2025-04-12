@@ -1,21 +1,12 @@
+import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { enableMapSet } from "immer";
 import type { AITrack } from "../lib/aiMetadata";
+import type { WebTrack } from "~/lib/musicMetadata";
 
 enableMapSet();
 
-export interface StoreTrack {
-  directory: string;
-  filename: string;
-  trackNumber: number;
-  discNumber: number;
-  title: string;
-  artists: string; // semicolon separated
-  album: string;
-  albumArtist: string;
-  duration: number;
-}
+export type StoreTrack = WebTrack;
 
 export interface StoreAlbum {
   name: string;

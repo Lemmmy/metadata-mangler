@@ -2,7 +2,6 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  type ColumnDef,
   type Table,
   type VisibilityState,
 } from "@tanstack/react-table";
@@ -13,27 +12,26 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { type StoreTrack } from "~/components/useMetadataStore";
-import { cn } from "~/lib/utils";
 import isEqual from "react-fast-compare";
+import { type StoreTrack } from "~/components/useMetadataStore";
 import { noop } from "~/lib/noop";
+import { cn } from "~/lib/utils";
+import { albumTableColumns } from "./useAlbumTableColumns";
 
 interface Props {
   tracks: StoreTrack[];
   columnVisibility: VisibilityState;
   setColumnVisibility: Dispatch<SetStateAction<VisibilityState>>;
-  columns: ColumnDef<StoreTrack>[];
 }
 
 export function AlbumTracksTable({
   tracks,
   columnVisibility,
   setColumnVisibility,
-  columns,
 }: Props) {
   const table = useReactTable<StoreTrack>({
     data: tracks,
-    columns,
+    columns: albumTableColumns,
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode: "onChange",
     enableColumnResizing: true,

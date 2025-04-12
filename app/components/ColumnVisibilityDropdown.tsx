@@ -7,23 +7,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { type Dispatch, type SetStateAction } from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import type { VisibilityState } from "@tanstack/react-table";
+import { albumTableColumns } from "./useAlbumTableColumns";
 
 interface ColumnVisibilityDropdownProps {
   columnVisibility: VisibilityState;
   setColumnVisibility: Dispatch<SetStateAction<VisibilityState>>;
 }
-
-const columnLabels: Record<string, string> = {
-  filename: "Filename",
-  trackNumber: "Track #",
-  discNumber: "Disc #",
-  title: "Title",
-  artists: "Artists",
-  album: "Album",
-  duration: "Duration",
-};
 
 export function ColumnVisibilityDropdown({
   columnVisibility,
@@ -36,6 +27,21 @@ export function ColumnVisibilityDropdown({
     }));
   };
 
+  const columnLabels = useMemo(() => {
+    return albumTableColumns.reduce(
+      (acc, column) => {
+        const id = column.id;
+        if (!id) return acc;
+
+        const header = column.header;
+        acc[id] = typeof header === "string" ? header : id;
+
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+  }, []);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -46,13 +52,14 @@ export function ColumnVisibilityDropdown({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {Object.entries(columnVisibility).map(([columnId, isVisible]) => (
+        {Object.entries(columnLabels).map(([columnId, label]) => (
           <DropdownMenuCheckboxItem
             key={columnId}
-            checked={isVisible}
+            checked={columnVisibility[columnId]}
             onCheckedChange={() => toggleColumnVisibility(columnId)}
+            onSelect={(e) => e.preventDefault()} // Keep the menu open
           >
-            {columnLabels[columnId] || columnId}
+            {label}
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>

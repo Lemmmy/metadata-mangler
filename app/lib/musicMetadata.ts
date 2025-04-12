@@ -8,17 +8,27 @@ import { parseFile } from "music-metadata";
 export interface FileTrack {
   directory: string;
   filename: string;
+
   trackNumber: number;
   discNumber: number;
+
   title: string;
   artists: string; // semicolon separated
   album: string;
   albumArtist: string;
+
   duration: number;
   coverArt: Uint8Array | null;
+
+  container: string;
+  codec: string;
+  tagTypes: string[];
 }
 
 export type WebTrack = Omit<FileTrack, "coverArt">;
+
+export const supportedFileTypes = [".flac", ".mp3", ".ogg"];
+export const supportedFileTypesLut = new Set(supportedFileTypes);
 
 /**
  * Reads metadata from a music file and converts it to our Track interface
@@ -50,14 +60,21 @@ export async function readTrackFromFile(filePath: string): Promise<FileTrack> {
     return {
       directory,
       filename,
+
       trackNumber,
       discNumber,
+
       title: metadata.common.title || "",
       artists: artistString,
       album: metadata.common.album || "",
       albumArtist: metadata.common.albumartist || "",
+
       duration: metadata.format.duration || 0,
       coverArt: metadata.common.picture?.[0]?.data || null,
+
+      container: metadata.format.container || "",
+      codec: metadata.format.codec || "",
+      tagTypes: metadata.format.tagTypes || [],
     };
   } catch (error) {
     console.error(`Error reading metadata from ${filePath}:`, error);
@@ -72,10 +89,10 @@ export async function readTrackFromFile(filePath: string): Promise<FileTrack> {
  */
 export async function readTracksFromDirectory(
   directoryPath: string,
+  limit: number = 512,
 ): Promise<FileTrack[]> {
   const tracks: FileTrack[] = [];
 
-  // Function to recursively scan directories
   async function scanDirectory(dir: string): Promise<void> {
     try {
       const entries = await fsp.readdir(dir, { withFileTypes: true });
@@ -85,20 +102,19 @@ export async function readTracksFromDirectory(
         const fullPath = path.join(dir, entry.name);
 
         if (entry.isDirectory()) {
-          // Recursively scan subdirectories
-          await scanDirectory(fullPath);
-        } else if (entry.isFile()) {
-          // Check if file is a supported audio format
-          const ext = path.extname(entry.name).toLowerCase();
-          if ([".flac", ".mp3", ".m4a", ".ogg", ".wav", ".aac"].includes(ext)) {
-            try {
-              // Read track metadata and add to tracks array
-              const track = await readTrackFromFile(fullPath);
-              tracks.push(track);
-            } catch (error) {
-              console.error(`Error processing file ${fullPath}:`, error);
-              // Continue with other files even if one fails
+          await scanDirectory(fullPath); // Recursively scan subdirectories
+        } else if (entry.isFile() && isSupportedMusicFile(fullPath)) {
+          try {
+            const track = await readTrackFromFile(fullPath);
+            tracks.push(track);
+
+            if (tracks.length >= limit) {
+              console.warn(`Limit of ${limit} tracks reached`);
+              return;
             }
+          } catch (error) {
+            console.error(`Error processing file ${fullPath}:`, error);
+            // Continue with other files even if one fails
           }
         }
       });
@@ -114,7 +130,6 @@ export async function readTracksFromDirectory(
   // Start scanning from the provided directory
   await scanDirectory(directoryPath);
 
-  // Sort tracks by disc number and track number
   return tracks.sort((a, b) => {
     // First sort by disc number
     if (a.discNumber !== b.discNumber) return a.discNumber - b.discNumber;
@@ -132,7 +147,7 @@ export async function readTracksFromDirectory(
  */
 export function isSupportedMusicFile(filePath: string): boolean {
   const ext = path.extname(filePath).toLowerCase();
-  return [".flac", ".mp3", ".m4a", ".ogg", ".wav", ".aac"].includes(ext);
+  return supportedFileTypesLut.has(ext);
 }
 
 /**
@@ -174,10 +189,8 @@ export function getAlbumCoverArt(tracks: FileTrack[]): Uint8Array | null {
  * @param coverArt Cover art Uint8Array
  * @returns Data URL for the cover art
  */
-export function getCoverArtUrl(coverArt: Uint8Array): string {
-  // Create a data URL from the cover art buffer
-  return `data:image/jpeg;base64,${Buffer.from(coverArt).toString("base64")}`;
-}
+export const getCoverArtUrl = (coverArt: Uint8Array): string =>
+  `data:image/jpeg;base64,${Buffer.from(coverArt).toString("base64")}`;
 
 export function cleanTrackForWeb(track: FileTrack): WebTrack {
   const { coverArt, ...rest } = track;
