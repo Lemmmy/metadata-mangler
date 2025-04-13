@@ -1,18 +1,19 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { z } from "zod";
+import * as v from "valibot";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
-export const zodStringNumber = (def: number) =>
-  z
-    .string()
-    .regex(/^\d+$/)
-    .default((def ?? 0).toString())
-    .transform(Number);
+export const vStringNumber = (def: number) =>
+  v.pipe(
+    v.optional(v.string(), (def ?? 0).toString()),
+    v.regex(/^\d+$/),
+    v.transform(Number),
+  );
 
-export const zodStringBoolean = (def: boolean) =>
-  z
-    .enum(["true", "false"])
-    .default(def ? "true" : "false")
-    .transform((v) => v.toLowerCase() === "true");
+export const vStringBoolean = (def: boolean) =>
+  v.pipe(
+    v.optional(v.string(), def ? "true" : "false"),
+    v.picklist(["true", "false"]),
+    v.transform((v) => v === "true"),
+  );

@@ -1,7 +1,7 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { env } from "~/lib/env";
-import { z } from "zod";
+import * as v from "valibot";
 import { publicProcedure, router } from "~/api/trpc";
 import { rebasePath } from "~/lib/paths";
 import { isSupportedMusicFile } from "~/lib/tags/musicMetadata";
@@ -10,7 +10,7 @@ export const browse = router({
   // Checks how many valid track files are in a subdirectory before attempting to recursively open it as an album.
   // Refuses if it's greater than the limit (512 by default).
   albumPrecheck: publicProcedure
-    .input(z.object({ path: z.string() }))
+    .input(v.object({ path: v.string() }))
     .query(async ({ input }) => {
       try {
         const directoryPath = rebasePath(input.path);

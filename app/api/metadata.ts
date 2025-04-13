@@ -1,5 +1,5 @@
 import path from "path";
-import { z } from "zod";
+import * as v from "valibot";
 import { publicProcedure, router } from "~/api/trpc";
 import type { SupplementalDataSource } from "~/lib/ai/aiMetadata";
 import {
@@ -21,31 +21,32 @@ import {
 export const metadata = router({
   lookup: publicProcedure
     .input(
-      z.object({
-        input: z.string(),
-        additionalInfo: z.string().optional(),
+      v.object({
+        input: v.string(),
+        additionalInfo: v.optional(v.string()),
         modelId: supportedModelValidator,
-        albumName: z.string(),
-        albumArtist: z.string(),
-        tracks: z.array(
-          z.object({
-            directory: z.string(),
-            filename: z.string(),
-            trackNumber: z.number(),
-            discNumber: z.number(),
-            title: z.string(),
-            artists: z.string(),
-          }),
+        albumName: v.string(),
+        albumArtist: v.string(),
+        tracks: v.pipe(
+          v.array(
+            v.object({
+              directory: v.string(),
+              filename: v.string(),
+              trackNumber: v.number(),
+              discNumber: v.number(),
+              title: v.string(),
+              artists: v.string(),
+            }),
+          ),
+          v.minLength(1),
         ),
-        estimateOnly: z.boolean().optional().default(false),
+        estimateOnly: v.optional(v.boolean(), false),
       }),
     )
     .mutation(async ({ input }) => {
       try {
         const { tracks } = input;
-        if (tracks.length === 0) throw new Error("No tracks provided");
-
-        const inputTracks = input.tracks.map(({ directory, ...t }) => ({
+        const inputTracks = tracks.map(({ directory, ...t }) => ({
           ...t,
           baseDir: path.basename(directory),
         }));

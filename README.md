@@ -27,6 +27,8 @@ coded. Beware.
 
 - Web interface with table-based metadata editor
 - Browse and edit your music library metadata
+- Japanese-capable romaji directory searching powered by [kuroshiro](https://github.com/hexenq/kuroshiro) and
+  [kuromoji.js](https://github.com/takuyaa/kuromoji.js)
 - AI-assisted metadata suggestions and corrections. Corrections work on data supplied from:
   - VGMdb (requires a [VGMdb API proxy](https://github.com/hufman/vgmdb))
   - Musicbrainz (TODO)

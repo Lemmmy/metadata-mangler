@@ -97,8 +97,6 @@ export const useMetadataStore = create<MetadataState>()(
     updateTrack: (index, field, value) =>
       set((state) => {
         if (index >= 0 && index < state.tracks.length) {
-          console.log("Updating track", index, "field", field, "value", value);
-
           // Handle numeric fields
           if (field === "trackNumber" || field === "discNumber") {
             value = parseInt(value, 10) || 1;

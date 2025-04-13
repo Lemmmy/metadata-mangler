@@ -85,9 +85,9 @@ export function AlbumTracksTable({
                 <th
                   key={header.id}
                   className={cn(
-                    "text-muted-foreground px-3 py-2 text-left text-xs font-medium tracking-wider uppercase",
-                    "border-l border-l-white/25",
-                    "relative select-none",
+                    "bg-muted text-muted-foreground px-3 py-2 text-left text-xs font-medium tracking-wider uppercase",
+                    "sticky top-0 select-none",
+                    "before:absolute before:inset-y-0 before:left-0 before:block before:!w-px before:bg-zinc-700",
                   )}
                   style={{
                     width: `calc(var(--header-${header?.id}-size) * 1px)`,
@@ -143,7 +143,7 @@ const TableBody = memo(
               <td
                 key={cell.id}
                 className={cn(
-                  "text-card-foreground h-0",
+                  "text-card-foreground border-l-border h-0 border-l",
                   cell.column.columnDef.meta?.className,
                   cell.column.columnDef.meta?.classNameFn?.(cell.getContext()),
                 )}

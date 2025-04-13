@@ -9,6 +9,7 @@ import { makeAppTitle } from "~/lib/constants";
 import { rebasePath, stripLibraryPath } from "~/lib/paths";
 import { isSupportedMusicFile } from "~/lib/tags/musicMetadata";
 import type { Route } from "./+types/browse";
+import { prefetch } from "~/lib/prefetch";
 
 const DirectoryList = lazy(() => import("~/components/browse/DirectoryList"));
 
@@ -49,6 +50,24 @@ export function meta({ data }: Route.MetaArgs) {
   return [{ title: makeAppTitle(data.pathBasename || "Browse") }];
 }
 
+export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [
+  async ({ context, params }) => {
+    const { queryClient, trpc } = prefetch(context);
+
+    const safePath = rebasePath(params["*"] || "");
+    const strippedPath = stripLibraryPath(safePath);
+
+    // Prefetch the album pre-check, but without blocking the page. Don't bother pre-checking the library root
+    if (strippedPath) {
+      queryClient.prefetchQuery(
+        trpc.browse.albumPrecheck.queryOptions({
+          path: strippedPath,
+        }),
+      );
+    }
+  },
+];
+
 // prettier-ignore
 export const handle: BreadcrumbHandle<Route.ComponentProps["loaderData"]> = {
   breadcrumb: (data) => data ? [
@@ -63,19 +82,14 @@ export default function Browse({
   loaderData: { entries, path },
 }: Route.ComponentProps) {
   return (
-    <div className="container mx-auto flex flex-col py-4">
+    <main className="container mx-auto flex h-screen flex-col p-2">
       <BreadcrumbMenu className="mb-2" />
 
       <Suspense fallback={<DirectorySkeleton />}>
         <Await resolve={entries}>
-          {(entries) => (
-            <DirectoryList
-              entries={entries}
-              basePath={path ? `/browse/${path}` : "/browse"}
-            />
-          )}
+          {(entries) => <DirectoryList entries={entries} basePath={path} />}
         </Await>
       </Suspense>
-    </div>
+    </main>
   );
 }

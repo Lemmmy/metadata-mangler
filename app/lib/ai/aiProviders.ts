@@ -1,7 +1,7 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import type { LanguageModel, LanguageModelUsage } from "ai";
-import { z } from "zod";
+import * as v from "valibot";
 import type { AITrack } from "./aiMetadata";
 import { estimateAnthropicTokenUsage } from "./aiProviderAnthropic";
 import { env } from "../env";
@@ -55,11 +55,10 @@ export const supportedModelLut: Record<string, SupportedModel> =
     {} as Record<string, SupportedModel>,
   );
 
-export const supportedModelValidator = z
-  .string()
-  .refine((value) => !!supportedModelLut[value], {
-    message: "Invalid model",
-  });
+export const supportedModelValidator = v.pipe(
+  v.string(),
+  v.check((value) => !!supportedModelLut[value], "Invalid model"),
+);
 
 export interface WebSupportedModel extends Pick<SupportedModel, "id" | "name"> {
   isAvailable: boolean;

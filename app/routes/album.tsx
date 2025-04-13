@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import path from "node:path";
+import { pathExists } from "path-exists";
 import { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { AlbumHeader } from "~/components/album/AlbumHeader";
@@ -8,19 +10,42 @@ import { AlbumTracksTable } from "~/components/album/table/AlbumTracksTable";
 import { useAlbumTableColumns } from "~/components/album/table/useAlbumTableColumns";
 import { useMetadataStore } from "~/components/album/useMetadataStore";
 import { makeAppTitle } from "~/lib/constants";
-import { env } from "~/lib/env";
+import { make404 } from "~/lib/errors";
+import { rebasePath, stripLibraryPath } from "~/lib/paths";
 import { prefetch } from "~/lib/prefetch";
 import { useTRPC } from "~/lib/trpc";
 import type { Route } from "./+types/album";
+import { Breadcrumb, type BreadcrumbHandle } from "~/components/Breadcrumb";
 
-export function loader() {
+export async function loader({ params }: Route.LoaderArgs) {
+  const safePath = rebasePath(params["*"] || "");
+  const strippedPath = stripLibraryPath(safePath);
+
+  if (!strippedPath || !(await pathExists(safePath))) {
+    throw make404("Invalid path or not found");
+  }
+
+  // Generate breadcrumbs for the current path
+  const breadcrumbs: { url: string; name: string }[] = strippedPath
+    .split("/")
+    .map((el, i, arr) => ({
+      url:
+        i === arr.length - 1
+          ? `/album/${arr.slice(0, i + 1).join("/")}`
+          : `/browse/${arr.slice(0, i + 1).join("/")}`,
+      name: el,
+    }))
+    .filter((bc) => bc.name !== "");
+
   return {
-    testDataPath: env.TEST_ALBUM_PATH,
+    path: strippedPath,
+    pathBasename: path.basename(strippedPath),
+    breadcrumbs,
   };
 }
 
-export function meta({}: Route.MetaArgs) {
-  return [{ title: makeAppTitle("Loading album...") }];
+export function meta({ data }: Route.MetaArgs) {
+  return [{ title: makeAppTitle(data?.pathBasename || "Album") }];
 }
 
 export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [
@@ -31,9 +56,17 @@ export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [
   },
 ];
 
-export default function Home({
-  loaderData: { testDataPath },
-}: Route.ComponentProps) {
+// prettier-ignore
+export const handle: BreadcrumbHandle<Route.ComponentProps["loaderData"]> = {
+  breadcrumb: (data) => data ? [
+    // The root of the music library
+    <Breadcrumb to="/browse" key="root">Browse</Breadcrumb>,
+    // The current directory
+    ...(data.breadcrumbs.map((bc, i) => <Breadcrumb to={bc.url} key={i}>{bc.name}</Breadcrumb>)),
+  ] : [],
+};
+
+export default function Home({ loaderData: { path } }: Route.ComponentProps) {
   // Get state and actions from the metadata store
   const { album, tracks, initialize } = useMetadataStore(
     useShallow((s) => ({
@@ -46,7 +79,7 @@ export default function Home({
   const trpc = useTRPC();
   const albumData = useQuery(
     trpc.album.getFromDirectory.queryOptions({
-      path: testDataPath,
+      path,
     }),
   );
 
@@ -66,31 +99,15 @@ export default function Home({
   const { columnVisibility, setColumnVisibility } =
     useAlbumTableColumns(originalTracks);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   // Use albumData.data?.tracks as fallback if store tracks are empty
   const displayTracks = tracks.length > 0 ? tracks : albumDataTracks;
 
   return (
-    <main className="text-foreground mx-auto box-border min-h-screen p-4">
+    <main className="text-foreground mx-auto box-border flex h-screen flex-col p-4">
       <AlbumHeader album={album} />
-
-      {isLoading && (
-        <div className="bg-muted mb-4 rounded-md p-4 text-center">
-          <p>Loading album metadata...</p>
-        </div>
-      )}
-      {error && (
-        <div className="bg-destructive text-destructive-foreground mb-4 rounded-md p-4">
-          <p>Error: {error}</p>
-        </div>
-      )}
 
       <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-[auto_1fr]">
         <div className="flex-shrink-0">

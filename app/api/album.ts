@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as v from "valibot";
 import { publicProcedure, router } from "~/api/trpc";
 import { rebasePath, stripLibraryPath } from "~/lib/paths";
 import {
@@ -13,19 +13,19 @@ import {
 import { writeTagsToFiles, type WriteResult } from "~/lib/tags/writeMetadata";
 
 // Schema for validating the directory path
-const directorySchema = z.object({
-  path: z.string().min(1),
+const directorySchema = v.object({
+  path: v.pipe(v.string(), v.minLength(1)),
 });
 
 // Schema for track metadata
-const trackMetadataSchema = z.object({
-  filePath: z.string(),
-  trackNumber: z.number().optional(),
-  discNumber: z.number().optional(),
-  title: z.string().optional(),
-  artists: z.string().optional(),
-  album: z.string().optional(),
-  albumArtist: z.string().optional(),
+const trackMetadataSchema = v.object({
+  filePath: v.string(),
+  trackNumber: v.optional(v.number()),
+  discNumber: v.optional(v.number()),
+  title: v.optional(v.string()),
+  artists: v.optional(v.string()),
+  album: v.optional(v.string()),
+  albumArtist: v.optional(v.string()),
 });
 
 export const album = router({
@@ -39,13 +39,13 @@ export const album = router({
 
         const albumName = getAlbumName(tracks);
         const albumArtist = getAlbumArtist(tracks);
-        const coverArt = getAlbumCoverArt(tracks);
+        const coverArt = await getAlbumCoverArt(tracks);
 
         return {
           album: {
             name: albumName || "Unknown Album",
             artist: albumArtist || "Unknown Artist",
-            coverArt: coverArt ? getCoverArtUrl(coverArt) : null,
+            coverArt: coverArt ? await getCoverArtUrl(coverArt) : null,
             directory: stripLibraryPath(input.path),
           },
           tracks: tracks.map(cleanTrackForWeb),
@@ -59,8 +59,8 @@ export const album = router({
   // Write metadata to album tracks
   writeTracks: publicProcedure
     .input(
-      z.object({
-        tracks: z.array(trackMetadataSchema),
+      v.object({
+        tracks: v.pipe(v.array(trackMetadataSchema), v.minLength(1)),
       }),
     )
     .mutation(async ({ input }) => {

@@ -3,6 +3,7 @@ import * as path from "path";
 import { parseFile } from "music-metadata";
 import { stripLibraryPath } from "../paths";
 import { env } from "../env";
+import sharp from "sharp";
 
 /**
  * Represents a music track with metadata
@@ -193,9 +194,89 @@ export function getAlbumArtist(tracks: FileTrack[]): string | null {
  * @param tracks Array of Track objects
  * @returns The cover art as a Uint8Array if available, or null if not found
  */
-export function getAlbumCoverArt(tracks: FileTrack[]): Uint8Array | null {
+export async function getAlbumCoverArt(
+  tracks: FileTrack[],
+): Promise<Uint8Array | null> {
   if (tracks.length === 0) return null;
-  return tracks.find((t) => t.coverArt)?.coverArt || null;
+
+  // First try to find embedded cover art in tracks
+  const embeddedCoverArt = tracks.find((t) => t.coverArt)?.coverArt || null;
+  if (embeddedCoverArt) return embeddedCoverArt;
+
+  // If no embedded cover art found, search for image files in track directories
+  const supportedImageExtensions = [".jpg", ".jpeg", ".png"];
+  const coverArtFilePatterns = ["cover", "folder", "artwork", "front", "back"];
+
+  // Get unique directories from tracks
+  const directories = [...new Set(tracks.map((track) => track.directory))];
+
+  async function scanDirectory(dir: string): Promise<Uint8Array | null> {
+    // Get all files in the directory
+    const files = await fsp.readdir(dir, { withFileTypes: true });
+
+    // First check for common cover art filenames
+    for (const pattern of coverArtFilePatterns) {
+      for (const ext of supportedImageExtensions) {
+        const potentialMatch = files.find(
+          (file) =>
+            file.isFile() && file.name.toLowerCase() === `${pattern}${ext}`,
+        );
+
+        if (potentialMatch) {
+          const coverPath = path.join(dir, potentialMatch.name);
+          return await fsp.readFile(coverPath);
+        }
+      }
+    }
+
+    // Then check for filenames matching the directory name
+    const dirName = path.basename(dir);
+    for (const ext of supportedImageExtensions) {
+      const potentialMatch = files.find(
+        (file) =>
+          file.isFile() &&
+          file.name.toLowerCase() === `${dirName.toLowerCase()}${ext}`,
+      );
+
+      if (potentialMatch) {
+        const coverPath = path.join(dir, potentialMatch.name);
+        return await fsp.readFile(coverPath);
+      }
+    }
+
+    // Check for any image files if nothing else matched
+    for (const file of files) {
+      if (!file.isFile()) continue;
+      const ext = path.extname(file.name).toLowerCase();
+      if (supportedImageExtensions.includes(ext)) {
+        const coverPath = path.join(dir, file.name);
+        return await fsp.readFile(coverPath);
+      }
+    }
+
+    // Scan subdirectories
+    for (const file of files) {
+      if (!file.isDirectory()) continue;
+      const subDir = path.join(dir, file.name);
+      const coverArt = await scanDirectory(subDir);
+      if (coverArt) return coverArt;
+    }
+
+    return null;
+  }
+
+  // Try to find cover art in each directory
+  for (const directory of directories) {
+    try {
+      const coverArt = await scanDirectory(directory);
+      if (coverArt) return coverArt;
+    } catch (error) {
+      console.error(`Error searching for cover art in ${directory}:`, error);
+      // Continue to next directory if there's an error
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -203,8 +284,14 @@ export function getAlbumCoverArt(tracks: FileTrack[]): Uint8Array | null {
  * @param coverArt Cover art Uint8Array
  * @returns Data URL for the cover art
  */
-export const getCoverArtUrl = (coverArt: Uint8Array): string =>
-  `data:image/jpeg;base64,${Buffer.from(coverArt).toString("base64")}`;
+export async function getCoverArtUrl(coverArt: Uint8Array): Promise<string> {
+  const buffer = Buffer.from(coverArt);
+  const image = await sharp(buffer)
+    .resize(384, 384, { fit: "inside" })
+    .toFormat("webp", { quality: 90 })
+    .toBuffer();
+  return `data:image/webp;base64,${image.toString("base64")}`;
+}
 
 export function cleanTrackForWeb(track: FileTrack): WebTrack {
   const { coverArt, ...rest } = track;

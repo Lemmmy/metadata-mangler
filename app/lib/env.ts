@@ -1,34 +1,37 @@
 import "dotenv/config";
-import { z } from "zod";
-import { zodStringBoolean, zodStringNumber } from "./utils";
+import * as v from "valibot";
+import { vStringBoolean, vStringNumber } from "./utils";
 
-export const env = z
-  .object({
-    OPENROUTER_API_KEY: z.string().optional(),
-    ANTHROPIC_API_KEY: z.string().optional(),
+export const env = v.parse(
+  v.pipe(
+    v.object({
+      OPENROUTER_API_KEY: v.optional(v.string()),
+      ANTHROPIC_API_KEY: v.optional(v.string()),
 
-    DEFAULT_WEB_MODEL: z.string().default("openrouter/optimus-alpha"),
-    DEFAULT_TEST_MODEL: z.string().default("openrouter/optimus-alpha"),
+      DEFAULT_WEB_MODEL: v.optional(v.string(), "openrouter/optimus-alpha"),
+      DEFAULT_TEST_MODEL: v.optional(v.string(), "openrouter/optimus-alpha"),
 
-    MUSIC_LIBRARY_PATH: z.string(),
-    TEST_ALBUM_PATH: z.string(),
-    // Allow accessing paths outside of the music library
-    ALLOW_TRAVERSAL: zodStringBoolean(false),
-    // Maximum number of tracks to try to load in an album at once
-    ALBUM_TRACK_LIMIT: zodStringNumber(512),
+      MUSIC_LIBRARY_PATH: v.string(),
+      TEST_ALBUM_PATH: v.string(),
+      // Allow accessing paths outside of the music library
+      ALLOW_TRAVERSAL: vStringBoolean(false),
+      // Maximum number of tracks to try to load in an album at once
+      ALBUM_TRACK_LIMIT: vStringNumber(512),
 
-    VGMDB_API_URL: z.string().optional(),
-    VGMDB_API_USERNAME: z.string().optional(),
-    VGMDB_API_PASSWORD: z.string().optional(),
+      VGMDB_API_URL: v.optional(v.string()),
+      VGMDB_API_USERNAME: v.optional(v.string()),
+      VGMDB_API_PASSWORD: v.optional(v.string()),
 
-    // Tag writing utilities
-    METAFLAC_PATH: z.string().optional(),
-    MID3V2_PATH: z.string().optional(),
-    VORBISCOMMENT_PATH: z.string().optional(),
-  })
-  // Require at least one API key
-  .refine(
-    (env) => env.OPENROUTER_API_KEY || env.ANTHROPIC_API_KEY,
-    "At least one API key is required",
-  )
-  .parse(process.env);
+      // Tag writing utilities
+      METAFLAC_PATH: v.optional(v.string()),
+      MID3V2_PATH: v.optional(v.string()),
+      VORBISCOMMENT_PATH: v.optional(v.string()),
+    }),
+    // Require at least one API key
+    v.check(
+      (env) => !!(env.OPENROUTER_API_KEY || env.ANTHROPIC_API_KEY),
+      "At least one API key is required",
+    ),
+  ),
+  process.env,
+);

@@ -1,11 +1,13 @@
-import { models } from "~/api/models";
-import { album } from "~/api/album";
-import { metadata } from "~/api/metadata";
-import { router } from "~/api/trpc";
+import { album } from "./album";
+import { browse } from "./browse";
+import { metadata } from "./metadata";
+import { models } from "./models";
+import { router } from "./trpc";
 
 export const appRouter = router({
   models,
   album,
+  browse,
   metadata,
 });
 

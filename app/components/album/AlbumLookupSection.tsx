@@ -13,6 +13,8 @@ import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibil
 import { ModelUsage } from "~/components/ModelEstimate";
 import { Button } from "~/components/ui/button";
 import { useModelPicker } from "~/components/useModelPicker";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 interface Props {
   album: StoreAlbum | null;
@@ -133,29 +135,25 @@ export function AlbumLookupSection({
       <h3 className="text-lg font-medium">Metadata lookup</h3>
       <div className="mt-2 space-y-3">
         <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="text-muted-foreground mb-1 block text-sm font-medium">
+          <div className="grid w-full gap-1.5">
+            <Label htmlFor="urlOrData">
               URL or supplementary track information
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               value={urlOrData}
               onChange={(e) => setUrlOrData(e.target.value)}
               placeholder="Enter a compatible URL (VGMDB, MusicBrainz, Bandcamp, etc.) or full-text supplementary track information"
-              className="border-input bg-background text-foreground placeholder-muted-foreground w-full rounded-md border p-2 text-sm"
               rows={3}
               required
             />
           </div>
 
-          <div>
-            <label className="text-muted-foreground mb-1 block text-sm font-medium">
-              Additional information
-            </label>
-            <textarea
+          <div className="grid w-full gap-1.5">
+            <Label htmlFor="additionalInfo">Additional information</Label>
+            <Textarea
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
               placeholder="Provide additional information to the model"
-              className="border-input bg-background text-foreground placeholder-muted-foreground w-full rounded-md border p-2 text-sm"
               rows={3}
             />
           </div>

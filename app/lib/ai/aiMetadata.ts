@@ -1,8 +1,9 @@
 import { generateObject, type LanguageModelUsage } from "ai";
 import { traceAISDKModel } from "evalite/ai-sdk";
-import { z } from "zod";
+import * as v from "valibot";
 import type { SupportedModel } from "./aiProviders";
 import type { FileTrack } from "../tags/musicMetadata";
+import { valibotSchema } from "@ai-sdk/valibot";
 
 export type SupplementalDataSource =
   | "vgmdb"
@@ -24,18 +25,18 @@ export type AITrack = Pick<
   baseDir: string;
 };
 
-const TrackSchema = z.object({
-  filename: z.string(),
-  trackNumber: z.number(),
-  discNumber: z.number(),
-  title: z.string(),
-  artists: z.string(),
+const TrackSchema = v.object({
+  filename: v.string(),
+  trackNumber: v.number(),
+  discNumber: v.number(),
+  title: v.string(),
+  artists: v.string(),
 });
 
-const AlbumSchema = z.object({
-  name: z.string(),
-  albumArtist: z.string(),
-  tracks: z.array(TrackSchema),
+const AlbumSchema = v.object({
+  name: v.string(),
+  albumArtist: v.string(),
+  tracks: v.array(TrackSchema),
 });
 
 /**
@@ -141,7 +142,7 @@ export async function generateImprovedMetadata(
   try {
     const { object, usage } = await generateObject({
       model: languageModel,
-      schema: AlbumSchema,
+      schema: valibotSchema(AlbumSchema),
       prompt: await generateImprovedMetadataPrompt(
         albumName,
         albumArtist,

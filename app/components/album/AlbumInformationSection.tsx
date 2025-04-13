@@ -4,83 +4,70 @@ import {
 } from "~/components/album/useMetadataStore";
 import { useShallow } from "zustand/react/shallow";
 import { cn } from "~/lib/utils";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface Props {
   album: StoreAlbum | null;
 }
 
 export function AlbumInformationSection({ album }: Props) {
-  const { originalAlbum, updateAlbumName, updateAlbumArtist } =
-    useMetadataStore(
-      useShallow((s) => ({
-        originalAlbum: s.originalAlbum,
-        updateAlbumName: s.updateAlbumName,
-        updateAlbumArtist: s.updateAlbumArtist,
-      })),
-    );
-
-  // Check if values are updated compared to original
-  const isNameUpdated = useMetadataStore(
-    useShallow((s) => s.originalAlbum?.name !== s.album?.name),
+  const {
+    originalAlbum,
+    updateAlbumName,
+    updateAlbumArtist,
+    isNameUpdated,
+    isArtistUpdated,
+  } = useMetadataStore(
+    useShallow((s) => ({
+      originalAlbum: s.originalAlbum,
+      updateAlbumName: s.updateAlbumName,
+      updateAlbumArtist: s.updateAlbumArtist,
+      isNameUpdated: s.originalAlbum?.name !== s.album?.name,
+      isArtistUpdated: s.originalAlbum?.artist !== s.album?.artist,
+    })),
   );
-
-  const isArtistUpdated = useMetadataStore(
-    useShallow((s) => s.originalAlbum?.artist !== s.album?.artist),
-  );
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateAlbumName(e.target.value);
-  };
-
-  const handleArtistChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateAlbumArtist(e.target.value);
-  };
 
   return (
     <div>
       <h2 className="text-xl font-semibold">Album information</h2>
       <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <label className="text-muted-foreground block text-sm font-medium">
-            Album name
-          </label>
+        {/* Album name */}
+        <div className="grid w-full gap-1.5">
+          <Label htmlFor="albumName">Album name</Label>
           <div className="relative mb-4">
-            <input
+            <Input
               type="text"
               className={cn(
-                "border-border w-full rounded-md border px-3 py-2",
-                "focus:ring-none focus:outline-2 focus:outline-white/50",
-                isNameUpdated && "bg-lime-600/20",
+                isNameUpdated && "bg-lime-600/20 dark:bg-lime-600/20",
               )}
               value={album?.name || ""}
-              onChange={handleNameChange}
+              onChange={(e) => updateAlbumName(e.target.value)}
             />
             {isNameUpdated && originalAlbum?.name && (
-              <div className="absolute -bottom-6 mt-1 px-3 text-xs text-white/50">
+              <p className="text-muted-foreground absolute -bottom-6 mt-1 px-3 text-xs">
                 {originalAlbum.name}
-              </div>
+              </p>
             )}
           </div>
         </div>
-        <div>
-          <label className="text-muted-foreground block text-sm font-medium">
-            Album artist
-          </label>
+
+        {/* Album artist */}
+        <div className="grid w-full gap-1.5">
+          <Label htmlFor="albumArtist">Album artist</Label>
           <div className="relative mb-4">
-            <input
+            <Input
               type="text"
               className={cn(
-                "border-border w-full rounded-md border px-3 py-2",
-                "focus:ring-none focus:outline-2 focus:outline-white/50",
-                isArtistUpdated && "bg-lime-600/20",
+                isArtistUpdated && "bg-lime-600/20 dark:bg-lime-600/20",
               )}
               value={album?.artist || ""}
-              onChange={handleArtistChange}
+              onChange={(e) => updateAlbumArtist(e.target.value)}
             />
             {isArtistUpdated && originalAlbum?.artist && (
-              <div className="absolute -bottom-6 mt-1 px-3 text-xs text-white/50">
+              <p className="text-muted-foreground absolute -bottom-6 mt-1 px-3 text-xs">
                 {originalAlbum.artist}
-              </div>
+              </p>
             )}
           </div>
         </div>

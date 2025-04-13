@@ -36,8 +36,6 @@ export function useDirectorySearch(entries: DirectoryListEntry[]) {
         }),
       );
 
-      console.log(processed);
-
       // Initialize fuzzy search
       setFuse(
         new Fuse<IndexedEntry>(processed, {
