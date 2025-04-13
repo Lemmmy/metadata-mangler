@@ -2,6 +2,7 @@ import * as fsp from "fs/promises";
 import * as path from "path";
 import { parseFile } from "music-metadata";
 import { stripLibraryPath } from "../paths";
+import { env } from "../env";
 
 /**
  * Represents a music track with metadata
@@ -102,7 +103,7 @@ export async function readTrackFromFile(
  */
 export async function readTracksFromDirectory(
   directoryPath: string,
-  limit: number = 512,
+  limit: number = env.ALBUM_TRACK_LIMIT,
 ): Promise<FileTrack[]> {
   const tracks: FileTrack[] = [];
 

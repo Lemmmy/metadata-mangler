@@ -12,17 +12,12 @@ export function rebasePath(inputPath: string): string {
     throw make400("Path is outside of music library");
   }
 
-  return joined;
+  return normalizePath(joined);
 }
 
 // Strips the music library path from a path
 export function stripLibraryPath(inputPath: string): string {
-  const normalizedInput = normalizePath(path.resolve(inputPath));
-  const normalizedLibrary = normalizePath(path.resolve(env.MUSIC_LIBRARY_PATH));
-
-  if (!normalizedInput.startsWith(normalizedLibrary) && !env.ALLOW_TRAVERSAL) {
-    throw make400("Path is outside of music library");
-  }
-
+  const normalizedInput = normalizePath(inputPath);
+  const normalizedLibrary = normalizePath(env.MUSIC_LIBRARY_PATH);
   return normalizedInput.slice(normalizedLibrary.length).replace(/^\/+/, "");
 }

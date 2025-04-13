@@ -103,14 +103,14 @@ ${userInstructions ? "The user's instructions should be given priority over the 
 Preserve the original filename and base directory.
 
 ROMANIZATION RULES:
-- Use the provided romaji for artist names and titles as a base. If no romaji is available in the supplemental
-  information, romanize it yourself.
-- NEVER use English-translated titles, unless the original title is in English.
-- When romanizing titles, keep English loan-words as English.
-- All artist names should be romanised in Japanese order (Surname Forename).
-- Long vowels: ALWAYS romanize おお sounds as 'oo' and おう sounds as 'ou'.
-- Particles: ALWAYS romanize は as 'wa' and を as 'o'.
 - If Japanese text was provided in the supplemental data, use it to help with romanization.
+- Use the provided romaji for artist names and titles as a foundation. If no romaji is available in the supplemental
+information, romanize it yourself.
+- NEVER use English-translated titles directly, unless the original title is in English.
+- When romanizing titles, you MUST keep English loan-words as English, NOT romaji.
+- All artist names should be romanised in Japanese order (Surname Forename).
+- ALWAYS use modified Hepburn romanization with kana-spelling style.
+- Long vowels: ALWAYS romanize おお sounds as 'oo' and おう sounds as 'ou'.
 `;
 }
 

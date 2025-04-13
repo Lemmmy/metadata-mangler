@@ -1,6 +1,7 @@
 import { File, Folder, Music } from "lucide-react";
 import type { ReactElement } from "react";
-import { Link } from "react-router";
+import { NavLink } from "react-router";
+import { useDirectorySearch } from "./useDirectorySearch";
 
 export interface DirectoryListEntry {
   name: string;
@@ -10,28 +11,44 @@ export interface DirectoryListEntry {
 
 interface Props {
   entries: DirectoryListEntry[];
+  basePath: string;
 }
 
-export function DirectoryList({ entries }: Props): ReactElement {
+export default function DirectoryList({
+  entries,
+  basePath,
+}: Props): ReactElement {
+  const { results, searchBox } = useDirectorySearch(entries);
   return (
-    <ul className="list-none">
-      {entries.map((item) => (
-        <DirectoryListItem key={item.name} item={item} />
-      ))}
-    </ul>
+    <>
+      <div className="mb-2 max-w-[360px]">{searchBox}</div>
+
+      <ul className="list-none">
+        {results.map((item) => (
+          <DirectoryListItem key={item.name} item={item} basePath={basePath} />
+        ))}
+      </ul>
+    </>
   );
 }
 
-function DirectoryListItem({ item }: { item: DirectoryListEntry }) {
+function DirectoryListItem({
+  item,
+  basePath,
+}: {
+  item: DirectoryListEntry;
+  basePath: string;
+}) {
   return (
     <li>
-      <Link
-        to={`/browse/${item.name}`}
-        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-zinc-100/10"
+      <NavLink
+        to={item.isDirectory ? `${basePath}/${item.name}` : "#"}
+        end
+        className="flex items-center gap-2 rounded px-2 py-1 hover:bg-zinc-100/10 [&.pending]:animate-pulse"
       >
         <DirectoryListItemIcon item={item} />
         <span>{item.name}</span>
-      </Link>
+      </NavLink>
     </li>
   );
 }

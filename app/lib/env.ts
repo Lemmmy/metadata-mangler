@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
+import { zodStringBoolean, zodStringNumber } from "./utils";
 
 export const env = z
   .object({
@@ -12,7 +13,9 @@ export const env = z
     MUSIC_LIBRARY_PATH: z.string(),
     TEST_ALBUM_PATH: z.string(),
     // Allow accessing paths outside of the music library
-    ALLOW_TRAVERSAL: z.boolean().default(false),
+    ALLOW_TRAVERSAL: zodStringBoolean(false),
+    // Maximum number of tracks to try to load in an album at once
+    ALBUM_TRACK_LIMIT: zodStringNumber(512),
 
     VGMDB_API_URL: z.string().optional(),
     VGMDB_API_USERNAME: z.string().optional(),

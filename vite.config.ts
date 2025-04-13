@@ -5,6 +5,17 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import babel from "vite-plugin-babel";
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      external: ["kuroshiro", "kuroshiro-analyzer-kuromoji"],
+      output: {
+        globals: {
+          kuroshiro: "Kuroshiro",
+          "kuroshiro-analyzer-kuromoji": "KuromojiAnalyzer",
+        },
+      },
+    },
+  },
   plugins: [
     tailwindcss(),
     babel({

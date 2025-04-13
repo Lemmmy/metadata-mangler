@@ -29,6 +29,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <ScrollRestoration />
+        <script
+          src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"
+          integrity="sha256-4+YJNVRJsd209WJTQCqn/FRHQ98zRgKOVqEh8D0HF+Y="
+          crossOrigin="anonymous"
+        ></script>
+        <script
+          src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"
+          integrity="sha256-v4lO37aQilWY5ufo/4xwxe+Vpj0SNcJSc2taqDjL/tE="
+          crossOrigin="anonymous"
+        ></script>
         <Scripts />
       </body>
     </html>
@@ -37,6 +47,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export const unstable_middleware = [queryClientMiddleware, trpcMiddleware];
 export const shouldRevalidate = () => false;
+
+export const links: Route.LinksFunction = () => [
+  { rel: "icon", href: "/favicon.svg" },
+];
 
 export function loader({ context }: Route.LoaderArgs) {
   const queryClient = context.get(queryClientContext);

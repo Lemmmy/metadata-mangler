@@ -1,17 +1,17 @@
+import { JSONDiff } from "autoevals";
 import { createScorer, evalite } from "evalite";
-import path from "node:path";
 import fs from "node:fs/promises";
+import path from "node:path";
+import { env } from "../env";
+import { cleanVgmdbAlbum, fetchVgmdbAlbum } from "../fetch/vgmdb";
+import { containsJapaneseCharacters } from "../jp/jpUtils";
+import { readTracksFromDirectory } from "../tags/musicMetadata";
 import {
   generateImprovedMetadata,
   type AITrack,
   type ImprovedMetadataResult,
   type SupplementalDataSource,
 } from "./aiMetadata";
-import { env } from "../env";
-import { readTracksFromDirectory } from "../tags/musicMetadata";
-import { containsJapaneseCharacters } from "../utils";
-import { cleanVgmdbAlbum, fetchVgmdbAlbum } from "../fetch/vgmdb";
-import { JSONDiff } from "autoevals";
 import { supportedModelLut } from "./aiProviders";
 
 type AIMetadataInput = [

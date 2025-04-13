@@ -7,29 +7,20 @@ import { AlbumLookupSection } from "~/components/album/AlbumLookupSection";
 import { AlbumTracksTable } from "~/components/album/table/AlbumTracksTable";
 import { useAlbumTableColumns } from "~/components/album/table/useAlbumTableColumns";
 import { useMetadataStore } from "~/components/album/useMetadataStore";
+import { makeAppTitle } from "~/lib/constants";
 import { env } from "~/lib/env";
 import { prefetch } from "~/lib/prefetch";
 import { useTRPC } from "~/lib/trpc";
 import type { Route } from "./+types/album";
 
-export const links: Route.LinksFunction = () => [
-  { rel: "icon", href: "/favicon.svg" },
-];
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Metadata Mangler" },
-    {
-      name: "description",
-      content: "AI-powered metadata editing tool for music albums",
-    },
-  ];
-}
-
 export function loader() {
   return {
     testDataPath: env.TEST_ALBUM_PATH,
   };
+}
+
+export function meta({}: Route.MetaArgs) {
+  return [{ title: makeAppTitle("Loading album...") }];
 }
 
 export const unstable_middleware: Route.unstable_MiddlewareFunction[] = [
@@ -63,10 +54,11 @@ export default function Home({
   const error = albumData.error ? albumData.error.message : null;
   const albumDataTracks = albumData.data?.tracks || [];
 
-  // Initialize the store with album data when it's loaded
+  // Initialize the store with album data when it's loaded, and also set the document title
   useEffect(() => {
     if (albumData.data?.album && albumData.data?.tracks) {
       initialize(albumData.data.album, albumData.data.tracks, true);
+      document.title = makeAppTitle(albumData.data.album.name);
     }
   }, [albumData.data, initialize]);
 
