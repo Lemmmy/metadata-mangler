@@ -10,6 +10,7 @@ import { rebasePath, stripLibraryPath } from "~/lib/paths";
 import { isSupportedMusicFile } from "~/lib/tags/musicMetadata";
 import type { Route } from "./+types/browse";
 import { prefetch } from "~/lib/prefetch";
+import { ClientOnly } from "remix-utils/client-only";
 
 const DirectoryList = lazy(() => import("~/components/browse/DirectoryList"));
 
@@ -85,11 +86,15 @@ export default function Browse({
     <main className="container mx-auto flex h-screen flex-col p-2">
       <BreadcrumbMenu className="mb-2" />
 
-      <Suspense fallback={<DirectorySkeleton />}>
-        <Await resolve={entries}>
-          {(entries) => <DirectoryList entries={entries} basePath={path} />}
-        </Await>
-      </Suspense>
+      <ClientOnly fallback={<DirectorySkeleton />}>
+        {() => (
+          <Suspense fallback={<DirectorySkeleton />}>
+            <Await resolve={entries}>
+              {(entries) => <DirectoryList entries={entries} basePath={path} />}
+            </Await>
+          </Suspense>
+        )}
+      </ClientOnly>
     </main>
   );
 }

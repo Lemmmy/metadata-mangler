@@ -1,8 +1,11 @@
 import { File, Folder, Music } from "lucide-react";
-import type { ReactElement } from "react";
+import type { HTMLProps, ReactElement } from "react";
 import { NavLink } from "react-router";
 import { useDirectorySearch } from "./useDirectorySearch";
 import { OpenAsAlbum } from "./OpenAsAlbum";
+import { useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { cn } from "~/lib/utils";
 
 export interface DirectoryListEntry {
   name: string;
@@ -34,30 +37,61 @@ export default function DirectoryList({
       </div>
 
       {/* Directory list */}
-      <div className="h-full overflow-y-auto">
-        <ul className="list-none">
-          {results.map((item) => (
+      <DirectoryListInner entries={results} basePath={basePath} />
+    </>
+  );
+}
+
+function DirectoryListInner({ entries, basePath }: Props) {
+  // eslint-disable-next-line react-compiler/react-compiler
+  "use no memo";
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 36,
+    overscan: 6,
+  });
+
+  return (
+    <div ref={parentRef} className="relative h-full max-h-full overflow-y-auto">
+      <div
+        className="relative m-0 p-0"
+        style={{ height: rowVirtualizer.getTotalSize() }}
+      >
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const item = entries[virtualRow.index];
+          return (
             <DirectoryListItem
               key={item.name}
               item={item}
               basePath={basePath}
+              className="absolute top-0 left-0 h-[36px] w-full truncate"
+              style={{ transform: `translateY(${virtualRow.start}px)` }}
             />
-          ))}
-        </ul>
+          );
+        })}
       </div>
-    </>
+    </div>
   );
 }
 
 function DirectoryListItem({
   item,
   basePath,
+  className,
+  ...props
 }: {
   item: DirectoryListEntry;
   basePath: string;
-}) {
+  className?: string;
+} & HTMLProps<HTMLDivElement>) {
   return (
-    <li className="flex items-center gap-1 py-0.5 tabular-nums">
+    <div
+      {...props}
+      className={cn("flex items-center gap-1 py-0.5 tabular-nums", className)}
+    >
       {/* Open as album button */}
       {item.isDirectory && (
         <OpenAsAlbum
@@ -79,7 +113,7 @@ function DirectoryListItem({
         <DirectoryListItemIcon item={item} />
         <span>{item.name}</span>
       </NavLink>
-    </li>
+    </div>
   );
 }
 
