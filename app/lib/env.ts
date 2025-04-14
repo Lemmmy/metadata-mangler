@@ -18,7 +18,6 @@ export const env = v.parse(
       ),
 
       MUSIC_LIBRARY_PATH: v.string(),
-      TEST_ALBUM_PATH: v.string(),
       // Allow accessing paths outside of the music library
       ALLOW_TRAVERSAL: vStringBoolean(false),
       // Maximum number of tracks to try to load in an album at once
