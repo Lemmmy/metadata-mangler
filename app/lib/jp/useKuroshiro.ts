@@ -5,7 +5,7 @@ export async function initKuroshiro(): Promise<Kuroshiro> {
 
   const kuroshiro = new ((Kuroshiro as any).default || Kuroshiro)();
   const analyzer = new KuromojiAnalyzer({
-    dictPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/",
+    dictPath: "/api/dict/",
   });
 
   await kuroshiro.init(analyzer);

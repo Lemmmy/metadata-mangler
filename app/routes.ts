@@ -5,4 +5,5 @@ export default [
   route("/browse/*", "routes/browse.tsx"),
   route("/album/*", "routes/album.tsx"),
   route("/api/trpc/*", "routes/trpc.ts"),
+  route("/api/dict/:dict", "routes/dict.ts"),
 ] satisfies RouteConfig;
