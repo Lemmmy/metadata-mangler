@@ -1,16 +1,35 @@
-import { File, Folder, Music } from "lucide-react";
+import { File, Folder, Music, SortAsc, SortDesc } from "lucide-react";
 import type { HTMLProps, ReactElement } from "react";
 import { NavLink } from "react-router";
-import { useDirectorySearch } from "./useDirectorySearch";
+import {
+  sortByNames,
+  useDirectorySearch,
+  type SortType,
+} from "./useDirectorySearch";
 import { OpenAsAlbum } from "./OpenAsAlbum";
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { cn } from "~/lib/utils";
+import type { Dayjs } from "dayjs";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 
 export interface DirectoryListEntry {
   name: string;
   isDirectory: boolean;
   isSupportedMusicFile: boolean;
+  mtime: string | null;
+}
+
+export interface ProcessedDirectoryListEntry
+  extends Omit<DirectoryListEntry, "mtime"> {
+  mtime: Dayjs | null;
 }
 
 interface Props {
@@ -22,7 +41,9 @@ export default function DirectoryList({
   entries,
   basePath,
 }: Props): ReactElement {
-  const { results, searchBox } = useDirectorySearch(entries);
+  const [sort, setSort] = useLocalStorage<SortType>("browseSort", "name_asc");
+  const { results, searchBox } = useDirectorySearch(entries, sort);
+
   return (
     <>
       {/* Top bar - filtering and open as album button */}
@@ -34,6 +55,10 @@ export default function DirectoryList({
         {basePath && (
           <OpenAsAlbum directory={basePath}>Open as album</OpenAsAlbum>
         )}
+
+        {/* Sort selector */}
+        <div className="flex-1" />
+        <DirectoryListSortSelector sort={sort} setSort={setSort} />
       </div>
 
       {/* Directory list */}
@@ -42,7 +67,13 @@ export default function DirectoryList({
   );
 }
 
-function DirectoryListInner({ entries, basePath }: Props) {
+function DirectoryListInner({
+  entries,
+  basePath,
+}: {
+  entries: ProcessedDirectoryListEntry[];
+  basePath: string;
+}) {
   // eslint-disable-next-line react-compiler/react-compiler
   "use no memo";
 
@@ -83,7 +114,7 @@ function DirectoryListItem({
   className,
   ...props
 }: {
-  item: DirectoryListEntry;
+  item: ProcessedDirectoryListEntry;
   basePath: string;
   className?: string;
 } & HTMLProps<HTMLDivElement>) {
@@ -110,8 +141,17 @@ function DirectoryListItem({
         end
         className="flex flex-1 items-center gap-2 rounded px-1 py-1 hover:bg-zinc-100/10 [&.pending]:animate-pulse"
       >
+        {/* Icon & name */}
         <DirectoryListItemIcon item={item} />
         <span>{item.name}</span>
+
+        {/* Spacer & modified time on right */}
+        <div className="flex-1" />
+        {item.mtime && (
+          <span className="text-muted-foreground text-xs">
+            {item.mtime.format("YYYY-MM-DD HH:mm")}
+          </span>
+        )}
       </NavLink>
     </div>
   );
@@ -119,8 +159,43 @@ function DirectoryListItem({
 
 const iconClass = "block h-4 w-4 flex-shrink-0 text-zinc-500";
 
-function DirectoryListItemIcon({ item }: { item: DirectoryListEntry }) {
+function DirectoryListItemIcon({
+  item,
+}: {
+  item: ProcessedDirectoryListEntry;
+}) {
   if (item.isDirectory) return <Folder className={iconClass} />;
   if (item.isSupportedMusicFile) return <Music className={iconClass} />;
   return <File className={iconClass} />;
+}
+
+function DirectoryListSortSelector({
+  sort,
+  setSort,
+}: {
+  sort: SortType;
+  setSort: (sort: SortType) => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Button variant="secondary">
+          {sort?.endsWith("desc") ? (
+            <SortDesc className="size-4" />
+          ) : (
+            <SortAsc className="size-4" />
+          )}
+          {sortByNames[sort]}
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent>
+        {Object.entries(sortByNames).map(([key, name]) => (
+          <DropdownMenuItem key={key} onClick={() => setSort(key as SortType)}>
+            {name}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }

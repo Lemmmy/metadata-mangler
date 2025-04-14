@@ -21,13 +21,26 @@ export async function loader({ params }: Route.LoaderArgs) {
   // Read the files and directories inside this directory (non-recursively)
   const entries = fsp
     .readdir(safePath, { withFileTypes: true })
-    .then((e) =>
-      e.map((e) => ({
+    .then(async (dirents) => {
+      // Stat all files in parallel for mtime
+      const stats = await Promise.all(
+        dirents.map(async (e) => {
+          try {
+            const stat = await fsp.stat(path.join(safePath, e.name));
+            return stat.mtime.toISOString();
+          } catch {
+            return null;
+          }
+        }),
+      );
+
+      return dirents.map((e, i) => ({
         name: e.name,
         isDirectory: e.isDirectory(),
         isSupportedMusicFile: isSupportedMusicFile(e.name),
-      })),
-    )
+        mtime: stats[i],
+      }));
+    })
     .catch();
 
   // Generate breadcrumbs for the current path
@@ -83,7 +96,7 @@ export default function Browse({
   loaderData: { entries, path },
 }: Route.ComponentProps) {
   return (
-    <main className="container mx-auto flex h-screen flex-col p-2">
+    <main className="mx-auto flex h-screen w-full max-w-6xl flex-col p-2">
       <BreadcrumbMenu className="mb-2" />
 
       <ClientOnly fallback={<DirectorySkeleton />}>
