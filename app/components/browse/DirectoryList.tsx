@@ -57,7 +57,7 @@ function DirectoryListItem({
   basePath: string;
 }) {
   return (
-    <li className="flex items-center gap-1 py-0.5">
+    <li className="flex items-center gap-1 py-0.5 tabular-nums">
       {/* Open as album button */}
       {item.isDirectory && (
         <OpenAsAlbum

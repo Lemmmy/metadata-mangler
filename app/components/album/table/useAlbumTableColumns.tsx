@@ -44,7 +44,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Filename",
     id: "filename",
     meta: {
-      className: "px-3 py-2 text-xs",
+      className: "px-3 py-2 text-xs tabular-nums",
     },
   }),
   columnHelper.accessor("discNumber", {
@@ -53,6 +53,9 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     cell: createEditableCellRenderer("discNumber", "number", 1),
     size: 32,
     enableResizing: false,
+    meta: {
+      className: "tabular-nums",
+    },
   }),
   columnHelper.accessor("trackNumber", {
     header: "Track #",
@@ -60,6 +63,9 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     cell: createEditableCellRenderer("trackNumber", "number", 1),
     size: 32,
     enableResizing: false,
+    meta: {
+      className: "tabular-nums",
+    },
   }),
   columnHelper.accessor("title", {
     header: "Title",
@@ -94,7 +100,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     size: 36,
     enableResizing: false,
     meta: {
-      className: "px-3 py-2",
+      className: "px-3 py-2 tabular-nums",
     },
   }),
   columnHelper.accessor("container", {

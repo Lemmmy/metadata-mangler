@@ -66,7 +66,9 @@ export const handle: BreadcrumbHandle<Route.ComponentProps["loaderData"]> = {
   ] : [],
 };
 
-export default function Home({ loaderData: { path } }: Route.ComponentProps) {
+export default function Home({
+  loaderData: { path, pathBasename },
+}: Route.ComponentProps) {
   // Get state and actions from the metadata store
   const { album, tracks, initialize } = useMetadataStore(
     useShallow((s) => ({
@@ -130,6 +132,7 @@ export default function Home({ loaderData: { path } }: Route.ComponentProps) {
           <AlbumInformationSection album={album} />
           <AlbumLookupSection
             album={album}
+            dirName={pathBasename}
             className="mt-4"
             columnVisibility={columnVisibility}
             setColumnVisibility={setColumnVisibility}

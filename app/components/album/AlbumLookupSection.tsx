@@ -15,9 +15,11 @@ import { Button } from "~/components/ui/button";
 import { useModelPicker } from "~/components/useModelPicker";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
 
 interface Props {
   album: StoreAlbum | null;
+  dirName: string;
   className?: string;
   columnVisibility: VisibilityState;
   setColumnVisibility: Dispatch<SetStateAction<VisibilityState>>;
@@ -25,6 +27,7 @@ interface Props {
 
 export function AlbumLookupSection({
   album,
+  dirName,
   className,
   columnVisibility,
   setColumnVisibility,
@@ -181,6 +184,13 @@ export function AlbumLookupSection({
             usage={(usage || estimateMutation.data) as PriceUsage}
             pending={estimateMutation.isPending}
           />
+
+          <VgmdbSearchDialogButton
+            albumName={album?.name || ""}
+            dirName={dirName}
+            onConfirm={(url) => setUrlOrData(url)}
+          />
+
           <ColumnVisibilityDropdown
             columnVisibility={columnVisibility}
             setColumnVisibility={setColumnVisibility}
