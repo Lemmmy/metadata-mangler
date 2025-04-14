@@ -16,15 +16,18 @@ COPY . /app/
 COPY --from=development-dependencies-env /app/node_modules /app/node_modules
 RUN pnpm run build
 
-FROM pnpm
+FROM node:23-bookworm
 
-RUN apk add --no-cache flac vorbis-tools python3 mutagen icu-data-full
+RUN apt-get update && apt-get install -y flac vorbis-tools python3 python3-pip icu-devtools
+RUN pip3 install --break-system-packages mutagen
 
 COPY ./package.json pnpm-lock.yaml /app/
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 
 WORKDIR /app
+RUN corepack enable
+RUN corepack install
 
 ENV NODE_ENV=production
 
