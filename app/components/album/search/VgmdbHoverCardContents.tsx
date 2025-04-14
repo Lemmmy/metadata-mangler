@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPreferredVgmdbName } from "~/lib/fetch/vgmdbUtils";
 import { useTRPC } from "~/lib/trpc";
-import { pluralN } from "~/lib/utils";
+import { plural, pluralN } from "~/lib/utils";
 
 export function VgmdbHoverCardContents({ albumId }: { albumId: number }) {
   const trpc = useTRPC();
@@ -27,15 +27,43 @@ export function VgmdbHoverCardContents({ albumId }: { albumId: number }) {
 
   return (
     <div className="flex gap-4">
-      {/* Cover art (if available) */}
-      {data.covers[0]?.thumb && (
-        <img
-          src={data.covers[0].thumb}
-          alt={data.name}
-          className="h-24 w-24 rounded"
-        />
-      )}
+      {/* Left column */}
+      <div className="flex w-24 flex-shrink-0 flex-col gap-1 text-center text-sm">
+        {/* Cover art (if available) */}
+        {data.covers[0]?.thumb && (
+          <img
+            src={data.covers[0].thumb}
+            alt={data.name}
+            className="mb-2 h-24 w-24 rounded"
+          />
+        )}
 
+        {/* Catalog number */}
+        <div className="text-xs">{data.catalog}</div>
+
+        {/* Release date */}
+        <div className="text-xs">{data.release_date}</div>
+
+        {/* Media format */}
+        <div className="text-muted-foreground text-xs">
+          <b>Format:</b> {data.media_format}
+        </div>
+
+        {/* Disc count & track count */}
+        <div className="text-muted-foreground text-xs">
+          <span className="whitespace-nowrap">
+            {pluralN(data.discs.length, "disc")},
+          </span>{" "}
+          <span className="whitespace-nowrap">
+            {pluralN(
+              data.discs.reduce((acc, disc) => acc + disc.tracks.length, 0),
+              "track",
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Right column */}
       <div className="flex flex-col gap-1 text-sm">
         {/* Album names */}
         <div className="font-bold">{data.name}</div>
@@ -45,29 +73,39 @@ export function VgmdbHoverCardContents({ albumId }: { albumId: number }) {
           </div>
         ))}
 
-        {/* Catalog number and release date */}
+        {/* Publish format (category) and classification */}
         <div className="text-muted-foreground text-xs">
-          {data.catalog} - {data.release_date}
-        </div>
-
-        {/* Media format, publish format (category) and classification */}
-        <div className="text-muted-foreground text-xs">
-          {data.media_format}, {data.publish_format}, {data.classification}
+          <span className="whitespace-nowrap">{data.publish_format}</span>
+          {", "}
+          <span className="whitespace-nowrap">{data.classification}</span>
         </div>
 
         {/* Publisher */}
-        <div className="text-muted-foreground text-xs">
-          {getPreferredVgmdbName(data.publisher.names)}
-        </div>
+        {data.publisher?.names && (
+          <div className="text-muted-foreground text-xs">
+            <b>Publisher:</b> {getPreferredVgmdbName(data.publisher.names)}
+          </div>
+        )}
 
-        {/* Disc count & track count */}
-        <div className="text-muted-foreground text-xs">
-          {pluralN(data.discs.length, "disc")},{" "}
-          {pluralN(
-            data.discs.reduce((acc, disc) => acc + disc.tracks.length, 0),
-            "track",
-          )}
-        </div>
+        {/* Composer & arranger list */}
+        {data.composers?.length > 0 && (
+          <div className="text-muted-foreground text-xs">
+            <b>{plural(data.composers.length, "Composer")}:</b>{" "}
+            {data.composers
+              .map((composer) => getPreferredVgmdbName(composer.names))
+              .join(", ")}
+          </div>
+        )}
+
+        {/* Arranger list */}
+        {data.arrangers?.length > 0 && (
+          <div className="text-muted-foreground text-xs">
+            <b>{plural(data.arrangers.length, "Arranger")}:</b>{" "}
+            {data.arrangers
+              .map((arranger) => getPreferredVgmdbName(arranger.names))
+              .join(", ")}
+          </div>
+        )}
       </div>
     </div>
   );
