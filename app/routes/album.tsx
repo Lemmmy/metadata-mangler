@@ -79,30 +79,28 @@ export default function Home({
   );
 
   const trpc = useTRPC();
-  const albumData = useQuery(
+  const { isLoading, error, data } = useQuery(
     trpc.album.getFromDirectory.queryOptions({
       path,
     }),
   );
 
-  const isLoading = albumData.isLoading;
-  const error = albumData.error ? albumData.error.message : null;
-  const albumDataTracks = albumData.data?.tracks || [];
+  const albumDataTracks = data?.tracks || [];
 
   // Initialize the store with album data when it's loaded, and also set the document title
   useEffect(() => {
-    if (albumData.data?.album && albumData.data?.tracks) {
-      initialize(albumData.data.album, albumData.data.tracks, true);
-      document.title = makeAppTitle(albumData.data.album.name);
+    if (data?.album && data?.tracks) {
+      initialize(data.album, data.tracks, true);
+      document.title = makeAppTitle(data.album.name);
     }
-  }, [albumData.data, initialize]);
+  }, [data, initialize]);
 
   const originalTracks = useMetadataStore(useShallow((s) => s.originalTracks));
   const { columnVisibility, setColumnVisibility } =
     useAlbumTableColumns(originalTracks);
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   // Use albumData.data?.tracks as fallback if store tracks are empty
   const displayTracks = tracks.length > 0 ? tracks : albumDataTracks;

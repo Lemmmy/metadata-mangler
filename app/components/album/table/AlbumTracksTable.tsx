@@ -2,6 +2,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type Row,
   type Table,
   type VisibilityState,
 } from "@tanstack/react-table";
@@ -120,7 +121,11 @@ export function AlbumTracksTable({
           ))}
         </thead>
 
-        <TableBody table={table} columnVisibility={columnVisibility} />
+        <TableBody
+          rows={table.getRowModel().rows}
+          data={table.options.data}
+          columnVisibility={columnVisibility}
+        />
       </table>
     </div>
   );
@@ -128,16 +133,17 @@ export function AlbumTracksTable({
 
 const TableBody = memo(
   function TableBody({
-    table,
+    rows,
   }: {
-    table: Table<StoreTrack>;
+    rows: Row<StoreTrack>[];
+    data: StoreTrack[];
     columnVisibility: VisibilityState; // Passed in to re-render on column visibility change
   }) {
     "use no memo"; // Issue with react-compiler and column visibility changing
 
     return (
       <tbody className="divide-border bg-card divide-y">
-        {table.getRowModel().rows.map((row) => (
+        {rows.map((row) => (
           <tr key={row.id} className="hover:bg-muted/50">
             {row.getVisibleCells().map((cell) => (
               <td
@@ -160,6 +166,7 @@ const TableBody = memo(
     );
   },
   (prev, next) =>
-    prev.table.options.data === next.table.options.data &&
+    prev.rows.length === next.rows.length &&
+    prev.data === next.data &&
     isEqual(prev.columnVisibility, next.columnVisibility),
 );

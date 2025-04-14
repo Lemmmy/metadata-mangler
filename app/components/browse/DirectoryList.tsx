@@ -178,7 +178,7 @@ function DirectoryListSortSelector({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button variant="secondary">
           {sort?.endsWith("desc") ? (
             <SortDesc className="size-4" />
