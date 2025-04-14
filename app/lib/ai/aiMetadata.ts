@@ -87,7 +87,8 @@ A SINGLE album artist should be provided.
   - For bands and idol groups, this would be the group's name.
   - For soundtracks, this would be the primary composer.
   - For solo artists, this would be the artist's name, excluding any featured artists.
-  - For compilations, etc., you MUST use 'Various Artists'.
+  - For rearrangement albums, this would be the primary arranger.
+  - For compilations with multiple performers, you MUST use 'Various Artists'.
 For each track, match it with the corresponding track based on track number and disc number.
 Track titles with instrumental suffixes such as 'Instrumental', 'Karaoke', 'Off-Vocal', should be normalized to
   just ' (Instrumental)' with all other suffix punctuation cleaned up.
