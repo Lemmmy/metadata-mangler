@@ -8,8 +8,14 @@ export const env = v.parse(
       OPENROUTER_API_KEY: v.optional(v.string()),
       ANTHROPIC_API_KEY: v.optional(v.string()),
 
-      DEFAULT_WEB_MODEL: v.optional(v.string(), "openrouter/optimus-alpha"),
-      DEFAULT_TEST_MODEL: v.optional(v.string(), "openrouter/optimus-alpha"),
+      DEFAULT_WEB_MODEL: v.optional(
+        v.string(),
+        "google/gemini-2.0-flash-exp:free",
+      ),
+      DEFAULT_TEST_MODEL: v.optional(
+        v.string(),
+        "google/gemini-2.0-flash-exp:free",
+      ),
 
       MUSIC_LIBRARY_PATH: v.string(),
       TEST_ALBUM_PATH: v.string(),

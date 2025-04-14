@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/lib/trpc";
 import { Button } from "../ui/button";
-import { SaveIcon } from "lucide-react";
+import { Save, Undo2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMetadataStore } from "~/components/album/useMetadataStore";
 import type { StoreAlbum } from "./useMetadataStore";
@@ -25,11 +25,12 @@ export function AlbumSaveButton({ album }: Props) {
     text: string;
   } | null>(null);
 
-  const { hasUnsavedChanges } = useMetadataStore(
+  const { hasUnsavedChanges, resetChanges } = useMetadataStore(
     useShallow((s) => ({
       hasUnsavedChanges: Object.values(s.updatedFields).some(
         (set) => set.size > 0,
       ),
+      resetChanges: s.resetChanges,
     })),
   );
 
@@ -119,14 +120,25 @@ export function AlbumSaveButton({ album }: Props) {
       )}
 
       <Button
+        variant="outline"
+        size="sm"
+        onClick={resetChanges}
+        disabled={!hasUnsavedChanges}
+        className="gap-1"
+      >
+        <Undo2 className="h-4 w-4" />
+        Reset changes
+      </Button>
+
+      <Button
         variant={hasUnsavedChanges ? "default" : "outline"}
         size="sm"
         onClick={handleSaveTracks}
         disabled={!album || writeTracksMutation.isPending}
         className="gap-1"
       >
-        <SaveIcon className="h-4 w-4" />
-        {writeTracksMutation.isPending ? "Saving..." : "Save Changes"}
+        <Save className="h-4 w-4" />
+        {writeTracksMutation.isPending ? "Saving..." : "Save changes"}
       </Button>
     </div>
   );

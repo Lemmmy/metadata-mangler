@@ -1,4 +1,8 @@
-import { generateObject, type LanguageModelUsage } from "ai";
+import {
+  generateObject,
+  type LanguageModelUsage,
+  type ProviderMetadata,
+} from "ai";
 import { traceAISDKModel } from "evalite/ai-sdk";
 import * as v from "valibot";
 import type { SupportedModel } from "./aiProviders";
@@ -16,6 +20,7 @@ export interface ImprovedMetadataResult {
   albumArtist: string;
   tracks: AITrack[];
   usage?: LanguageModelUsage;
+  providerMetadata?: ProviderMetadata;
 }
 
 export type AITrack = Pick<
@@ -137,11 +142,11 @@ export async function generateImprovedMetadata(
   supplementalData: any,
   userInstructions?: string | null,
 ): Promise<ImprovedMetadataResult> {
-  const languageModel = traceAISDKModel(model.provider());
+  const languageModel = traceAISDKModel(model.provider(model.id));
   const evaluating = import.meta.env.VITE_ENV === "test";
 
   try {
-    const { object, usage } = await generateObject({
+    const { object, usage, providerMetadata } = await generateObject({
       model: languageModel,
       schema: valibotSchema(AlbumSchema),
       prompt: await generateImprovedMetadataPrompt(
@@ -190,6 +195,7 @@ export async function generateImprovedMetadata(
       albumArtist: cleanField(object.albumArtist),
       tracks: newTracks,
       usage,
+      providerMetadata,
     };
   } catch (error) {
     console.error("Error generating improved metadata:", error);

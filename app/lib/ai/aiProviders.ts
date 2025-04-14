@@ -13,7 +13,7 @@ export interface SupportedModel {
   id: string;
   name: string;
   isAvailable: () => boolean;
-  provider: () => LanguageModel;
+  provider: (id: string) => LanguageModel;
   inputUsdPer1Mil: number;
   outputUsdPer1Mil: number;
   estimateUsageFn?: (
@@ -26,10 +26,42 @@ export interface SupportedModel {
 export const supportedModels: SupportedModel[] = [
   // Models from OpenRouter
   {
-    id: "openrouter/optimus-alpha",
-    name: "Optimus Alpha",
+    id: "google/gemini-2.5-pro-exp-03-25:free",
+    name: "Gemini 2.5 Pro Experimental",
     isAvailable: hasOpenRouter,
-    provider: () => openrouter("openrouter/optimus-alpha"),
+    provider: openrouter,
+    inputUsdPer1Mil: 0,
+    outputUsdPer1Mil: 0,
+  },
+  {
+    id: "google/gemini-2.0-flash-exp:free",
+    name: "Gemini 2.0 Flash Experimental",
+    isAvailable: hasOpenRouter,
+    provider: openrouter,
+    inputUsdPer1Mil: 0,
+    outputUsdPer1Mil: 0,
+  },
+  {
+    id: "google/gemini-flash-1.5-8b-exp",
+    name: "Gemini Flash 1.5 8B Experimental",
+    isAvailable: hasOpenRouter,
+    provider: openrouter,
+    inputUsdPer1Mil: 0,
+    outputUsdPer1Mil: 0,
+  },
+  {
+    id: "mistralai/mistral-small-3.1-24b-instruct:free",
+    name: "Mistral Small 3.1 24B",
+    isAvailable: hasOpenRouter,
+    provider: openrouter,
+    inputUsdPer1Mil: 0,
+    outputUsdPer1Mil: 0,
+  },
+  {
+    id: "mistralai/mistral-7b-instruct:free",
+    name: "Mistral 7B Instruct",
+    isAvailable: hasOpenRouter,
+    provider: openrouter,
     inputUsdPer1Mil: 0,
     outputUsdPer1Mil: 0,
   },
@@ -39,7 +71,16 @@ export const supportedModels: SupportedModel[] = [
     id: "claude-3-5-sonnet-latest",
     name: "Claude 3.5 Sonnet",
     isAvailable: hasAnthropic,
-    provider: () => anthropic("claude-3-5-sonnet-latest"),
+    provider: anthropic,
+    inputUsdPer1Mil: 0.8,
+    outputUsdPer1Mil: 4.0,
+    estimateUsageFn: estimateAnthropicTokenUsage,
+  },
+  {
+    id: "claude-3-haiku-latest",
+    name: "Claude 3 Haiku",
+    isAvailable: hasAnthropic,
+    provider: anthropic,
     inputUsdPer1Mil: 0.8,
     outputUsdPer1Mil: 4.0,
     estimateUsageFn: estimateAnthropicTokenUsage,
