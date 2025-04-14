@@ -1,13 +1,13 @@
+import { valibotSchema } from "@ai-sdk/valibot";
 import {
   generateObject,
   type LanguageModelUsage,
+  type LanguageModelV1,
   type ProviderMetadata,
 } from "ai";
-import { traceAISDKModel } from "evalite/ai-sdk";
 import * as v from "valibot";
-import type { SupportedModel } from "./aiProviders";
 import type { FileTrack } from "../tags/musicMetadata";
-import { valibotSchema } from "@ai-sdk/valibot";
+import type { SupportedModel } from "./aiProviders";
 
 export type SupplementalDataSource =
   | "vgmdb"
@@ -141,8 +141,11 @@ export async function generateImprovedMetadata(
   supplementalDataSource: SupplementalDataSource,
   supplementalData: any,
   userInstructions?: string | null,
+  traceFn?: (model: LanguageModelV1) => LanguageModelV1,
 ): Promise<ImprovedMetadataResult> {
-  const languageModel = traceAISDKModel(model.provider(model.id));
+  const languageModel = traceFn
+    ? traceFn(model.provider(model.id))
+    : model.provider(model.id);
   const evaluating = import.meta.env.VITE_ENV === "test";
 
   try {

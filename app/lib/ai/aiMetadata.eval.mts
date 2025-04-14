@@ -14,6 +14,7 @@ import {
 } from "./aiMetadata";
 import { supportedModelLut } from "./aiProviders";
 import { cleanVgmdbAlbum } from "../fetch/vgmdbUtils";
+import { traceAISDKModel } from "evalite/ai-sdk";
 
 type AIMetadataInput = [
   string,
@@ -175,6 +176,7 @@ evalite<AIMetadataInput, ImprovedMetadataResult, AIMetadataExpected>(
         supplementalDataSource,
         supplementalData,
         userInstructions,
+        traceAISDKModel,
       ),
 
     scorers: [metadataRequirementsScorer, JSONDiff],
