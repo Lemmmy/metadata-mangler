@@ -18,8 +18,7 @@ RUN pnpm run build
 
 FROM pnpm
 
-RUN apk add --no-cache flac vorbis-tools python3 py3-pip
-RUN pip3 install mutagen
+RUN apk add --no-cache flac vorbis-tools python3 mutagen
 
 COPY ./package.json pnpm-lock.yaml /app/
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules

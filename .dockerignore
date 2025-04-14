@@ -10,3 +10,5 @@ eslint.config.json
 .vscode
 .husky
 .dockerignore
+evalData
+.env
