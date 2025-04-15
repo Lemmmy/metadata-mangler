@@ -32,6 +32,11 @@ export async function writeFlacTags(
 
     // First, remove existing tags that we're going to change
     for (const key of Object.keys(changedTags)) {
+      if (key === "albumArtist") {
+        // Remove legacy "ALBUM ARTIST" tags too
+        args.push("--remove-tag=ALBUM ARTIST");
+      }
+
       args.push(`--remove-tag=${key}`);
     }
 
