@@ -29,11 +29,11 @@ export async function writeMp3Tags(
   newTags: Partial<WritableTags>,
 ): Promise<WriteResult> {
   try {
-    // Get changed tags (as single values for MP3)
+    // Get changed tags (as arrays for MP3)
     const changedTags = await getChangedTags(
       filePath,
       newTags,
-      true,
+      false,
       MP3_TAG_MAPPING,
     );
 
@@ -46,10 +46,12 @@ export async function writeMp3Tags(
     const mid3v2Path = env.MID3V2_PATH || "mid3v2";
     const args: string[] = [];
 
-    // Add each tag to the arguments
-    for (const [key, value] of Object.entries(changedTags)) {
-      args.push(key);
-      args.push(value as string);
+    // Add each tag to the arguments, repeating the command argument for each value
+    for (const [key, values] of Object.entries(changedTags)) {
+      for (const value of values) {
+        args.push(key);
+        args.push(value);
+      }
     }
 
     // Add the file path as the last argument
