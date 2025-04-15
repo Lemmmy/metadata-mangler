@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactElement } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useEffect, type ReactElement } from "react";
 import { useTRPC } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 
 export function useModelPicker(): [string, ReactElement] {
   const trpc = useTRPC();
@@ -9,15 +10,22 @@ export function useModelPicker(): [string, ReactElement] {
     trpc.models.supportedModels.queryOptions(),
   );
 
-  const [selectedModel, setSelectedModel] = useState<string>(
+  const [selectedModel, setSelectedModel] = useLocalStorage<string>(
+    "model",
     supportedModelData.data?.defaultModel || "",
   );
 
   useEffect(() => {
-    if (supportedModelData.data && !selectedModel) {
+    if (
+      supportedModelData.data &&
+      (!selectedModel ||
+        !supportedModelData.data.supportedModels.find(
+          (model) => model.id === selectedModel,
+        ))
+    ) {
       setSelectedModel(supportedModelData.data.defaultModel);
     }
-  }, [supportedModelData.data, selectedModel]);
+  }, [supportedModelData.data, selectedModel, setSelectedModel]);
 
   const modelPicker = (
     <div className="flex items-baseline">
