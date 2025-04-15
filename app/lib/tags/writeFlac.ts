@@ -45,6 +45,7 @@ export async function writeFlacTags(
     // Add the file path as the last argument
     args.push(filePath);
 
+    console.log("Executing metaflac with args:", args);
     await execFileAsync(metaflacPath, args);
     return createWriteResult(filePath, true);
   } catch (error) {

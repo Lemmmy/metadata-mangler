@@ -42,6 +42,7 @@ export async function writeOggTags(
     args.push(filePath);
 
     // The -w flag overwrites all tags, so we don't need to remove them first
+    console.log("Executing vorbiscomment with args:", args);
     await execFileAsync(vorbiscommentPath, args);
     return createWriteResult(filePath, true);
   } catch (error) {

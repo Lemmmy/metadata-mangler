@@ -57,6 +57,7 @@ export async function writeMp3Tags(
     // Add the file path as the last argument
     args.push(filePath);
 
+    console.log("Executing mid3v2 with args:", args);
     await execFileAsync(mid3v2Path, args);
     return createWriteResult(filePath, true);
   } catch (error) {
