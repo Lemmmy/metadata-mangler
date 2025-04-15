@@ -9,12 +9,13 @@ const execFileAsync = promisify(execFile);
 
 // MP3 tag name mapping (mid3v2 uses different argument names)
 const MP3_TAG_MAPPING = {
-  title: "--song",
-  artists: "--artist",
-  album: "--album",
-  albumArtist: "--album-artist",
-  trackNumber: "--track",
-  discNumber: "--disc",
+  title: "--TIT2",
+  artists: "--TPE1",
+  album: "--TALB",
+  albumArtist: "--TPE2",
+  trackNumber: "--TRCK",
+  discNumber: "--TPOS",
+  // year: "--TYER"
 };
 
 /**
@@ -39,16 +40,6 @@ export async function writeMp3Tags(
     // If no tags have changed, return success
     if (Object.keys(changedTags).length === 0) {
       return createWriteResult(filePath, true);
-    }
-
-    // Special handling for multiple artists in MP3
-    // If there are multiple artists, also set the TPE2 frame
-    if (
-      changedTags["--artist"] &&
-      typeof changedTags["--artist"] === "string" &&
-      changedTags["--artist"].includes(";")
-    ) {
-      changedTags["--TPE2"] = changedTags["--artist"];
     }
 
     // Build the mid3v2 command arguments
