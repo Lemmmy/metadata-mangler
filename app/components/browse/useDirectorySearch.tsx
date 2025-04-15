@@ -44,6 +44,10 @@ export function useDirectorySearch(
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
+  useEffect(() => {
+    setQuery("");
+  }, [entries]);
+
   const processedEntries = useMemo(() => {
     const newEntries = entries.map((e) => ({
       ...e,
