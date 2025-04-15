@@ -16,6 +16,7 @@ import { prefetch } from "~/lib/prefetch";
 import { useTRPC } from "~/lib/trpc";
 import type { Route } from "./+types/album";
 import { Breadcrumb, type BreadcrumbHandle } from "~/components/Breadcrumb";
+import { AlbumArt } from "~/components/album/AlbumArt";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const safePath = rebasePath(params["*"] || "");
@@ -111,19 +112,7 @@ export default function Home({
 
       <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-[auto_1fr]">
         <div className="flex-shrink-0">
-          {album?.coverArt ? (
-            <img
-              src={album.coverArt}
-              alt="Album Cover"
-              className="h-48 w-48 rounded-lg object-cover shadow-md"
-            />
-          ) : (
-            <div className="bg-muted flex h-48 w-48 items-center justify-center rounded-lg">
-              <span className="text-muted-foreground text-sm">
-                No cover art
-              </span>
-            </div>
-          )}
+          <AlbumArt path={path} />
         </div>
 
         <div>

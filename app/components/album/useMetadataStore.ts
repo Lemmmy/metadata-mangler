@@ -27,6 +27,9 @@ interface MetadataState {
   originalTracks: StoreTrack[];
   updatedFields: Record<number, Set<string>>;
 
+  urlOrData: string;
+  additionalInfo: string;
+
   initialize: (
     album: StoreAlbum,
     tracks: StoreTrack[],
@@ -37,6 +40,10 @@ interface MetadataState {
   updateTrack: (index: number, field: StoreTrackUpdatable, value: any) => void;
   updateTracks: (tracks: AITrack[]) => void;
   resetChanges: () => void;
+
+  setUrlOrData: (urlOrData: string) => void;
+  setAdditionalInfo: (additionalInfo: string) => void;
+  setAlbumArt: (albumArt: string | null) => void;
 }
 
 export const useMetadataStore = create<MetadataState>()(
@@ -46,6 +53,8 @@ export const useMetadataStore = create<MetadataState>()(
     tracks: [],
     originalTracks: [],
     updatedFields: {},
+    urlOrData: "",
+    additionalInfo: "",
 
     initialize: (album, tracks, resetOriginal = true) =>
       set((state) => {
@@ -56,6 +65,8 @@ export const useMetadataStore = create<MetadataState>()(
         if (resetOriginal)
           state.originalTracks = JSON.parse(JSON.stringify(tracks)); // Deep copy
         state.updatedFields = {};
+        state.urlOrData = "";
+        state.additionalInfo = "";
       }),
 
     updateAlbumName: (name) =>
@@ -143,6 +154,21 @@ export const useMetadataStore = create<MetadataState>()(
       set((state) => {
         state.tracks = JSON.parse(JSON.stringify(state.originalTracks)); // Deep copy
         state.updatedFields = {};
+      }),
+
+    setUrlOrData: (urlOrData: string) =>
+      set((state) => {
+        state.urlOrData = urlOrData;
+      }),
+
+    setAdditionalInfo: (additionalInfo: string) =>
+      set((state) => {
+        state.additionalInfo = additionalInfo;
+      }),
+
+    setAlbumArt: (albumArt: string | null) =>
+      set((state) => {
+        if (state.album) state.album.coverArt = albumArt;
       }),
   })),
 );

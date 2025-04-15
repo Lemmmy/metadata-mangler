@@ -36,17 +36,27 @@ export function AlbumLookupSection({
   const lookupMutation = useMutation(trpc.metadata.lookup.mutationOptions());
   const estimateMutation = useMutation(trpc.metadata.lookup.mutationOptions());
 
-  const [urlOrData, setUrlOrData] = useState("");
-  const [additionalInfo, setAdditionalInfo] = useState("");
   const [selectedModel, modelPicker] = useModelPicker();
 
   const [usage, setUsage] = useState<PriceUsage | null>(null);
 
-  const { updateAlbumName, updateAlbumArtist, updateTracks } = useMetadataStore(
+  const {
+    updateAlbumName,
+    updateAlbumArtist,
+    updateTracks,
+    urlOrData,
+    additionalInfo,
+    setUrlOrData,
+    setAdditionalInfo,
+  } = useMetadataStore(
     useShallow((s) => ({
       updateAlbumName: s.updateAlbumName,
       updateAlbumArtist: s.updateAlbumArtist,
       updateTracks: s.updateTracks,
+      urlOrData: s.urlOrData,
+      additionalInfo: s.additionalInfo,
+      setUrlOrData: s.setUrlOrData,
+      setAdditionalInfo: s.setAdditionalInfo,
     })),
   );
 

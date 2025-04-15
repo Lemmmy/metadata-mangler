@@ -1,13 +1,21 @@
+import fsp from "node:fs/promises";
+import path from "node:path";
+import { pathExists } from "path-exists";
+import sharp from "sharp";
 import * as v from "valibot";
 import { publicProcedure, router } from "~/api/trpc";
+import {
+  getBestCoverFromSourceUrl,
+  parseSupplementalDataSource,
+} from "~/lib/fetch/supplementalFetch";
 import { rebasePath, stripLibraryPath } from "~/lib/paths";
 import {
-  readTracksFromDirectory,
-  getAlbumName,
+  cleanTrackForWeb,
   getAlbumArtist,
   getAlbumCoverArt,
+  getAlbumName,
   getCoverArtUrl,
-  cleanTrackForWeb,
+  readTracksFromDirectory,
   type WritableTags,
 } from "~/lib/tags/musicMetadata";
 import { writeTagsToFiles, type WriteResult } from "~/lib/tags/writeMetadata";
@@ -98,6 +106,58 @@ export const album = router({
         };
       } catch (error) {
         console.error("Error writing track metadata:", error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }),
+
+  // Fetch and save best cover from source URL
+  fetchCoverFromSource: publicProcedure
+    .input(
+      v.object({
+        path: v.pipe(v.string(), v.minLength(1)),
+        sourceUrl: v.pipe(v.string(), v.minLength(1)),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const outPath = path.join(rebasePath(input.path), "cover.jpg");
+        if (await pathExists(outPath)) {
+          return { success: true, coverPath: outPath };
+        }
+
+        const source = parseSupplementalDataSource(input.sourceUrl);
+        const coverUrl = await getBestCoverFromSourceUrl(
+          source,
+          input.sourceUrl,
+        );
+        if (!coverUrl) {
+          return { success: false, error: "No cover image found at source" };
+        }
+
+        // Fetch the cover image
+        const res = await fetch(coverUrl);
+        if (!res.ok) {
+          return {
+            success: false,
+            error: `Failed to fetch cover: ${res.status}`,
+          };
+        }
+        const buffer = Buffer.from(await res.arrayBuffer());
+
+        // Resize to 512x512
+        const resized = await sharp(buffer)
+          .resize(512, 512, { fit: "inside" })
+          .toFormat("jpeg", { quality: 90 })
+          .toBuffer();
+
+        // Save as cover.jpg in the directory
+        await fsp.writeFile(outPath, resized);
+        return { success: true, coverArt: await getCoverArtUrl(resized) };
+      } catch (error) {
+        console.error("fetchCoverFromSource error:", error);
         return {
           success: false,
           error: error instanceof Error ? error.message : String(error),

@@ -34,7 +34,7 @@ async function fetchSupplementalData(
       const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
       const cleanedAlbum = cleanVgmdbAlbum(vgmdbAlbum);
 
-      return JSON.stringify(cleanedAlbum, null, 2);
+      return JSON.stringify(cleanedAlbum);
     }
   } else if (source === "musicbrainz") {
     const match = input.match(URL_PATTERNS.musicbrainz);
@@ -71,4 +71,37 @@ export async function fetchCachedSupplementalData(
   const result = await fetchSupplementalData(source, input);
   if (result) cache.set(input, result);
   return result;
+}
+
+// Returns the best cover image URL from a supported source URL (vgmdb, etc)
+export async function getBestCoverFromSourceUrl(
+  source: SupplementalDataSource,
+  input: string,
+): Promise<string | null> {
+  if (source === "user") {
+    return input;
+  } else if (source === "vgmdb") {
+    const match = input.match(URL_PATTERNS.vgmdb);
+    if (match && match[3]) {
+      const albumId = parseInt(match[3], 10);
+      const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
+      return vgmdbAlbum.covers[0]?.full || vgmdbAlbum.covers[0]?.thumb || null;
+    }
+  } else if (source === "musicbrainz") {
+    const match = input.match(URL_PATTERNS.musicbrainz);
+    if (match && match[1]) {
+      const releaseId = match[1];
+      // TODO: Implement musicbrainz data fetching
+      return null;
+    }
+  } else if (source === "bandcamp") {
+    const match = input.match(URL_PATTERNS.bandcamp);
+    if (match && match[1]) {
+      const releaseId = match[1];
+      // TODO: Implement bandcamp data fetching
+      return null;
+    }
+  }
+
+  return null;
 }
