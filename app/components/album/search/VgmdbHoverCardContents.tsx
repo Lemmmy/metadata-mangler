@@ -30,14 +30,13 @@ export function VgmdbHoverCardContents({ albumId }: { albumId: number }) {
       {/* Left column */}
       <div className="flex w-24 flex-shrink-0 flex-col gap-1 text-center text-sm">
         {/* Cover art (if available) */}
-        {data.covers[0]?.thumb ||
-          (data.picture_thumb && (
-            <img
-              src={data.covers[0]?.thumb || data.picture_thumb}
-              alt={data.name}
-              className="mb-2 h-24 w-24 rounded"
-            />
-          ))}
+        {(data.covers[0]?.thumb || data.picture_thumb) && (
+          <img
+            src={data.covers[0]?.thumb || data.picture_thumb}
+            alt={data.name}
+            className="mb-2 h-24 w-24 rounded"
+          />
+        )}
 
         {/* Catalog number */}
         <div className="text-xs">{data.catalog}</div>
