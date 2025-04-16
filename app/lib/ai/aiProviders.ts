@@ -77,7 +77,7 @@ export const supportedModels: SupportedModel[] = [
     estimateUsageFn: estimateAnthropicTokenUsage,
   },
   {
-    id: "claude-3-haiku-latest",
+    id: "claude-3-haiku-20240307",
     name: "Claude 3 Haiku",
     isAvailable: hasAnthropic,
     provider: anthropic,
