@@ -47,7 +47,10 @@ export async function loader({ params }: Route.LoaderArgs) {
   const breadcrumbs: { url: string; name: string }[] = strippedPath
     .split("/")
     .map((el, i, arr) => ({
-      url: `/browse/${arr.slice(0, i + 1).join("/")}`,
+      url: `/browse/${arr
+        .slice(0, i + 1)
+        .map(encodeURIComponent)
+        .join("/")}`,
       name: el,
     }))
     .filter((bc) => bc.name !== "");

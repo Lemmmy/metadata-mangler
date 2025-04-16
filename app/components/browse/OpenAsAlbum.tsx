@@ -36,7 +36,7 @@ export function OpenAsAlbum({
     if (directory) {
       precheck.refetch().then(({ data }) => {
         if (data?.success) {
-          navigate(`/album/${directory}`);
+          navigate(`/album/${encodeURIComponent(directory)}`);
         }
       });
     }

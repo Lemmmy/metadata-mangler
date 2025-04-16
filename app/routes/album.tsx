@@ -32,8 +32,14 @@ export async function loader({ params }: Route.LoaderArgs) {
     .map((el, i, arr) => ({
       url:
         i === arr.length - 1
-          ? `/album/${arr.slice(0, i + 1).join("/")}`
-          : `/browse/${arr.slice(0, i + 1).join("/")}`,
+          ? `/album/${arr
+              .slice(0, i + 1)
+              .map(encodeURIComponent)
+              .join("/")}`
+          : `/browse/${arr
+              .slice(0, i + 1)
+              .map(encodeURIComponent)
+              .join("/")}`,
       name: el,
     }))
     .filter((bc) => bc.name !== "");

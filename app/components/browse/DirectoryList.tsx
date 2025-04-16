@@ -135,7 +135,7 @@ function DirectoryListItem({
       <NavLink
         to={
           item.isDirectory
-            ? `${basePath ? `/browse/${basePath}` : "/browse"}/${item.name}`
+            ? `${basePath ? `/browse/${encodeURIComponent(basePath)}` : "/browse"}/${item.name}`
             : "#"
         }
         end
