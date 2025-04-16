@@ -82,7 +82,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         : error.statusText || details;
   } else {
     console.error("Non-route error:", error);
-    if (import.meta.env.DEV && error && error instanceof Error) {
+    if (error instanceof Error) {
       details = error.message;
       stack = error.stack;
     }
