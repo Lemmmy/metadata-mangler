@@ -33,7 +33,7 @@ export function VgmdbHoverCardContents({ albumId }: { albumId: number }) {
         {data.covers[0]?.thumb ||
           (data.picture_thumb && (
             <img
-              src={data.covers[0].thumb || data.picture_thumb}
+              src={data.covers[0]?.thumb || data.picture_thumb}
               alt={data.name}
               className="mb-2 h-24 w-24 rounded"
             />
