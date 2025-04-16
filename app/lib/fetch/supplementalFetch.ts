@@ -85,7 +85,14 @@ export async function getBestCoverFromSourceUrl(
     if (match && match[3]) {
       const albumId = parseInt(match[3], 10);
       const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
-      return vgmdbAlbum.covers[0]?.full || vgmdbAlbum.covers[0]?.thumb || null;
+      return (
+        vgmdbAlbum.covers[0]?.full ||
+        vgmdbAlbum.covers[0]?.thumb ||
+        vgmdbAlbum.picture_full ||
+        vgmdbAlbum.picture_small ||
+        vgmdbAlbum.picture_thumb ||
+        null
+      );
     }
   } else if (source === "musicbrainz") {
     const match = input.match(URL_PATTERNS.musicbrainz);
