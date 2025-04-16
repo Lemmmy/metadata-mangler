@@ -1,5 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { openrouter } from "@openrouter/ai-sdk-provider";
+import { openai } from "@ai-sdk/openai";
 import type { LanguageModel, LanguageModelUsage } from "ai";
 import * as v from "valibot";
 import type { AITrack } from "./aiMetadata";
@@ -8,6 +9,7 @@ import { env } from "../env";
 
 const hasAnthropic = () => !!env.ANTHROPIC_API_KEY;
 const hasOpenRouter = () => !!env.OPENROUTER_API_KEY;
+const hasOpenAI = () => !!env.OPENAI_API_KEY;
 
 export interface SupportedModel {
   id: string;
@@ -27,7 +29,7 @@ export const supportedModels: SupportedModel[] = [
   // Models from OpenRouter
   {
     id: "google/gemini-2.5-pro-exp-03-25:free",
-    name: "Gemini 2.5 Pro Experimental",
+    name: "Google Gemini 2.5 Pro Experimental",
     isAvailable: hasOpenRouter,
     provider: openrouter,
     inputUsdPer1Mil: 0,
@@ -35,7 +37,7 @@ export const supportedModels: SupportedModel[] = [
   },
   {
     id: "google/gemini-2.0-flash-exp:free",
-    name: "Gemini 2.0 Flash Experimental",
+    name: "Google Gemini 2.0 Flash Experimental",
     isAvailable: hasOpenRouter,
     provider: openrouter,
     inputUsdPer1Mil: 0,
@@ -43,7 +45,7 @@ export const supportedModels: SupportedModel[] = [
   },
   {
     id: "google/gemini-flash-1.5-8b-exp",
-    name: "Gemini Flash 1.5 8B Experimental",
+    name: "Google Gemini Flash 1.5 8B Experimental",
     isAvailable: hasOpenRouter,
     provider: openrouter,
     inputUsdPer1Mil: 0,
@@ -69,7 +71,7 @@ export const supportedModels: SupportedModel[] = [
   // Models from Anthropic
   {
     id: "claude-3-5-sonnet-latest",
-    name: "Claude 3.5 Sonnet",
+    name: "Anthropic Claude 3.5 Sonnet",
     isAvailable: hasAnthropic,
     provider: anthropic,
     inputUsdPer1Mil: 0.8,
@@ -78,12 +80,46 @@ export const supportedModels: SupportedModel[] = [
   },
   {
     id: "claude-3-haiku-20240307",
-    name: "Claude 3 Haiku",
+    name: "Anthropic Claude 3 Haiku",
     isAvailable: hasAnthropic,
     provider: anthropic,
     inputUsdPer1Mil: 0.8,
     outputUsdPer1Mil: 4.0,
     estimateUsageFn: estimateAnthropicTokenUsage,
+  },
+
+  // Models from OpenAI
+  {
+    id: "gpt-4.1-2025-04-14",
+    name: "OpenAI GPT-4.1",
+    isAvailable: hasOpenAI,
+    provider: openai,
+    inputUsdPer1Mil: 2.0,
+    outputUsdPer1Mil: 8.0,
+  },
+  {
+    id: "gpt-4o-2024-08-06",
+    name: "OpenAI GPT-4o",
+    isAvailable: hasOpenAI,
+    provider: openai,
+    inputUsdPer1Mil: 2.5,
+    outputUsdPer1Mil: 10.0,
+  },
+  {
+    id: "gpt-4.1-mini-2025-04-14",
+    name: "OpenAI GPT-4.1 mini",
+    isAvailable: hasOpenAI,
+    provider: openai,
+    inputUsdPer1Mil: 0.4,
+    outputUsdPer1Mil: 1.6,
+  },
+  {
+    id: "gpt-4o-mini-2024-07-18",
+    name: "OpenAI GPT-4o mini",
+    isAvailable: hasOpenAI,
+    provider: openai,
+    inputUsdPer1Mil: 0.15,
+    outputUsdPer1Mil: 0.6,
   },
 ];
 

@@ -3,16 +3,16 @@ import { useMutation } from "@tanstack/react-query";
 import type { VisibilityState } from "@tanstack/react-table";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
 import {
   useMetadataStore,
   type StoreAlbum,
 } from "~/components/album/useMetadataStore";
-import type { PriceUsage } from "~/lib/ai/aiProviders";
-import { useTRPC } from "~/lib/trpc";
-import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
 import { ModelUsage } from "~/components/ModelEstimate";
 import { Button } from "~/components/ui/button";
 import { useModelPicker } from "~/components/useModelPicker";
+import type { PriceUsage } from "~/lib/ai/aiProviders";
+import { useTRPC } from "~/lib/trpc";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
@@ -192,7 +192,6 @@ export function AlbumLookupSection({
           <ModelUsage
             isEstimate={!usage}
             usage={(usage || estimateMutation.data) as PriceUsage}
-            pending={estimateMutation.isPending}
           />
 
           <VgmdbSearchDialogButton

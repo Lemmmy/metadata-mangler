@@ -6,6 +6,7 @@ import {
   generateImprovedMetadata,
   generateImprovedMetadataPrompt,
 } from "~/lib/ai/aiMetadata";
+import { estimateGenericTokenUsage } from "~/lib/ai/aiProviderGeneric";
 import {
   supportedModelLut,
   supportedModelValidator,
@@ -75,7 +76,7 @@ export const metadata = router({
         const model = supportedModelLut[input.modelId];
 
         if (input.estimateOnly) {
-          const estimateFn = model.estimateUsageFn;
+          const estimateFn = model.estimateUsageFn || estimateGenericTokenUsage;
           if (!estimateFn) {
             return { success: false };
           }

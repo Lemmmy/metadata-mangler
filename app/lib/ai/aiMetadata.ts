@@ -76,16 +76,6 @@ export async function generateImprovedMetadataPrompt(
 You are a music metadata expert. Your task is to improve the metadata for a set of music tracks. You have been provided
 with the original track metadata, and supplemental album data from a third-party provider.
 
-ORIGINAL ALBUM NAME: ${albumName}
-ORIGINAL ALBUM ARTIST: ${albumArtist}
-ORIGINAL TRACK METADATA FROM FILES:
-<tracks>\n${JSON.stringify(tracksInfo, null, 2)}\n</tracks>
-
-SUPPLEMENTAL THIRD-PARTY ALBUM INFORMATION:
-${wrapSupplementalData(supplementalDataSource, supplementalData)}
-
-${userInstructions ? `IMPORTANT USER-PROVIDED INSTRUCTIONS:\n${wrapSupplementalData("user", userInstructions)}` : ""}
-
 Based on the third-party album information, please provide improved metadata for the album and each track.
 The album name should be provided in romaji where appropriate.
 A SINGLE album artist should be provided.
@@ -93,7 +83,7 @@ A SINGLE album artist should be provided.
   - For soundtracks, this would be the primary composer.
   - For solo artists, this would be the artist's name, excluding any featured artists.
   - For rearrangement albums, this would be the primary arranger.
-  - For compilations with multiple performers, you MUST use 'Various Artists'.
+  - For compilations with multiple performers, use the circle or label's name.
 For each track, match it with the corresponding track based on track number and disc number.
 Track titles with instrumental suffixes such as 'Instrumental', 'Karaoke', 'Off-Vocal', should be normalized to
   just ' (Instrumental)' with all other suffix punctuation cleaned up.
@@ -112,12 +102,21 @@ Preserve the original filename and base directory.
 ROMANIZATION RULES:
 - If Japanese text was provided in the supplemental data, use it to help with romanization.
 - Use the provided romaji for artist names and titles as a foundation. If no romaji is available in the supplemental
-information, romanize it yourself.
+  information, romanize it automatically.
 - NEVER use English-translated titles directly, unless the original title is in English.
 - When romanizing titles, you MUST keep English loan-words as English, NOT romaji.
-- All artist names should be romanised in Japanese order (Surname Forename).
-- ALWAYS use modified Hepburn romanization with kana-spelling style.
-- Long vowels: ALWAYS romanize おお sounds as 'oo' and おう sounds as 'ou'.
+- ALWAYS use modified Hepburn romanization with kana-spelling style. ALWAYS romanize おお sounds as 'oo' and おう
+  sounds as 'ou'.
+- All Japanese names MUST be romanized in Japanese order (Surname Forename). This includes artist names.
+
+ORIGINAL ALBUM NAME: ${albumName}
+ORIGINAL ALBUM ARTIST: ${albumArtist}
+ORIGINAL TRACK METADATA FROM FILES:
+<tracks>\n${JSON.stringify(tracksInfo, null, 2)}\n</tracks>
+
+SUPPLEMENTAL THIRD-PARTY ALBUM INFORMATION:
+${wrapSupplementalData(supplementalDataSource, supplementalData)}
+${userInstructions ? `\nIMPORTANT USER-PROVIDED INSTRUCTIONS:\n${wrapSupplementalData("user", userInstructions)}` : ""}
 `;
 }
 

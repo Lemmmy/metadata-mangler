@@ -39,7 +39,7 @@ coded. Beware.
 ## Requirements
 
 - Self-hosting required (needs direct filesystem access)
-- API key for either OpenRouter or Anthropic
+- API key for either OpenRouter, Anthropic, or OpenAI
 - Node.js 20 or later
 
 ## Getting Started
@@ -62,6 +62,7 @@ Deploy with Docker, or create a `.env` file in the root directory with the follo
 # At least one API key is required for AI corrections
 OPENROUTER_API_KEY=sk-or-v1-...
 ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
 
 # Path to the root of your music library
 MUSIC_LIBRARY_PATH=/path/to/your/music/library

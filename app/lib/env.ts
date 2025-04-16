@@ -7,6 +7,7 @@ export const env = v.parse(
     v.object({
       OPENROUTER_API_KEY: v.optional(v.string()),
       ANTHROPIC_API_KEY: v.optional(v.string()),
+      OPENAI_API_KEY: v.optional(v.string()),
 
       DEFAULT_WEB_MODEL: v.optional(
         v.string(),
@@ -34,7 +35,12 @@ export const env = v.parse(
     }),
     // Require at least one API key
     v.check(
-      (env) => !!(env.OPENROUTER_API_KEY || env.ANTHROPIC_API_KEY),
+      (env) =>
+        !!(
+          env.OPENROUTER_API_KEY ||
+          env.ANTHROPIC_API_KEY ||
+          env.OPENAI_API_KEY
+        ),
       "At least one API key is required",
     ),
   ),
