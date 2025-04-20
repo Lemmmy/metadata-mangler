@@ -195,10 +195,14 @@ export function useAlbumTableColumns(
   // Show some of the hidden-by-default columns under certain conditions
   useEffect(() => {
     if (originalTracks.length > 0) {
+      function normalizeTag(tag: any) {
+        return Array.isArray(tag) ? [...tag].sort().join(",") : tag;
+      }
+
       // If there's more than one value for album-specific tags, show that tag's column
       function checkTagCardinality(tag: keyof StoreTrackUpdatable) {
         const uniqueValues = new Set(
-          originalTracks.map((track) => track[tag]).filter(Boolean),
+          originalTracks.map((t) => normalizeTag(t[tag])).filter(Boolean),
         );
         if (uniqueValues.size > 1) {
           setColumnVisibility((prev) => ({
