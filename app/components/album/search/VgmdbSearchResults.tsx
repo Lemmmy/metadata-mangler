@@ -9,6 +9,7 @@ import { type VgmdbAlbumSearchResult } from "~/lib/fetch/vgmdb";
 import { getPreferredVgmdbName } from "~/lib/fetch/vgmdbUtils";
 import { cn } from "~/lib/utils";
 import { VgmdbHoverCardContents } from "./VgmdbHoverCardContents";
+import type { ProcessedVgmdbAlbumSearchResult } from "./VgmdbSearchDialog";
 
 export const categoryClasses: Record<string, string> = {
   "Doujin/Fanmade": "text-orange-500 dark:text-orange-400",
@@ -20,7 +21,7 @@ export const categoryClasses: Record<string, string> = {
 };
 
 interface Props {
-  results: VgmdbAlbumSearchResult[];
+  results: ProcessedVgmdbAlbumSearchResult[];
   onConfirm: (id: string) => void;
   isLoading: boolean;
 }
@@ -60,7 +61,7 @@ function VgmdbSearchResult({
   result,
   onConfirm,
 }: {
-  result: VgmdbAlbumSearchResult;
+  result: ProcessedVgmdbAlbumSearchResult;
   onConfirm: (id: string) => void;
 }) {
   const url = `https://vgmdb.net/${result.link}`;
@@ -101,7 +102,12 @@ function VgmdbSearchResult({
   return (
     <>
       {/* Catalog number */}
-      <Cell className="px-2 whitespace-nowrap tabular-nums">
+      <Cell
+        className={cn(
+          "px-2 whitespace-nowrap tabular-nums",
+          result.catalogNumberMatched && "text-primary font-semibold",
+        )}
+      >
         {result.catalog}
       </Cell>
 

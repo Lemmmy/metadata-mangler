@@ -1,16 +1,23 @@
 import { useThrottledValue } from "@tanstack/react-pacer";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useTRPC } from "~/lib/trpc";
 import { VgmdbSearchResults } from "./VgmdbSearchResults";
+import { parseCatalogNumber } from "~/lib/fetch/vgmdbUtils";
+import type { VgmdbAlbumSearchResult } from "~/lib/fetch/vgmdb";
 
 export interface VgmdbSearchDialogProps {
   dirName: string;
   albumName: string;
   onConfirm: (id: string) => void;
+}
+
+export interface ProcessedVgmdbAlbumSearchResult
+  extends VgmdbAlbumSearchResult {
+  catalogNumberMatched: boolean;
 }
 
 export function VgmdbSearchDialog({
@@ -38,6 +45,32 @@ export function VgmdbSearchDialog({
     setSearch(albumName);
   }, [albumName]);
 
+  const albums = searchQuery.data?.results?.albums;
+  const catalogNumber = parseCatalogNumber(dirName);
+  const sortedResults = useMemo(() => {
+    if (!albums) return [];
+
+    const out: ProcessedVgmdbAlbumSearchResult[] = [];
+
+    for (const result of albums) {
+      const catalogNumberMatched = result.catalog === catalogNumber;
+      if (catalogNumberMatched) {
+        // If there's a catalog number match in the results, it should be pushed to the top of the list.
+        out.unshift({
+          ...result,
+          catalogNumberMatched,
+        });
+      } else {
+        out.push({
+          ...result,
+          catalogNumberMatched,
+        });
+      }
+    }
+
+    return out;
+  }, [albums, catalogNumber]);
+
   return (
     <>
       {/* Search box & refresh button */}
@@ -61,7 +94,7 @@ export function VgmdbSearchDialog({
 
       {/* Search results */}
       <VgmdbSearchResults
-        results={searchQuery.data?.results?.albums || []}
+        results={sortedResults}
         onConfirm={onConfirm}
         isLoading={searchQuery.isLoading}
       />
