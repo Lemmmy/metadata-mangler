@@ -50,6 +50,9 @@ export function AlbumSaveButton({ album }: Props) {
         artists: track.artists,
         album: track.album,
         albumArtist: track.albumArtist,
+        year: track.year,
+        date: track.date,
+        grouping: track.grouping,
       }));
 
       setSaveMessage(null);
