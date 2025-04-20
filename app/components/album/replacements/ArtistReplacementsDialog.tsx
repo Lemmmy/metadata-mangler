@@ -13,7 +13,7 @@ import { ResettableInput } from "~/components/ui/input";
 import { useMetadataStore } from "../useMetadataStore";
 import { useTRPC } from "~/lib/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { ArrowRightLeft, Loader2 } from "lucide-react";
 
 export interface ArtistReplacementsDialogProps {
   onClose: () => void;
@@ -100,7 +100,7 @@ export function ArtistReplacementsDialog({
         </VisuallyHidden>
       </DialogHeader>
 
-      <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+      <div className="grid max-h-[480px] grid-cols-2 gap-x-2 gap-y-1 overflow-y-scroll">
         {Object.entries(replacements).map(([original, replacement]) => (
           <React.Fragment key={original}>
             <ResettableInput
@@ -111,6 +111,20 @@ export function ArtistReplacementsDialog({
               }
               onReset={() =>
                 setReplacements((r) => ({ ...r, [original]: original }))
+              }
+              extra={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setReplacements((r) => ({
+                      ...r,
+                      [original]: swapNames(replacement),
+                    }))
+                  }
+                >
+                  <ArrowRightLeft />
+                </Button>
               }
             />
           </React.Fragment>
@@ -132,4 +146,8 @@ export function ArtistReplacementsDialog({
       </DialogFooter>
     </DialogContent>
   );
+}
+
+function swapNames(input: string) {
+  return input.replace(/(\w+)\s+(\w+)/, "$2 $1");
 }

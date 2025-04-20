@@ -116,7 +116,8 @@ ROMANIZATION RULES:
 - When romanizing titles, you MUST keep English loan-words as English, NOT romaji.
 - ALWAYS use modified Hepburn romanization with kana-spelling style. ALWAYS romanize おお sounds as 'oo' and おう
   sounds as 'ou'.
-- All Japanese names MUST be romanized in Japanese order (Surname Forename). This includes artist names.
+- All Japanese names MUST be romanized in Japanese order (Surname Forename). This includes artist names. For example:
+  'Jun Maeda' is incorrect, but 'Maeda Jun' is correct.
 `;
 }
 
