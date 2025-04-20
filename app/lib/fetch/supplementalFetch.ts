@@ -1,6 +1,6 @@
 import { LRUCache } from "lru-cache";
 import type { SupplementalDataSource } from "../ai/aiMetadata";
-import { fetchVgmdbAlbum } from "../fetch/vgmdb";
+import { fetchVgmdbAlbum, parseVgmdbReleaseDate } from "../fetch/vgmdb";
 import { cleanVgmdbAlbum } from "./vgmdbUtils";
 
 const URL_PATTERNS = {
@@ -9,6 +9,15 @@ const URL_PATTERNS = {
     /^https?:\/\/(www\.)?musicbrainz\.org\/release\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i,
   bandcamp: /^https?:\/\/.*\.bandcamp\.com\/(album|track)\/[a-zA-Z0-9-]+/i,
 };
+
+export interface SupplementalData {
+  cleanRaw: string;
+  raw: any;
+  albumName?: string;
+  albumArtist?: string;
+  year?: string;
+  date?: string;
+}
 
 export function parseSupplementalDataSource(
   input: string,
@@ -24,17 +33,24 @@ export function parseSupplementalDataSource(
 async function fetchSupplementalData(
   source: SupplementalDataSource,
   input: string,
-): Promise<string | null> {
+): Promise<SupplementalData | null> {
   if (source === "user") {
-    return input;
+    return { cleanRaw: input, raw: input };
   } else if (source === "vgmdb") {
     const match = input.match(URL_PATTERNS.vgmdb);
     if (match && match[3]) {
       const albumId = parseInt(match[3], 10);
       const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
       const cleanedAlbum = cleanVgmdbAlbum(vgmdbAlbum);
+      const [year, date] = parseVgmdbReleaseDate(vgmdbAlbum.release_date);
 
-      return JSON.stringify(cleanedAlbum);
+      return {
+        cleanRaw: JSON.stringify(cleanedAlbum),
+        raw: vgmdbAlbum,
+        albumName: cleanedAlbum.name,
+        year,
+        date,
+      };
     }
   } else if (source === "musicbrainz") {
     const match = input.match(URL_PATTERNS.musicbrainz);
@@ -55,7 +71,7 @@ async function fetchSupplementalData(
   return null;
 }
 
-const cache = new LRUCache<string, string>({
+const cache = new LRUCache<string, SupplementalData>({
   max: 100,
   ttl: 60 * 60 * 1000, // 1 hour
 });
@@ -63,7 +79,7 @@ const cache = new LRUCache<string, string>({
 export async function fetchCachedSupplementalData(
   source: SupplementalDataSource,
   input: string,
-): Promise<string | null> {
+): Promise<SupplementalData | null> {
   // TODO: Race conditions still possible
   const cachedValue = cache.get(input);
   if (cachedValue) return cachedValue;
@@ -81,19 +97,16 @@ export async function getBestCoverFromSourceUrl(
   if (source === "user") {
     return input;
   } else if (source === "vgmdb") {
-    const match = input.match(URL_PATTERNS.vgmdb);
-    if (match && match[3]) {
-      const albumId = parseInt(match[3], 10);
-      const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
-      return (
-        vgmdbAlbum.covers[0]?.full ||
-        vgmdbAlbum.covers[0]?.thumb ||
-        vgmdbAlbum.picture_full ||
-        vgmdbAlbum.picture_small ||
-        vgmdbAlbum.picture_thumb ||
-        null
-      );
-    }
+    const vgmdbAlbum = await fetchCachedSupplementalData("vgmdb", input);
+    if (!vgmdbAlbum) return null;
+    return (
+      vgmdbAlbum.raw.covers[0]?.full ||
+      vgmdbAlbum.raw.covers[0]?.thumb ||
+      vgmdbAlbum.raw.picture_full ||
+      vgmdbAlbum.raw.picture_small ||
+      vgmdbAlbum.raw.picture_thumb ||
+      null
+    );
   } else if (source === "musicbrainz") {
     const match = input.match(URL_PATTERNS.musicbrainz);
     if (match && match[1]) {

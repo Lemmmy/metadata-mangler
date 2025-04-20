@@ -19,6 +19,9 @@ export interface FileTrack {
   artists: string; // semicolon separated
   album: string;
   albumArtist: string;
+  year: string;
+  date: string;
+  grouping: string;
 
   duration: number;
   coverArt: Uint8Array | null;
@@ -32,7 +35,15 @@ export type WebTrack = Omit<FileTrack, "coverArt">;
 
 export type WritableTags = Pick<
   FileTrack,
-  "trackNumber" | "discNumber" | "title" | "artists" | "album" | "albumArtist"
+  | "trackNumber"
+  | "discNumber"
+  | "title"
+  | "artists"
+  | "album"
+  | "albumArtist"
+  | "year"
+  | "grouping"
+  | "date"
 >;
 
 export const supportedFileTypes = [".flac", ".mp3", ".ogg"];
@@ -83,6 +94,16 @@ export async function readTrackFromFile(
       artists: artistString,
       album: metadata.common.album || "",
       albumArtist: metadata.common.albumartist || "",
+      year: metadata.common.year?.toString() || metadata.common.date || "",
+      date: metadata.common.date || metadata.common.year?.toString() || "",
+
+      // music-metadata doesn't put vorbis CONTENTGROUP into common.grouping
+      grouping:
+        metadata.common.grouping ||
+        metadata.native?.vorbis
+          ?.find((v) => v.id === "CONTENTGROUP")
+          ?.value?.toString() ||
+        "",
 
       duration: metadata.format.duration || 0,
       coverArt: metadata.common.picture?.[0]?.data || null,
@@ -166,13 +187,17 @@ export function isSupportedMusicFile(filePath: string): boolean {
 }
 
 /**
- * Gets the album name from a set of tracks
+ * Gets the value of a tag from any track in a set of tracks
  * @param tracks Array of Track objects
- * @returns The album name if available, or null if not found
+ * @param tag The tag to retrieve
+ * @returns The value of the tag if available, or null if not found
  */
-export function getAlbumName(tracks: FileTrack[]): string | null {
+export function getTagFromAnyTrack<T extends keyof FileTrack>(
+  tracks: FileTrack[],
+  tag: T,
+): FileTrack[T] | null {
   if (tracks.length === 0) return null;
-  return tracks.find((t) => t.album)?.album || null;
+  return tracks.find((t) => t[tag])?.[tag] || null;
 }
 
 /**

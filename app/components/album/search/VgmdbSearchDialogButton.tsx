@@ -38,9 +38,9 @@ export function VgmdbSearchDialogButton({
           <VisuallyHidden asChild>
             <DialogDescription>Search by album name</DialogDescription>
           </VisuallyHidden>
-
-          <VgmdbSearchDialog {...props} onConfirm={onConfirm} />
         </DialogHeader>
+
+        <VgmdbSearchDialog {...props} onConfirm={onConfirm} />
       </DialogContent>
     </Dialog>
   );

@@ -36,7 +36,7 @@ export async function writeFlacTags(
 
     // Build the metaflac command arguments
     const metaflacPath = env.METAFLAC_PATH || "metaflac";
-    const args: string[] = [];
+    const args: string[] = ["--no-utf8-convert"];
 
     // First, remove existing tags that we're going to change
     for (const key of Object.keys(changedTags)) {

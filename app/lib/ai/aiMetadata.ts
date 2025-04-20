@@ -60,7 +60,7 @@ export async function generateImprovedMetadataPrompt(
   albumArtist: string,
   tracks: AITrack[],
   supplementalDataSource: SupplementalDataSource,
-  supplementalData: any,
+  supplementalData: string,
   userInstructions?: string | null,
 ): Promise<string> {
   const tracksInfo = tracks.map((track) => ({

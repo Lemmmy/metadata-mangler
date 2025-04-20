@@ -8,14 +8,16 @@ import { type WriteResult } from "./writeMetadata";
 const execFileAsync = promisify(execFile);
 
 // MP3 tag name mapping (mid3v2 uses different argument names)
-const MP3_TAG_MAPPING = {
+const MP3_TAG_MAPPING: Record<keyof WritableTags, string> = {
   title: "--TIT2",
   artists: "--TPE1",
   album: "--TALB",
   albumArtist: "--TPE2",
   trackNumber: "--TRCK",
   discNumber: "--TPOS",
-  // year: "--TYER"
+  year: "--TYER",
+  date: "--TDAT",
+  grouping: "--TIT1",
 };
 
 /**

@@ -75,7 +75,7 @@ export function AlbumTracksTable({
 
   return (
     <div
-      className="border-border h-full min-h-[320px] overflow-auto rounded-lg border shadow-md"
+      className="border-border h-full min-h-[320px] overflow-auto border shadow-md"
       style={columnSizeVars}
     >
       <table className="divide-border h-full w-full table-fixed border-collapse divide-y">

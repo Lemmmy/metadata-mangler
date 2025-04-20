@@ -20,7 +20,7 @@ declare module "@tanstack/react-table" {
 }
 
 function createEditableCellRenderer(
-  field: StoreTrackUpdatable,
+  field: keyof StoreTrackUpdatable,
   type: "text" | "number" = "text",
   min?: number,
 ) {
@@ -89,6 +89,34 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Album Artist",
     id: "albumArtist",
     cell: createEditableCellRenderer("albumArtist"),
+    meta: {
+      hiddenByDefault: true,
+    },
+  }),
+  columnHelper.accessor("year", {
+    header: "Year",
+    id: "year",
+    cell: createEditableCellRenderer("year"),
+    size: 48,
+    meta: {
+      hiddenByDefault: true,
+      className: "tabular-nums",
+    },
+  }),
+  columnHelper.accessor("date", {
+    header: "Date",
+    id: "date",
+    cell: createEditableCellRenderer("date"),
+    size: 48,
+    meta: {
+      hiddenByDefault: true,
+      className: "tabular-nums",
+    },
+  }),
+  columnHelper.accessor("grouping", {
+    header: "Grouping",
+    id: "grouping",
+    cell: createEditableCellRenderer("grouping"),
     meta: {
       hiddenByDefault: true,
     },
@@ -167,16 +195,27 @@ export function useAlbumTableColumns(
   // Show some of the hidden-by-default columns under certain conditions
   useEffect(() => {
     if (originalTracks.length > 0) {
-      // If there's more than one album, show the album column
-      const uniqueAlbums = new Set(
-        originalTracks.map((track) => track.album).filter(Boolean),
-      );
-      if (uniqueAlbums.size > 1) {
-        setColumnVisibility((prev) => ({
-          ...prev,
-          album: true,
-        }));
+      // If there's more than one value for album-specific tags, show that tag's column
+      function checkTagCardinality(tag: keyof StoreTrackUpdatable) {
+        const uniqueValues = new Set(
+          originalTracks.map((track) => track[tag]).filter(Boolean),
+        );
+        if (uniqueValues.size > 1) {
+          setColumnVisibility((prev) => ({
+            ...prev,
+            [tag]: true,
+          }));
+        }
       }
+
+      checkTagCardinality("album");
+      checkTagCardinality("albumArtist");
+      checkTagCardinality("year");
+      checkTagCardinality("date");
+      checkTagCardinality("grouping");
+      checkTagCardinality("container");
+      checkTagCardinality("codec");
+      checkTagCardinality("tagTypes");
 
       // If the track has a suspicious container/tag combination, show the container and tag types columns
       const suspicious = originalTracks.some((t) =>

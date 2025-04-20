@@ -93,19 +93,22 @@ export async function getChangedTags(
   filePath: string,
   newTags: Partial<WritableTags>,
   singleValueTags = false,
-  tagMapping: Record<string, string> = {},
-): Promise<Record<string, string | string[]>> {
+  tagMapping: Partial<Record<keyof WritableTags, string>> = {},
+): Promise<Record<keyof WritableTags, string | string[]>> {
   // Read existing tags to compare
   const existingTrack = await readTrackFromFile(filePath, false, false);
 
   // Mapping of WritableTags fields to tag names (default if not provided)
-  const mapping: Record<string, string> = {
+  const mapping: Record<keyof WritableTags, string> = {
     title: tagMapping.title || "TITLE",
     artists: tagMapping.artists || "ARTIST",
     album: tagMapping.album || "ALBUM",
     albumArtist: tagMapping.albumArtist || "ALBUMARTIST",
     trackNumber: tagMapping.trackNumber || "TRACKNUMBER",
     discNumber: tagMapping.discNumber || "DISCNUMBER",
+    year: tagMapping.year || "YEAR",
+    date: tagMapping.date || "DATE",
+    grouping: tagMapping.grouping || "CONTENTGROUP",
   };
 
   // Only include tags that have changed

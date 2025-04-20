@@ -242,3 +242,11 @@ export async function searchVgmdbAlbums(
     };
   }
 }
+
+export function parseVgmdbReleaseDate(
+  date?: string | null,
+): [string, string] | [undefined, undefined] {
+  if (!date) return [undefined, undefined];
+  const [year] = date.split("-", 1);
+  return [year, date];
+}

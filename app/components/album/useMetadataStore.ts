@@ -1,8 +1,9 @@
-import { enableMapSet } from "immer";
+import { enableMapSet, type WritableDraft } from "immer";
+import type { PickByValue } from "utility-types";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import type { WebTrack, WritableTags } from "~/lib/tags/musicMetadata";
 import type { AITrack } from "../../lib/ai/aiMetadata";
-import type { WebTrack } from "~/lib/tags/musicMetadata";
 
 enableMapSet();
 
@@ -11,16 +12,16 @@ export type StoreTrack = WebTrack;
 export interface StoreAlbum {
   name: string;
   artist: string;
+  year: string;
+  date: string;
+  grouping: string;
   coverArt: string | null;
   directory: string;
 }
 
-export type StoreTrackUpdatable = keyof Omit<
-  StoreTrack,
-  "directory" | "filename" | "duration"
->;
+export type StoreTrackUpdatable = StoreTrack & WritableTags;
 
-interface MetadataState {
+export interface MetadataState {
   album: StoreAlbum | null;
   originalAlbum: StoreAlbum | null;
   tracks: StoreTrack[];
@@ -37,13 +38,46 @@ interface MetadataState {
   ) => void;
   updateAlbumName: (name: string) => void;
   updateAlbumArtist: (artist: string) => void;
-  updateTrack: (index: number, field: StoreTrackUpdatable, value: any) => void;
+  updateAlbumYear: (year: string) => void;
+  updateAlbumDate: (date: string) => void;
+  updateAlbumGrouping: (grouping: string) => void;
+  updateTrack: (
+    index: number,
+    field: keyof StoreTrackUpdatable,
+    value: any,
+  ) => void;
   updateTracks: (tracks: AITrack[]) => void;
   resetChanges: () => void;
 
   setUrlOrData: (urlOrData: string) => void;
   setAdditionalInfo: (additionalInfo: string) => void;
   setAlbumArt: (albumArt: string | null) => void;
+}
+
+// Utility to update album and all tracks for a given field
+function updateAlbumAndTracks<
+  AF extends keyof StoreAlbum,
+  TF extends keyof StoreTrackUpdatable,
+>(
+  state: WritableDraft<MetadataState>,
+  albumField: AF,
+  trackField: TF,
+  value: StoreAlbum[AF] & StoreTrackUpdatable[TF],
+) {
+  const album = state.album;
+  if (album) {
+    album[albumField] = value;
+  }
+
+  for (let i = 0; i < state.tracks.length; i++) {
+    const track = state.tracks[i];
+    const oldVal = track[trackField];
+    if (oldVal !== value) {
+      const set = (state.updatedFields[i] ||= {});
+      set[trackField] = true;
+    }
+    track[trackField] = value;
+  }
 }
 
 export const useMetadataStore = create<MetadataState>()(
@@ -71,38 +105,27 @@ export const useMetadataStore = create<MetadataState>()(
 
     updateAlbumName: (name) =>
       set((state) => {
-        if (state.album) state.album.name = name;
-
-        // Update the 'album' field in every track, too
-        for (let i = 0; i < state.tracks.length; i++) {
-          const track = state.tracks[i];
-
-          const oldName = track.album;
-          if (oldName !== name) {
-            const set = (state.updatedFields[i] ||= {});
-            set["album"] = true;
-          }
-
-          track.album = name;
-        }
+        updateAlbumAndTracks(state, "name", "album", name);
       }),
 
     updateAlbumArtist: (artist) =>
       set((state) => {
-        if (state.album) state.album.artist = artist;
+        updateAlbumAndTracks(state, "artist", "albumArtist", artist);
+      }),
 
-        // Update the 'album artist' field in every track, too
-        for (let i = 0; i < state.tracks.length; i++) {
-          const track = state.tracks[i];
+    updateAlbumYear: (year) =>
+      set((state) => {
+        updateAlbumAndTracks(state, "year", "year", year);
+      }),
 
-          const oldArtist = track.albumArtist;
-          if (oldArtist !== artist) {
-            const set = (state.updatedFields[i] ||= {});
-            set["albumArtist"] = true;
-          }
+    updateAlbumDate: (date) =>
+      set((state) => {
+        updateAlbumAndTracks(state, "date", "date", date);
+      }),
 
-          track.albumArtist = artist;
-        }
+    updateAlbumGrouping: (grouping) =>
+      set((state) => {
+        updateAlbumAndTracks(state, "grouping", "grouping", grouping);
       }),
 
     updateTrack: (index, field, value) =>

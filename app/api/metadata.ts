@@ -15,6 +15,7 @@ import {
 import {
   fetchCachedSupplementalData,
   parseSupplementalDataSource,
+  type SupplementalData,
 } from "~/lib/fetch/supplementalFetch";
 
 // Regex patterns for supported URLs
@@ -54,14 +55,17 @@ export const metadata = router({
 
         // Determine if the input is a URL or raw supplemental data
         let supplementalDataSource: SupplementalDataSource = "user";
-        let supplementalData = input.input;
+        let supplementalData: SupplementalData = {
+          cleanRaw: input.input,
+          raw: input.input,
+        };
 
-        const parsedSource = parseSupplementalDataSource(supplementalData);
+        const parsedSource = parseSupplementalDataSource(input.input);
         if (parsedSource !== "user") {
           try {
             const fetched = await fetchCachedSupplementalData(
               parsedSource,
-              supplementalData,
+              input.input,
             );
             if (fetched) {
               supplementalDataSource = parsedSource;
@@ -88,7 +92,7 @@ export const metadata = router({
               input.albumArtist,
               inputTracks,
               supplementalDataSource,
-              supplementalData,
+              supplementalData.cleanRaw,
               input.additionalInfo,
             ),
             inputTracks,
@@ -106,7 +110,7 @@ export const metadata = router({
             input.albumArtist,
             inputTracks,
             supplementalDataSource,
-            supplementalData,
+            supplementalData.cleanRaw,
             input.additionalInfo,
           );
 
@@ -114,6 +118,8 @@ export const metadata = router({
             success: true,
             albumName: output.name,
             albumArtist: output.albumArtist,
+            year: supplementalData.year,
+            date: supplementalData.date,
             tracks: output.tracks,
             ...output.usage,
             ...usageToPrice(output.usage, model),

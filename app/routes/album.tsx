@@ -113,16 +113,16 @@ export default function Home({
   const displayTracks = tracks.length > 0 ? tracks : albumDataTracks;
 
   return (
-    <main className="text-foreground mx-auto box-border flex h-screen flex-col p-4">
+    <main className="text-foreground mx-auto box-border flex h-screen flex-col">
       <AlbumHeader album={album} />
 
-      <div className="mb-4 grid grid-cols-1 gap-6 md:grid-cols-[auto_1fr]">
+      <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-[auto_1fr]">
         <div className="flex-shrink-0">
           <AlbumArt path={path} />
         </div>
 
         <div>
-          <AlbumInformationSection album={album} />
+          <AlbumInformationSection />
           <AlbumLookupSection
             album={album}
             dirName={pathBasename}

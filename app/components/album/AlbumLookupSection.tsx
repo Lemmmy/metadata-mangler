@@ -43,6 +43,8 @@ export function AlbumLookupSection({
   const {
     updateAlbumName,
     updateAlbumArtist,
+    updateAlbumYear,
+    updateAlbumDate,
     updateTracks,
     urlOrData,
     additionalInfo,
@@ -52,6 +54,8 @@ export function AlbumLookupSection({
     useShallow((s) => ({
       updateAlbumName: s.updateAlbumName,
       updateAlbumArtist: s.updateAlbumArtist,
+      updateAlbumYear: s.updateAlbumYear,
+      updateAlbumDate: s.updateAlbumDate,
       updateTracks: s.updateTracks,
       urlOrData: s.urlOrData,
       additionalInfo: s.additionalInfo,
@@ -115,13 +119,10 @@ export function AlbumLookupSection({
 
       // Update edited tracks with the new metadata
       if (result.success && "tracks" in result && result.tracks) {
-        if (result.albumName) {
-          updateAlbumName(result.albumName);
-        }
-
-        if (result.albumArtist) {
-          updateAlbumArtist(result.albumArtist);
-        }
+        if (result.albumName) updateAlbumName(result.albumName);
+        if (result.albumArtist) updateAlbumArtist(result.albumArtist);
+        if (result.year) updateAlbumYear(result.year);
+        if (result.date) updateAlbumDate(result.date);
 
         updateTracks(result.tracks);
       } else if (!result.success && "error" in result && result.error) {

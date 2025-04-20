@@ -4,6 +4,7 @@ import { pathExists } from "path-exists";
 import sharp from "sharp";
 import * as v from "valibot";
 import { publicProcedure, router } from "~/api/trpc";
+import type { StoreAlbum } from "~/components/album/useMetadataStore";
 import {
   getBestCoverFromSourceUrl,
   parseSupplementalDataSource,
@@ -13,8 +14,8 @@ import {
   cleanTrackForWeb,
   getAlbumArtist,
   getAlbumCoverArt,
-  getAlbumName,
   getCoverArtUrl,
+  getTagFromAnyTrack,
   readTracksFromDirectory,
   type WritableTags,
 } from "~/lib/tags/musicMetadata";
@@ -44,18 +45,18 @@ export const album = router({
       try {
         // Read tracks from the directory with original metadata
         const tracks = await readTracksFromDirectory(rebasePath(input.path));
-
-        const albumName = getAlbumName(tracks);
-        const albumArtist = getAlbumArtist(tracks);
         const coverArt = await getAlbumCoverArt(tracks);
 
         return {
           album: {
-            name: albumName || "Unknown Album",
-            artist: albumArtist || "Unknown Artist",
+            name: getTagFromAnyTrack(tracks, "album") || "Unknown Album",
+            artist: getAlbumArtist(tracks) || "Unknown Artist",
             coverArt: coverArt ? await getCoverArtUrl(coverArt) : null,
             directory: stripLibraryPath(input.path),
-          },
+            year: getTagFromAnyTrack(tracks, "year") || "",
+            date: getTagFromAnyTrack(tracks, "date") || "",
+            grouping: getTagFromAnyTrack(tracks, "grouping") || "",
+          } satisfies StoreAlbum,
           tracks: tracks.map(cleanTrackForWeb),
         };
       } catch (error) {

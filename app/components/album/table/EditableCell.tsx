@@ -8,7 +8,7 @@ import { cn } from "~/lib/utils";
 interface EditableCellProps {
   value: string | number;
   index: number;
-  field: StoreTrackUpdatable;
+  field: keyof StoreTrackUpdatable;
   type?: "text" | "number";
   min?: number;
 }
