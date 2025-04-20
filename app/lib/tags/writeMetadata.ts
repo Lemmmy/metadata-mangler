@@ -171,6 +171,23 @@ export async function getChangedTags(
       : [discNumberStr];
   }
 
+  if (newTags.year !== undefined && newTags.year !== existingTrack.year) {
+    changedTags[mapping.year] = singleValueTags ? newTags.year : [newTags.year];
+  }
+
+  if (newTags.date !== undefined && newTags.date !== existingTrack.date) {
+    changedTags[mapping.date] = singleValueTags ? newTags.date : [newTags.date];
+  }
+
+  if (
+    newTags.grouping !== undefined &&
+    newTags.grouping !== existingTrack.grouping
+  ) {
+    changedTags[mapping.grouping] = singleValueTags
+      ? newTags.grouping
+      : [newTags.grouping];
+  }
+
   return changedTags;
 }
 
