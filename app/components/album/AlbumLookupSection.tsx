@@ -16,6 +16,7 @@ import { useTRPC } from "~/lib/trpc";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
+import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 
 interface Props {
   album: StoreAlbum | null;
@@ -200,6 +201,11 @@ export function AlbumLookupSection({
             dirName={dirName}
             onConfirm={(url) => setUrlOrData(url)}
           />
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          <ArtistReplacementsDialogButton />
 
           <ColumnVisibilityDropdown
             columnVisibility={columnVisibility}

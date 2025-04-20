@@ -54,7 +54,7 @@ export function OpenAsAlbum({
       className={cn(props.className, precheck.isLoading && "animate-pulse")}
       onClick={openAsAlbum}
     >
-      <Disc3 className="h-4 w-4" />
+      <Disc3 />
       {children}
     </Button>
   );

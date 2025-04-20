@@ -126,7 +126,7 @@ export function AlbumSaveButton({ album }: Props) {
         disabled={!hasUnsavedChanges}
         className="gap-1"
       >
-        <Undo2 className="h-4 w-4" />
+        <Undo2 />
         Reset changes
       </Button>
 
@@ -137,7 +137,7 @@ export function AlbumSaveButton({ album }: Props) {
         disabled={!album || writeTracksMutation.isPending}
         className="gap-1"
       >
-        <Save className="h-4 w-4" />
+        <Save />
         {writeTracksMutation.isPending ? "Saving..." : "Save changes"}
       </Button>
     </div>

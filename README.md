@@ -42,6 +42,11 @@ coded. Beware.
 - API key for either OpenRouter, Anthropic, or OpenAI
 - Node.js 20 or later
 
+### Optional
+
+- MongoDB for saving of common corrections
+- [VGMdb API proxy](https://github.com/hufman/vgmdb)
+
 ## Getting Started
 
 ### Installation
@@ -59,13 +64,16 @@ pnpm install
 Deploy with Docker, or create a `.env` file in the root directory with the following variables:
 
 ```
+# Path to the root of your music library
+MUSIC_LIBRARY_PATH=/path/to/your/music/library
+
+# MongoDB connection string (optional)
+MONGO_URI=mongodb://localhost:27017
+
 # At least one API key is required for AI corrections
 OPENROUTER_API_KEY=sk-or-v1-...
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
-
-# Path to the root of your music library
-MUSIC_LIBRARY_PATH=/path/to/your/music/library
 
 # VGMdb API URL is required. Credentials are optional (if your server uses basic auth)
 VGMDB_API_URL=https://vgmdb.example.com

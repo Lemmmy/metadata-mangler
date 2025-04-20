@@ -141,7 +141,7 @@ function VgmdbSearchControls({
         onClick={onRefresh}
         disabled={isPending}
       >
-        <RefreshCw className="h-4 w-4" />
+        <RefreshCw />
       </Button>
     </div>
   );

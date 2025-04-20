@@ -180,11 +180,7 @@ function DirectoryListSortSelector({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary">
-          {sort?.endsWith("desc") ? (
-            <SortDesc className="size-4" />
-          ) : (
-            <SortAsc className="size-4" />
-          )}
+          {sort?.endsWith("desc") ? <SortDesc /> : <SortAsc />}
           {sortByNames[sort]}
         </Button>
       </DropdownMenuTrigger>

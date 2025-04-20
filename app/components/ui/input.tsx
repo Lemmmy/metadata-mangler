@@ -1,6 +1,8 @@
 import * as React from "react";
 
 import { cn } from "~/lib/utils";
+import { Button } from "./button";
+import { Undo2 } from "lucide-react";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -18,4 +20,41 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   );
 }
 
-export { Input };
+function ResettableInput({
+  className,
+  inputClassName,
+  onReset,
+  isUpdated,
+  ...props
+}: React.ComponentProps<"input"> & {
+  onReset: () => void;
+  isUpdated: boolean;
+  inputClassName?: string;
+}) {
+  return (
+    <div className={cn("flex", className)}>
+      {/* Input */}
+      <Input
+        {...props}
+        className={cn(
+          "flex-1 rounded-r-none",
+          isUpdated && "bg-lime-600/20 dark:bg-lime-600/20",
+          inputClassName,
+        )}
+      />
+
+      {/* Reset button */}
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={onReset}
+        disabled={!isUpdated}
+        className="flex-shrink-0 rounded-l-none border-l-0"
+      >
+        <Undo2 />
+      </Button>
+    </div>
+  );
+}
+
+export { Input, ResettableInput };

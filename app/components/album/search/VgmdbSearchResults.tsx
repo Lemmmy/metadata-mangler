@@ -139,7 +139,7 @@ function VgmdbSearchResult({
           onClick={(e) => e.stopPropagation()}
         >
           <Button variant="ghost" size="sm" className="!px-2">
-            <Globe className="h-4 w-4" />
+            <Globe />
           </Button>
         </a>
       </Cell>

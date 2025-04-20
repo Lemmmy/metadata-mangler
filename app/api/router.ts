@@ -4,12 +4,14 @@ import { metadata } from "./metadata";
 import { models } from "./models";
 import { router } from "./trpc";
 import { search } from "./search";
+import { replacements } from "./replacements";
 
 export const appRouter = router({
-  models,
   album,
   browse,
   metadata,
+  models,
+  replacements,
   search,
 });
 

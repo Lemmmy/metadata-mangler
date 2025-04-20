@@ -7,7 +7,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import type { PickByValue } from "utility-types";
 import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Input, ResettableInput } from "../ui/input";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import { Undo2 } from "lucide-react";
@@ -44,29 +44,13 @@ export function AlbumTagInput<T extends keyof StoreAlbum>({
       <Label htmlFor="albumName">{label}</Label>
 
       <div className="relative mb-4">
-        <div className="flex items-center">
-          {/* Input */}
-          <Input
-            type="text"
-            className={cn(
-              "rounded-r-none",
-              isUpdated && "bg-lime-600/20 dark:bg-lime-600/20",
-            )}
-            value={value || ""}
-            onChange={(e) => update(e.target.value)}
-          />
-
-          {/* Reset button */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={reset}
-            disabled={!isUpdated}
-            className="rounded-l-none border-l-0"
-          >
-            <Undo2 className="h-4 w-4" />
-          </Button>
-        </div>
+        <ResettableInput
+          type="text"
+          value={value || ""}
+          onChange={(e) => update(e.target.value)}
+          onReset={reset}
+          isUpdated={isUpdated}
+        />
 
         {/* Original value */}
         {isUpdated && originalAlbum?.[field] && (

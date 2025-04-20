@@ -45,7 +45,7 @@ export function ColumnVisibilityDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-auto">
+        <Button variant="outline" size="sm">
           Columns
         </Button>
       </DropdownMenuTrigger>

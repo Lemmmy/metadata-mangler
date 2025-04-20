@@ -18,8 +18,6 @@ import {
   type SupplementalData,
 } from "~/lib/fetch/supplementalFetch";
 
-// Regex patterns for supported URLs
-
 export const metadata = router({
   lookup: publicProcedure
     .input(

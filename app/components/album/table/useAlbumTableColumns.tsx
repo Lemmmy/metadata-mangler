@@ -86,7 +86,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
   }),
   columnHelper.accessor("albumArtist", {
-    header: "Album Artist",
+    header: "Album artist",
     id: "albumArtist",
     cell: createEditableCellRenderer("albumArtist"),
     meta: {
@@ -150,7 +150,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
   }),
   columnHelper.accessor("tagTypes", {
-    header: "Tag Types",
+    header: "Tag types",
     id: "tagTypes",
     cell: (ctx) => {
       const sus = isTagSuspicious(
