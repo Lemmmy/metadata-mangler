@@ -160,6 +160,7 @@ export function AlbumLookupSection({
               placeholder="Enter a compatible URL (VGMDB, MusicBrainz, Bandcamp, etc.) or full-text supplementary track information"
               rows={3}
               required
+              className="h-[64px] overflow-y-scroll"
             />
           </div>
 
@@ -170,6 +171,7 @@ export function AlbumLookupSection({
               onChange={(e) => setAdditionalInfo(e.target.value)}
               placeholder="Provide additional information to the model"
               rows={3}
+              className="h-[64px] overflow-y-scroll"
             />
           </div>
         </div>
