@@ -76,6 +76,15 @@ export async function generateImprovedMetadataPrompt(
 You are a music metadata expert. Your task is to improve the metadata for a set of music tracks. You have been provided
 with the original track metadata, and supplemental album data from a third-party provider.
 
+ORIGINAL ALBUM NAME: ${albumName}
+ORIGINAL ALBUM ARTIST: ${albumArtist}
+ORIGINAL TRACK METADATA FROM FILES:
+<tracks>\n${JSON.stringify(tracksInfo, null, 2)}\n</tracks>
+
+SUPPLEMENTAL THIRD-PARTY ALBUM INFORMATION:
+${wrapSupplementalData(supplementalDataSource, supplementalData)}
+${userInstructions ? `\nIMPORTANT USER-PROVIDED INSTRUCTIONS:\n${wrapSupplementalData("user", userInstructions)}` : ""}
+
 Based on the third-party album information, please provide improved metadata for the album and each track.
 The album name should be provided in romaji where appropriate.
 A SINGLE album artist should be provided.
@@ -108,15 +117,6 @@ ROMANIZATION RULES:
 - ALWAYS use modified Hepburn romanization with kana-spelling style. ALWAYS romanize おお sounds as 'oo' and おう
   sounds as 'ou'.
 - All Japanese names MUST be romanized in Japanese order (Surname Forename). This includes artist names.
-
-ORIGINAL ALBUM NAME: ${albumName}
-ORIGINAL ALBUM ARTIST: ${albumArtist}
-ORIGINAL TRACK METADATA FROM FILES:
-<tracks>\n${JSON.stringify(tracksInfo, null, 2)}\n</tracks>
-
-SUPPLEMENTAL THIRD-PARTY ALBUM INFORMATION:
-${wrapSupplementalData(supplementalDataSource, supplementalData)}
-${userInstructions ? `\nIMPORTANT USER-PROVIDED INSTRUCTIONS:\n${wrapSupplementalData("user", userInstructions)}` : ""}
 `;
 }
 
