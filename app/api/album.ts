@@ -35,6 +35,9 @@ const trackMetadataSchema = v.object({
   artists: v.optional(v.string()),
   album: v.optional(v.string()),
   albumArtist: v.optional(v.string()),
+  year: v.optional(v.string()),
+  date: v.optional(v.string()),
+  grouping: v.optional(v.string()),
 });
 
 export const album = router({
