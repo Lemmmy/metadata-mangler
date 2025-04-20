@@ -27,8 +27,8 @@ export function AlbumSaveButton({ album }: Props) {
 
   const { hasUnsavedChanges, resetChanges } = useMetadataStore(
     useShallow((s) => ({
-      hasUnsavedChanges: Object.values(s.updatedFields).some(
-        (set) => set.size > 0,
+      hasUnsavedChanges: Object.values(s.updatedFields).some((set) =>
+        Object.values(set).some((v) => v),
       ),
       resetChanges: s.resetChanges,
     })),

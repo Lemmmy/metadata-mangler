@@ -25,7 +25,7 @@ interface MetadataState {
   originalAlbum: StoreAlbum | null;
   tracks: StoreTrack[];
   originalTracks: StoreTrack[];
-  updatedFields: Record<number, Set<string>>;
+  updatedFields: Record<number, Record<string, boolean>>;
 
   urlOrData: string;
   additionalInfo: string;
@@ -79,8 +79,8 @@ export const useMetadataStore = create<MetadataState>()(
 
           const oldName = track.album;
           if (oldName !== name) {
-            const set = (state.updatedFields[i] ||= new Set<string>());
-            set.add("album");
+            const set = (state.updatedFields[i] ||= {});
+            set["album"] = true;
           }
 
           track.album = name;
@@ -97,8 +97,8 @@ export const useMetadataStore = create<MetadataState>()(
 
           const oldArtist = track.albumArtist;
           if (oldArtist !== artist) {
-            const set = (state.updatedFields[i] ||= new Set<string>());
-            set.add("albumArtist");
+            const set = (state.updatedFields[i] ||= {});
+            set["albumArtist"] = true;
           }
 
           track.albumArtist = artist;
@@ -117,8 +117,8 @@ export const useMetadataStore = create<MetadataState>()(
           (state.tracks[index] as any)[field] = value;
 
           // Mark this field as updated
-          const set = (state.updatedFields[index] ||= new Set<string>());
-          set.add(field);
+          const set = (state.updatedFields[index] ||= {});
+          set[field] = true;
         } else {
           console.warn(
             "Invalid index for updateTrack:",
@@ -143,8 +143,8 @@ export const useMetadataStore = create<MetadataState>()(
               originalTrack[field as keyof StoreTrack]
             ) {
               (originalTrack as any)[field] = newTrack[field as keyof AITrack];
-              const set = (state.updatedFields[i] ||= new Set<string>());
-              set.add(field);
+              const set = (state.updatedFields[i] ||= {});
+              set[field] = true;
             }
           }
         }
@@ -153,6 +153,7 @@ export const useMetadataStore = create<MetadataState>()(
     resetChanges: () =>
       set((state) => {
         state.tracks = JSON.parse(JSON.stringify(state.originalTracks)); // Deep copy
+        state.album = JSON.parse(JSON.stringify(state.originalAlbum)); // Deep copy
         state.updatedFields = {};
       }),
 
