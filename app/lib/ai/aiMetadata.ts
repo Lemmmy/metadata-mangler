@@ -107,6 +107,12 @@ NEVER duplicate an artist in the artist list.
 If the supplemental information has a 'Notes' section, it should be used as the ground truth for per-track artists.
 ${userInstructions ? "The user's instructions should be given priority over the supplemental information." : ""}
 Preserve the original filename and base directory.
+${
+  supplementalDataSource === "vgmdb"
+    ? "The supplementary data source has incorrect Japanese name ordering. " +
+      "All Japanese names must be converted to Surname Forename order."
+    : ""
+}
 
 ROMANIZATION RULES:
 - If Japanese text was provided in the supplemental data, use it to help with romanization.
