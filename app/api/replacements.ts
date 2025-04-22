@@ -57,4 +57,38 @@ export const replacements = router({
         return { success: false };
       }
     }),
+
+  getArtistAutocompletions: publicProcedure
+    .input(
+      v.object({
+        query: v.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { query } = input;
+      const collections = await getCollections();
+      if (!collections) return { success: false, results: [] };
+
+      try {
+        // Create a case-insensitive regex for the query
+        const regex = new RegExp(query, "i");
+
+        // Find all documents where the replacement field matches the regex
+        const results = await collections.savedArtistReplacements
+          .find({
+            replacement: { $regex: regex },
+          })
+          .limit(10) // Limit results to prevent overwhelming responses
+          .toArray();
+
+        // Return only the replacement values (destination artists)
+        return {
+          success: true,
+          results: results.map((r) => r.replacement),
+        };
+      } catch (error) {
+        console.error("Error getting artist autocompletions:", error);
+        return { success: false, results: [] };
+      }
+    }),
 });

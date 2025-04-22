@@ -17,6 +17,7 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
 import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
+import { ArtistAddButton } from "./replacements/ArtistAddButton";
 
 interface Props {
   album: StoreAlbum | null;
@@ -206,6 +207,8 @@ export function AlbumLookupSection({
 
           {/* Spacer */}
           <div className="flex-1" />
+
+          <ArtistAddButton />
 
           <ArtistReplacementsDialogButton />
 
