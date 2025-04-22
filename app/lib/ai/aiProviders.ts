@@ -70,8 +70,17 @@ export const supportedModels: SupportedModel[] = [
 
   // Models from Anthropic
   {
-    id: "claude-3-5-sonnet-latest",
-    name: "Anthropic Claude 3.5 Sonnet",
+    id: "claude-3-5-sonnet-20241022",
+    name: "Anthropic Claude 3.5 Sonnet v2",
+    isAvailable: hasAnthropic,
+    provider: anthropic,
+    inputUsdPer1Mil: 3.0,
+    outputUsdPer1Mil: 15.0,
+    estimateUsageFn: estimateAnthropicTokenUsage,
+  },
+  {
+    id: "claude-3-5-haiku-20241022",
+    name: "Anthropic Claude 3.5 Haiku",
     isAvailable: hasAnthropic,
     provider: anthropic,
     inputUsdPer1Mil: 0.8,
@@ -83,8 +92,8 @@ export const supportedModels: SupportedModel[] = [
     name: "Anthropic Claude 3 Haiku",
     isAvailable: hasAnthropic,
     provider: anthropic,
-    inputUsdPer1Mil: 0.8,
-    outputUsdPer1Mil: 4.0,
+    inputUsdPer1Mil: 0.25,
+    outputUsdPer1Mil: 1.25,
     estimateUsageFn: estimateAnthropicTokenUsage,
   },
 
