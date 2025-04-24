@@ -11,25 +11,27 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { useMetadataStore } from "../useMetadataStore";
-import { VgmdbSearchDialog } from "./VgmdbSearchDialog";
+import { MusicBrainzSearchDialog } from "./MusicBrainzSearchDialog";
 
-export function VgmdbSearchDialogButton({
+export function MusicBrainzSearchDialogButton({
   onConfirm: rawOnConfirm,
   dirName,
 }: {
-  onConfirm: (id: string) => void;
+  onConfirm: (url: string) => void;
   dirName: string;
 }) {
   const [open, setOpen] = useState(false);
 
-  const { albumName } = useMetadataStore(
+  const { albumName, albumArtist, tracks } = useMetadataStore(
     useShallow((s) => ({
       albumName: s.album?.name || "",
+      albumArtist: s.album?.artist || "",
+      tracks: s.tracks,
     })),
   );
 
-  const onConfirm = (id: string) => {
-    rawOnConfirm(id);
+  const onConfirm = (url: string) => {
+    rawOnConfirm(url);
     setOpen(false);
   };
 
@@ -37,21 +39,23 @@ export function VgmdbSearchDialogButton({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" size="sm">
-          Search VGMdb
+          Search MusicBrainz
         </Button>
       </DialogTrigger>
       <DialogContent className="w-full min-w-[480px] md:max-w-[1024px]">
         <DialogHeader>
-          <DialogTitle>Search VGMdb</DialogTitle>
+          <DialogTitle>Search MusicBrainz</DialogTitle>
           <VisuallyHidden asChild>
             <DialogDescription>Search by album name</DialogDescription>
           </VisuallyHidden>
         </DialogHeader>
 
-        <VgmdbSearchDialog
+        <MusicBrainzSearchDialog
           dirName={dirName}
           onConfirm={onConfirm}
           albumName={albumName}
+          albumArtist={albumArtist}
+          tracks={tracks}
         />
       </DialogContent>
     </Dialog>

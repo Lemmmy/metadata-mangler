@@ -29,3 +29,18 @@ export const vStringBoolean = (def: boolean) =>
     v.picklist(["true", "false"]),
     v.transform((v) => v === "true"),
   );
+
+export const shouldNeverHappen = (msg: string, ...args: any[]): never => {
+  console.error(msg, ...args);
+  if (isDev()) {
+    // eslint-disable-next-line no-debugger
+    debugger;
+  }
+
+  throw new Error(`This should never happen: ${msg}`);
+};
+
+// Helper to check if we're in development mode
+function isDev(): boolean {
+  return process.env.NODE_ENV === "development";
+}

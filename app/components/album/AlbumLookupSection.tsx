@@ -15,9 +15,10 @@ import type { PriceUsage } from "~/lib/ai/aiProviders";
 import { useTRPC } from "~/lib/trpc";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
-import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 import { ArtistAddButton } from "./replacements/ArtistAddButton";
+import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
+import { MusicBrainzSearchDialogButton } from "./search/MusicBrainzSearchDialogButton";
+import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
 
 interface Props {
   album: StoreAlbum | null;
@@ -200,7 +201,10 @@ export function AlbumLookupSection({
           />
 
           <VgmdbSearchDialogButton
-            albumName={album?.name || ""}
+            dirName={dirName}
+            onConfirm={(url) => setUrlOrData(url)}
+          />
+          <MusicBrainzSearchDialogButton
             dirName={dirName}
             onConfirm={(url) => setUrlOrData(url)}
           />

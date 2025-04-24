@@ -46,6 +46,8 @@ coded. Beware.
 
 - MongoDB for saving of common corrections
 - [VGMdb API proxy](https://github.com/hufman/vgmdb)
+- Self-hosted MusicBrainz API (e.g. [musicbrainz-docker](https://github.com/metabrainz/musicbrainz-docker)). MusicBrainz
+  rate limits will be disabled if a self-hosted API is used.
 
 ## Getting Started
 
@@ -79,6 +81,9 @@ OPENAI_API_KEY=sk-...
 VGMDB_API_URL=https://vgmdb.example.com
 VGMDB_API_USERNAME=...
 VGMDB_API_PASSWORD=...
+
+# MusicBrainz API URL is required if you're using a self-hosted API
+MUSICBRAINZ_BASE_URL=https://musicbrainz.example.com
 ```
 
 ### Development

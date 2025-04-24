@@ -2,11 +2,16 @@ import { LRUCache } from "lru-cache";
 import type { SupplementalDataSource } from "../ai/aiMetadata";
 import { fetchVgmdbAlbum, parseVgmdbReleaseDate } from "../fetch/vgmdb";
 import { cleanVgmdbAlbum } from "./vgmdbUtils";
+import {
+  getMusicBrainzRelease,
+  fetchDetailedMusicBrainzRelease,
+  cleanMusicBrainzRelease,
+} from "../fetch/musicbrainz";
 
 const URL_PATTERNS = {
   vgmdb: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/album\/(\d+)/i,
   musicbrainz:
-    /^https?:\/\/(www\.)?musicbrainz\.org\/release\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i,
+    /^https?:\/\/((?:www|beta)\.)?musicbrainz\.org\/release\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i,
   bandcamp: /^https?:\/\/.*\.bandcamp\.com\/(album|track)\/[a-zA-Z0-9-]+/i,
 };
 
@@ -54,10 +59,20 @@ async function fetchSupplementalData(
     }
   } else if (source === "musicbrainz") {
     const match = input.match(URL_PATTERNS.musicbrainz);
-    if (match && match[1]) {
-      const releaseId = match[1];
-      // TODO: Implement musicbrainz data fetching
-      return null;
+    if (match && match[2]) {
+      const releaseId = match[2];
+      const mbRelease = await getMusicBrainzRelease(releaseId);
+      const detailedRelease = await fetchDetailedMusicBrainzRelease(releaseId);
+      const cleanedAlbum = cleanMusicBrainzRelease(detailedRelease, mbRelease);
+
+      return {
+        cleanRaw: JSON.stringify(cleanedAlbum),
+        raw: detailedRelease,
+        albumName: cleanedAlbum.albumName,
+        albumArtist: cleanedAlbum.albumArtist,
+        year: detailedRelease.date?.split("-")[0],
+        date: detailedRelease.date,
+      };
     }
   } else if (source === "bandcamp") {
     const match = input.match(URL_PATTERNS.bandcamp);

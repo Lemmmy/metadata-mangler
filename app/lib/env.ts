@@ -40,6 +40,8 @@ export const env = v.parse(
       VGMDB_API_USERNAME: v.optional(v.string()),
       VGMDB_API_PASSWORD: v.optional(v.string()),
 
+      MUSICBRAINZ_BASE_URL: v.optional(v.string()),
+
       // Tag writing utilities (will fallback to $PATH if not specified)
       METAFLAC_PATH: v.optional(v.string()),
       MID3V2_PATH: v.optional(v.string()),

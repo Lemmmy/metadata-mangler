@@ -115,11 +115,9 @@ export interface CleanVgmdbAlbum {
   names: VgmdbNames;
   notes: string;
   discs: {
-    disc_length: string;
     name: string;
     tracks: {
       names: VgmdbNames;
-      track_length: string;
     }[];
   }[];
   composers: VgmdbArtist[];
