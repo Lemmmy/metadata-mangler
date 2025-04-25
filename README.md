@@ -27,14 +27,30 @@ coded. Beware.
 
 - Web interface with table-based metadata editor
 - Browse and edit your music library metadata
+  - Support for populating album tags:
+    - Album Name (`ALBUM`/`TALB`)
+    - Album Artist (`ALBUMARTIST`/`TPE2`)
+    - Grouping (`CONTENTGROUP`/`TIT1`)
+    - Catalog Number (`CATALOGNUMBER`/`TXXX:CATALOGNUMBER`)
+    - Barcode (`BARCODE`/`TXXX:BARCODE`)
+    - Custom Album Subtitle (`COMMENT2ALBUM`/`TXXX:COMMENT2ALBUM`)
+    - Custom Track Comment (`COMMENT2TRACK`/`TXXX:COMMENT2TRACK`)
+  - Support for populating track tags:
+    - Track Number (`TRACKNUMBER`/`TRCK`)
+    - Disc Number (`DISCNUMBER`/`TPOS`)
+    - Title (`TITLE`/`TIT2`)
+    - Artists, semi-colon separated in the UI for convenience (`ARTIST`/`TPE1`)
 - Japanese-capable romaji directory searching powered by [kuroshiro](https://github.com/hexenq/kuroshiro) and
   [kuromoji.js](https://github.com/takuyaa/kuromoji.js)
-- Search VGMdb directly from the interface
+- Search VGMdb and MusicBrainz directly from the interface
 - AI-assisted metadata suggestions and corrections. Corrections work on data supplied from:
   - VGMdb (requires a [VGMdb API proxy](https://github.com/hufman/vgmdb))
-  - Musicbrainz (TODO)
+  - MusicBrainz
   - Bandcamp (TODO)
   - Any text input
+- Automatically highlights per-track differences in album-level tags
+- Automatically highlights suspicious container/tag combinations, such as ID3 in FLAC containers
+- Bulk artist name replacement tool, with memory of previous replacements
 
 ## Requirements
 
@@ -82,7 +98,7 @@ VGMDB_API_URL=https://vgmdb.example.com
 VGMDB_API_USERNAME=...
 VGMDB_API_PASSWORD=...
 
-# MusicBrainz API URL is required if you're using a self-hosted API
+# MusicBrainz API URL if you're using a self-hosted API
 MUSICBRAINZ_BASE_URL=https://musicbrainz.example.com
 ```
 
