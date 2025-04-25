@@ -1,14 +1,12 @@
-import { useAsyncThrottler } from "@tanstack/react-pacer";
 import { useMutation } from "@tanstack/react-query";
 import type { VisibilityState } from "@tanstack/react-table";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { type Dispatch, type SetStateAction } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
 import {
   useMetadataStore,
   type StoreAlbum,
 } from "~/components/album/useMetadataStore";
-import { ModelUsage } from "~/components/ModelEstimate";
 import { Button } from "~/components/ui/button";
 import { useModelPicker } from "~/components/useModelPicker";
 import type { PriceUsage } from "~/lib/ai/aiProviders";
@@ -37,11 +35,8 @@ export function AlbumLookupSection({
 }: Props) {
   const trpc = useTRPC();
   const lookupMutation = useMutation(trpc.metadata.lookup.mutationOptions());
-  const estimateMutation = useMutation(trpc.metadata.lookup.mutationOptions());
 
-  const [selectedModel, modelPicker] = useModelPicker();
-
-  const [usage, setUsage] = useState<PriceUsage | null>(null);
+  const { selectedModel, modelPicker, setUsage } = useModelPicker();
 
   const {
     updateAlbumName,
@@ -65,37 +60,6 @@ export function AlbumLookupSection({
       setUrlOrData: s.setUrlOrData,
       setAdditionalInfo: s.setAdditionalInfo,
     })),
-  );
-
-  const estimateThrottler = useAsyncThrottler(
-    async (
-      urlOrData: string,
-      additionalInfo: string,
-      selectedModel: string,
-      album: StoreAlbum | null,
-    ) => {
-      if (!urlOrData.trim()) return;
-
-      try {
-        const bareState = useMetadataStore.getState();
-        const tracks = bareState.tracks;
-
-        estimateMutation.mutate({
-          input: urlOrData,
-          additionalInfo: additionalInfo || undefined,
-          modelId: selectedModel,
-          albumName: album?.name || "",
-          albumArtist: album?.artist || "",
-          tracks,
-          estimateOnly: true,
-        });
-      } catch (error) {
-        console.error("Error during lookup:", error);
-      }
-    },
-    {
-      wait: 500,
-    },
   );
 
   const handleLookup = async () => {
@@ -135,17 +99,6 @@ export function AlbumLookupSection({
       console.error("Error during lookup:", error);
     }
   };
-
-  useEffect(() => {
-    if (urlOrData.trim() && album) {
-      estimateThrottler.maybeExecute(
-        urlOrData,
-        additionalInfo,
-        selectedModel,
-        album,
-      );
-    }
-  }, [urlOrData, additionalInfo, album, estimateThrottler, selectedModel]);
 
   return (
     <div className={className}>
@@ -195,10 +148,6 @@ export function AlbumLookupSection({
           )}
 
           {modelPicker}
-          <ModelUsage
-            isEstimate={!usage}
-            usage={(usage || estimateMutation.data) as PriceUsage}
-          />
 
           <VgmdbSearchDialogButton
             dirName={dirName}

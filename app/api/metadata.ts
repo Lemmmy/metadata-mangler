@@ -68,7 +68,6 @@ export const metadata = router({
             if (fetched) {
               supplementalDataSource = parsedSource;
               supplementalData = fetched;
-              console.log("Fetched supplemental data:", fetched);
             }
           } catch (error) {
             console.error(`Error fetching data for ${parsedSource}:`, error);

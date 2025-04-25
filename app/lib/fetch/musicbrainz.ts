@@ -94,7 +94,6 @@ export async function searchMusicBrainzReleases(
   const query = buildMusicBrainzQuery("release", searchTerm, artistFilter);
   const response = await mbApi.search("release", { query, limit: 50 });
   const results = response.releases.map(processReleaseResult);
-  console.log(results);
   releasesSearchCache.set(cacheKey, results);
   return results;
 }
