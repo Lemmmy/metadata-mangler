@@ -6,6 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
 import {
   useMetadataStore,
+  type AlbumUpdatable,
   type StoreAlbum,
 } from "~/components/album/useMetadataStore";
 import { useModelPicker } from "~/components/useModelPicker";
@@ -40,26 +41,18 @@ export function AlbumLookupSection({
   const { selectedModel, modelPicker, setUsage } = useModelPicker();
 
   const {
-    updateAlbumName,
-    updateAlbumArtist,
-    updateAlbumYear,
-    updateAlbumDate,
-    updateAlbumCatalogNumber,
-    updateAlbumBarcode,
+    updateAlbumField,
     updateTracks,
+    lockedAlbumFields,
     urlOrData,
     additionalInfo,
     setUrlOrData,
     setAdditionalInfo,
   } = useMetadataStore(
     useShallow((s) => ({
-      updateAlbumName: s.updateAlbumName,
-      updateAlbumArtist: s.updateAlbumArtist,
-      updateAlbumYear: s.updateAlbumYear,
-      updateAlbumDate: s.updateAlbumDate,
-      updateAlbumCatalogNumber: s.updateAlbumCatalogNumber,
-      updateAlbumBarcode: s.updateAlbumBarcode,
+      updateAlbumField: s.updateAlbumField,
       updateTracks: s.updateTracks,
+      lockedAlbumFields: s.lockedAlbumFields,
       urlOrData: s.urlOrData,
       additionalInfo: s.additionalInfo,
       setUrlOrData: s.setUrlOrData,
@@ -108,15 +101,28 @@ export function AlbumLookupSection({
 
       // Update edited tracks with the new metadata
       if (result.success && "tracks" in result && result.tracks) {
-        if (result.albumName) updateAlbumName(result.albumName);
-        if (result.albumArtist) updateAlbumArtist(result.albumArtist);
-        if (result.year) updateAlbumYear(result.year);
-        if (result.date) updateAlbumDate(result.date);
-        if (result.catalogNumber)
-          updateAlbumCatalogNumber(result.catalogNumber);
-        if (result.barcode) updateAlbumBarcode(result.barcode);
+        const res = result; // narrow the type
+        function update(
+          resultField: keyof typeof res,
+          field: keyof AlbumUpdatable,
+          value: any,
+        ) {
+          // update the album field if it changed and if it isn't locked
+          if (res[resultField] && !lockedAlbumFields[field]) {
+            updateAlbumField(field, value);
+          }
+        }
 
-        updateTracks(result.tracks);
+        // album-specific fields
+        update("albumName", "name", res.albumName);
+        update("albumArtist", "artist", res.albumArtist);
+        update("year", "year", res.year);
+        update("date", "date", res.date);
+        update("catalogNumber", "catalogNumber", res.catalogNumber);
+        update("barcode", "barcode", res.barcode);
+
+        // tracks
+        updateTracks(res.tracks);
       } else if (!result.success && "error" in result && result.error) {
         console.error("Error from lookup:", result.error);
         toast.error("Error during lookup, see console for details");

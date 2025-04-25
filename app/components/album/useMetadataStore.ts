@@ -22,6 +22,22 @@ export interface StoreAlbum {
 }
 
 export type StoreTrackUpdatable = StoreTrack & WritableTags;
+export type AlbumUpdatable = Omit<StoreAlbum, "coverArt">;
+
+export const albumTrackFieldMap: Record<
+  keyof AlbumUpdatable,
+  keyof StoreTrackUpdatable
+> = {
+  name: "album",
+  artist: "albumArtist",
+  year: "year",
+  date: "date",
+  grouping: "grouping",
+  directory: "directory",
+  catalogNumber: "catalogNumber",
+  barcode: "barcode",
+  albumSubtitle: "albumSubtitle",
+};
 
 export interface MetadataState {
   album: StoreAlbum | null;
@@ -29,6 +45,7 @@ export interface MetadataState {
   tracks: StoreTrack[];
   originalTracks: StoreTrack[];
   updatedFields: Record<number, Record<string, boolean>>;
+  lockedAlbumFields: Record<string, boolean>;
 
   urlOrData: string;
   additionalInfo: string;
@@ -38,20 +55,14 @@ export interface MetadataState {
     tracks: StoreTrack[],
     resetOriginal?: boolean,
   ) => void;
-  updateAlbumName: (name: string) => void;
-  updateAlbumArtist: (artist: string) => void;
-  updateAlbumYear: (year: string) => void;
-  updateAlbumDate: (date: string) => void;
-  updateAlbumGrouping: (grouping: string) => void;
-  updateAlbumCatalogNumber: (catalogNumber: string) => void;
-  updateAlbumBarcode: (barcode: string) => void;
-  updateAlbumSubtitle: (albumSubtitle: string) => void;
+  updateAlbumField: (field: keyof AlbumUpdatable, value: any) => void;
   updateTrack: (
     index: number,
     field: keyof StoreTrackUpdatable,
     value: any,
   ) => void;
   updateTracks: (tracks: AITrack[]) => void;
+  setAlbumFieldLocked: (field: keyof StoreAlbum, locked: boolean) => void;
   resetChanges: () => void;
 
   setUrlOrData: (urlOrData: string) => void;
@@ -92,6 +103,7 @@ export const useMetadataStore = create<MetadataState>()(
     tracks: [],
     originalTracks: [],
     updatedFields: {},
+    lockedAlbumFields: {},
     urlOrData: "",
     additionalInfo: "",
 
@@ -108,54 +120,9 @@ export const useMetadataStore = create<MetadataState>()(
         state.additionalInfo = "";
       }),
 
-    updateAlbumName: (name) =>
+    updateAlbumField: (field, value) =>
       set((state) => {
-        updateAlbumAndTracks(state, "name", "album", name);
-      }),
-
-    updateAlbumArtist: (artist) =>
-      set((state) => {
-        updateAlbumAndTracks(state, "artist", "albumArtist", artist);
-      }),
-
-    updateAlbumYear: (year) =>
-      set((state) => {
-        updateAlbumAndTracks(state, "year", "year", year);
-      }),
-
-    updateAlbumDate: (date) =>
-      set((state) => {
-        updateAlbumAndTracks(state, "date", "date", date);
-      }),
-
-    updateAlbumGrouping: (grouping) =>
-      set((state) => {
-        updateAlbumAndTracks(state, "grouping", "grouping", grouping);
-      }),
-
-    updateAlbumCatalogNumber: (catalogNumber) =>
-      set((state) => {
-        updateAlbumAndTracks(
-          state,
-          "catalogNumber",
-          "catalogNumber",
-          catalogNumber,
-        );
-      }),
-
-    updateAlbumBarcode: (barcode) =>
-      set((state) => {
-        updateAlbumAndTracks(state, "barcode", "barcode", barcode);
-      }),
-
-    updateAlbumSubtitle: (albumSubtitle) =>
-      set((state) => {
-        updateAlbumAndTracks(
-          state,
-          "albumSubtitle",
-          "albumSubtitle",
-          albumSubtitle,
-        );
+        updateAlbumAndTracks(state, field, albumTrackFieldMap[field], value);
       }),
 
     updateTrack: (index, field, value) =>
@@ -201,6 +168,12 @@ export const useMetadataStore = create<MetadataState>()(
             }
           }
         }
+      }),
+
+    setAlbumFieldLocked: (field, locked) =>
+      set((state) => {
+        const set = (state.lockedAlbumFields ||= {});
+        set[field] = locked;
       }),
 
     resetChanges: () =>

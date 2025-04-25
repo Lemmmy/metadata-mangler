@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "~/lib/utils";
 import { Button } from "./button";
-import { Undo2 } from "lucide-react";
+import { Undo2, Lock, LockOpen } from "lucide-react";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -24,19 +24,25 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   );
 }
 
+interface ResettableInputProps extends React.ComponentProps<"input"> {
+  onReset: () => void;
+  onLockChange?: (locked: boolean) => void;
+  locked?: boolean;
+  isUpdated: boolean;
+  inputClassName?: string;
+  extra?: React.ReactNode;
+}
+
 function ResettableInput({
   className,
   inputClassName,
   onReset,
+  locked,
+  onLockChange,
   isUpdated,
   extra,
   ...props
-}: React.ComponentProps<"input"> & {
-  onReset: () => void;
-  isUpdated: boolean;
-  inputClassName?: string;
-  extra?: React.ReactNode;
-}) {
+}: ResettableInputProps) {
   return (
     <div
       className={cn(
@@ -56,6 +62,22 @@ function ResettableInput({
       />
 
       {extra}
+
+      {/* Lock button */}
+      {onLockChange && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onLockChange(!locked)}
+          className={cn(
+            "flex-shrink-0 !rounded-none",
+            locked &&
+              "bg-red-500/20 !text-red-200 hover:bg-red-500/30 dark:bg-red-500/20 dark:hover:bg-red-500/30",
+          )}
+        >
+          {locked ? <Lock /> : <LockOpen />}
+        </Button>
+      )}
 
       {/* Reset button */}
       <Button

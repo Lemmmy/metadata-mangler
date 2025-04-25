@@ -1,41 +1,45 @@
 import type { ReactNode } from "react";
-import {
-  useMetadataStore,
-  type StoreAlbum,
-  type MetadataState,
-} from "./useMetadataStore";
 import { useShallow } from "zustand/react/shallow";
-import type { PickByValue } from "utility-types";
-import { Label } from "../ui/label";
-import { Input, ResettableInput } from "../ui/input";
 import { cn } from "~/lib/utils";
-import { Button } from "../ui/button";
-import { Undo2 } from "lucide-react";
+import { ResettableInput } from "../ui/input";
+import { Label } from "../ui/label";
+import { useMetadataStore, type AlbumUpdatable } from "./useMetadataStore";
 
-interface Props<T extends keyof StoreAlbum> {
+interface Props<T extends keyof AlbumUpdatable> {
   label: ReactNode;
   field: T;
-  updater: keyof PickByValue<MetadataState, (input: string) => void>;
   className?: string;
 }
 
-export function AlbumTagInput<T extends keyof StoreAlbum>({
+export function AlbumTagInput<T extends keyof AlbumUpdatable>({
   label,
   field,
-  updater,
   className,
 }: Props<T>) {
-  const { originalAlbum, value, update, isUpdated } = useMetadataStore(
+  const {
+    originalAlbum,
+    value,
+    update,
+    isUpdated,
+    locked,
+    setAlbumFieldLocked,
+  } = useMetadataStore(
     useShallow((s) => ({
       originalAlbum: s.originalAlbum,
       value: s.album?.[field],
-      update: s[updater],
+      update: s.updateAlbumField,
       isUpdated: s.originalAlbum?.[field] !== s.album?.[field],
+      locked: s.lockedAlbumFields[field],
+      setAlbumFieldLocked: s.setAlbumFieldLocked,
     })),
   );
 
   const reset = () => {
-    update(originalAlbum?.[field] || "");
+    update(field, originalAlbum?.[field] || "");
+  };
+
+  const handleLockChange = (locked: boolean) => {
+    setAlbumFieldLocked(field, locked);
   };
 
   return (
@@ -47,9 +51,11 @@ export function AlbumTagInput<T extends keyof StoreAlbum>({
         <ResettableInput
           type="text"
           value={value || ""}
-          onChange={(e) => update(e.target.value)}
+          onChange={(e) => update(field, e.target.value)}
           onReset={reset}
           isUpdated={isUpdated}
+          locked={locked}
+          onLockChange={handleLockChange}
         />
 
         {/* Original value */}
