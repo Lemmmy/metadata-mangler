@@ -27,6 +27,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { useTRPC } from "~/lib/trpc";
 import { useMetadataStore } from "../useMetadataStore";
+import { fromSemicolonString } from "~/lib/tags/musicMetadataShared";
 
 type ArtistAddMode = "prepend" | "append";
 
@@ -83,7 +84,9 @@ function ArtistAddPopover({
     // Add all track artists
     for (const track of tracks) {
       if (track.artists) {
-        track.artists.split(/;\s*/).forEach((a) => artists.add(a.trim()));
+        fromSemicolonString(track.artists).forEach((a) =>
+          artists.add(a.trim()),
+        );
       }
     }
 
@@ -119,7 +122,7 @@ function ArtistAddPopover({
     const state = useMetadataStore.getState();
     for (let i = 0; i < state.tracks.length; i++) {
       const track = state.tracks[i];
-      const artists = track.artists.split(/;\s*/).map((a) => a.trim());
+      const artists = fromSemicolonString(track.artists);
       const trimmedArtist = artist.trim();
 
       // Skip if the artist already exists in the list

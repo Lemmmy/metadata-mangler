@@ -1,22 +1,15 @@
 import "musicbrainz-api";
+import type { ILabel } from "musicbrainz-api";
 
 declare module "musicbrainz-api" {
+  export interface IRelease {
+    ["label-info"]?: {
+      label: ILabel;
+      ["catalog-number"]?: string;
+    }[];
+  }
+
   export interface IRelation {
-    artist?: IArtist;
-    "attribute-ids": unknown[];
-    direction: RelationDirection;
-    "target-credit": string;
-    end: null | unknown;
-    "source-credit": string;
-    ended: boolean;
-    "attribute-values": unknown[];
-    attributes?: any[];
-    type: string;
-    begin?: null | unknown;
-    "target-type"?: "url" | "work";
-    "type-id": string;
-    url?: IUrl;
-    release?: IRelease;
     work?: IWork;
   }
 

@@ -2,13 +2,17 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 import { env } from "~/lib/env";
 import { type WritableTags } from "./musicMetadata";
-import { createWriteResult, getChangedTags } from "./writeMetadata";
+import {
+  createWriteResult,
+  getChangedTags,
+  type TagMapping,
+} from "./writeMetadata";
 import { type WriteResult } from "./writeMetadata";
 
 const execFileAsync = promisify(execFile);
 
 // MP3 tag name mapping (mid3v2 uses different argument names)
-const MP3_TAG_MAPPING: Record<keyof WritableTags, string> = {
+const MP3_TAG_MAPPING: TagMapping = {
   title: "--TIT2",
   artists: "--TPE1",
   album: "--TALB",
@@ -18,6 +22,10 @@ const MP3_TAG_MAPPING: Record<keyof WritableTags, string> = {
   year: "--TYER",
   date: "--TDAT",
   grouping: "--TIT1",
+  catalogNumber: "--TXXX:CATALOGNUMBER",
+  barcode: "--TXXX:BARCODE",
+  albumSubtitle: "--TXXX:COMMENT2ALBUM",
+  trackComment: "--TXXX:COMMENT2TRACK",
 };
 
 /**

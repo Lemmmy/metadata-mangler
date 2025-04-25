@@ -8,6 +8,10 @@ import {
 import * as v from "valibot";
 import type { FileTrack } from "../tags/musicMetadata";
 import type { SupportedModel } from "./aiProviders";
+import {
+  fromSemicolonString,
+  toSemicolonString,
+} from "../tags/musicMetadataShared";
 
 export type SupplementalDataSource =
   | "vgmdb"
@@ -189,11 +193,11 @@ export async function generateImprovedMetadata(
         title: cleanField(improvedTrack.title),
         trackNumber: cleanAnyToNumber(improvedTrack.trackNumber),
         discNumber: cleanAnyToNumber(improvedTrack.discNumber),
-        artists: improvedTrack.artists
-          .split(/;\s*/)
-          .map(cleanField)
-          .filter((artist, index, self) => self.indexOf(artist) === index)
-          .join("; "),
+        artists: toSemicolonString(
+          fromSemicolonString(improvedTrack.artists)
+            .map(cleanField)
+            .filter((artist, index, self) => self.indexOf(artist) === index),
+        ),
         filename: matchingTrack.filename,
         baseDir: matchingTrack.baseDir,
       };

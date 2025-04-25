@@ -1,5 +1,4 @@
 import { enableMapSet, type WritableDraft } from "immer";
-import type { PickByValue } from "utility-types";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import type { WebTrack, WritableTags } from "~/lib/tags/musicMetadata";
@@ -17,6 +16,9 @@ export interface StoreAlbum {
   grouping: string;
   coverArt: string | null;
   directory: string;
+  catalogNumber: string | null;
+  barcode: string | null;
+  albumSubtitle: string | null;
 }
 
 export type StoreTrackUpdatable = StoreTrack & WritableTags;
@@ -41,6 +43,9 @@ export interface MetadataState {
   updateAlbumYear: (year: string) => void;
   updateAlbumDate: (date: string) => void;
   updateAlbumGrouping: (grouping: string) => void;
+  updateAlbumCatalogNumber: (catalogNumber: string) => void;
+  updateAlbumBarcode: (barcode: string) => void;
+  updateAlbumSubtitle: (albumSubtitle: string) => void;
   updateTrack: (
     index: number,
     field: keyof StoreTrackUpdatable,
@@ -126,6 +131,31 @@ export const useMetadataStore = create<MetadataState>()(
     updateAlbumGrouping: (grouping) =>
       set((state) => {
         updateAlbumAndTracks(state, "grouping", "grouping", grouping);
+      }),
+
+    updateAlbumCatalogNumber: (catalogNumber) =>
+      set((state) => {
+        updateAlbumAndTracks(
+          state,
+          "catalogNumber",
+          "catalogNumber",
+          catalogNumber,
+        );
+      }),
+
+    updateAlbumBarcode: (barcode) =>
+      set((state) => {
+        updateAlbumAndTracks(state, "barcode", "barcode", barcode);
+      }),
+
+    updateAlbumSubtitle: (albumSubtitle) =>
+      set((state) => {
+        updateAlbumAndTracks(
+          state,
+          "albumSubtitle",
+          "albumSubtitle",
+          albumSubtitle,
+        );
       }),
 
     updateTrack: (index, field, value) =>

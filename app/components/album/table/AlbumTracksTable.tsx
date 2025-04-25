@@ -78,7 +78,7 @@ export function AlbumTracksTable({
       className="border-border h-full min-h-[320px] overflow-auto border shadow-md"
       style={columnSizeVars}
     >
-      <table className="divide-border h-full w-full table-fixed border-collapse divide-y">
+      <table className="divide-border max-h-full w-full table-fixed border-collapse divide-y">
         <thead className="bg-muted">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>

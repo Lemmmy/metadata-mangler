@@ -44,15 +44,7 @@ export function AlbumSaveButton({ album }: Props) {
       // Prepare tracks for saving
       const tracksToSave = tracks.map((track) => ({
         filePath: track.directory + "/" + track.filename, // Construct full file path
-        trackNumber: track.trackNumber,
-        discNumber: track.discNumber,
-        title: track.title,
-        artists: track.artists,
-        album: track.album,
-        albumArtist: track.albumArtist,
-        year: track.year,
-        date: track.date,
-        grouping: track.grouping,
+        ...track,
       }));
 
       setSaveMessage(null);

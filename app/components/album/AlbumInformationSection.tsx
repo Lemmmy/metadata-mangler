@@ -23,6 +23,7 @@ export function AlbumInformationSection() {
           label="Album artist"
           field="artist"
           updater="updateAlbumArtist"
+          className="col-span-2"
         />
 
         {/* Grouping */}
@@ -30,6 +31,15 @@ export function AlbumInformationSection() {
           label="Grouping"
           field="grouping"
           updater="updateAlbumGrouping"
+          className="col-span-2"
+        />
+
+        {/* Subtitle */}
+        <AlbumTagInput
+          label="Subtitle"
+          field="albumSubtitle"
+          updater="updateAlbumSubtitle"
+          className="col-span-2"
         />
 
         {/* Year */}
@@ -37,6 +47,20 @@ export function AlbumInformationSection() {
 
         {/* Date */}
         <AlbumTagInput label="Date" field="date" updater="updateAlbumDate" />
+
+        {/* Catalog number */}
+        <AlbumTagInput
+          label="Catalog number"
+          field="catalogNumber"
+          updater="updateAlbumCatalogNumber"
+        />
+
+        {/* Barcode */}
+        <AlbumTagInput
+          label="Barcode"
+          field="barcode"
+          updater="updateAlbumBarcode"
+        />
       </div>
     </div>
   );

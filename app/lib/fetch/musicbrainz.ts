@@ -1,18 +1,18 @@
+import { LRUCache } from "lru-cache";
 import type {
-  IRelease,
-  IArtistCredit,
   IAlias,
-  IRecording,
-  IWork,
+  IArtistCredit,
   IMedium,
-  ITrack,
+  IRecording,
   IRelation,
+  IRelease,
+  ITrack,
+  IWork,
 } from "musicbrainz-api";
 import { MusicBrainzApi } from "musicbrainz-api";
-import { appContact, appId } from "../constants";
-import { LRUCache } from "lru-cache";
-import { env } from "../env";
 import PQueue from "p-queue";
+import { appContact, appId } from "../constants";
+import { env } from "../env";
 
 const mbApi = new MusicBrainzApi({
   appName: appId,
@@ -162,11 +162,18 @@ export async function getMusicBrainzRelease(id: string) {
   return result;
 }
 
+export function getMusicBrainzCatalogNumber(release: IRelease): string {
+  return (
+    release["label-info"]?.find((li) => li["catalog-number"])?.[
+      "catalog-number"
+    ] || ""
+  );
+}
+
 // Process a release result into a standardized format
 function processReleaseResult(release: IRelease): MusicBrainzReleaseResult {
   // Extract catalog number from label-info if available
-  const labelInfo = (release as any)["label-info"];
-  const catalogNumber = labelInfo?.[0]?.["catalog-number"] || "";
+  const catalogNumber = getMusicBrainzCatalogNumber(release);
 
   return {
     id: release.id,

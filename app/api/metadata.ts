@@ -21,10 +21,8 @@ import {
 export const metadata = router({
   lookup: publicProcedure
     .input(
-      v.object({
+      v.strictObject({
         input: v.string(),
-        additionalInfo: v.optional(v.string()),
-        modelId: supportedModelValidator,
         albumName: v.string(),
         albumArtist: v.string(),
         tracks: v.pipe(
@@ -41,6 +39,19 @@ export const metadata = router({
           v.minLength(1),
         ),
         estimateOnly: v.optional(v.boolean(), false),
+        settings: v.strictObject({
+          enableAI: v.boolean(),
+          aiSettings: v.strictObject({
+            modelId: supportedModelValidator,
+            additionalInfo: v.optional(v.string()),
+          }),
+          inheritSupplementalFields: v.strictObject({
+            year: v.boolean(),
+            date: v.boolean(),
+            catalogNumber: v.boolean(),
+            barcode: v.boolean(),
+          }),
+        }),
       }),
     )
     .mutation(async ({ input }) => {
@@ -75,7 +86,7 @@ export const metadata = router({
           }
         }
 
-        const model = supportedModelLut[input.modelId];
+        const model = supportedModelLut[input.settings.aiSettings.modelId];
 
         if (input.estimateOnly) {
           const estimateFn = model.estimateUsageFn || estimateGenericTokenUsage;
@@ -91,7 +102,7 @@ export const metadata = router({
               inputTracks,
               supplementalDataSource,
               supplementalData.cleanRaw,
-              input.additionalInfo,
+              input.settings.aiSettings.additionalInfo,
             ),
             inputTracks,
           );
@@ -102,25 +113,38 @@ export const metadata = router({
             ...usageToPrice(usage, model),
           };
         } else {
-          const output = await generateImprovedMetadata(
-            model,
-            input.albumName,
-            input.albumArtist,
-            inputTracks,
-            supplementalDataSource,
-            supplementalData.cleanRaw,
-            input.additionalInfo,
-          );
+          const output = input.settings.enableAI
+            ? await generateImprovedMetadata(
+                model,
+                input.albumName,
+                input.albumArtist,
+                inputTracks,
+                supplementalDataSource,
+                supplementalData.cleanRaw,
+                input.settings.aiSettings.additionalInfo,
+              )
+            : undefined;
 
           return {
             success: true,
-            albumName: output.name,
-            albumArtist: output.albumArtist,
-            year: supplementalData.year,
-            date: supplementalData.date,
-            tracks: output.tracks,
-            ...output.usage,
-            ...usageToPrice(output.usage, model),
+            albumName: output?.name || input.albumName,
+            albumArtist: output?.albumArtist || input.albumArtist,
+            year: input.settings.inheritSupplementalFields.year
+              ? supplementalData.year
+              : undefined,
+            date: input.settings.inheritSupplementalFields.date
+              ? supplementalData.date
+              : undefined,
+            catalogNumber: input.settings.inheritSupplementalFields
+              .catalogNumber
+              ? supplementalData.catalogNumber
+              : undefined,
+            barcode: input.settings.inheritSupplementalFields.barcode
+              ? supplementalData.barcode
+              : undefined,
+            tracks: output?.tracks || [],
+            ...output?.usage,
+            ...usageToPrice(output?.usage, model),
           };
         }
       } catch (error) {

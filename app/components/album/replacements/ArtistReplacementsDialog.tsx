@@ -14,6 +14,10 @@ import { useMetadataStore } from "../useMetadataStore";
 import { useTRPC } from "~/lib/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowRightLeft, Loader2 } from "lucide-react";
+import {
+  fromSemicolonString,
+  toSemicolonString,
+} from "~/lib/tags/musicMetadataShared";
 
 export interface ArtistReplacementsDialogProps {
   onClose: () => void;
@@ -27,14 +31,13 @@ export function ArtistReplacementsDialog({
   const tracks = useMetadataStore(useShallow((s) => s.tracks));
   const initialReplacements = useMemo(
     () =>
-      tracks.reduce(
-        (acc, track) => {
-          track.artists.split(/;\s*/).forEach((artist) => {
-            acc[artist.trim()] = artist.trim();
-          });
-          return acc;
-        },
-        {} as Record<string, string>,
+      Object.fromEntries(
+        tracks.flatMap((track) =>
+          fromSemicolonString(track.artists).map((artist) => [
+            artist.trim(),
+            artist.trim(),
+          ]),
+        ),
       ),
     [tracks],
   );
@@ -79,10 +82,11 @@ export function ArtistReplacementsDialog({
         const state = useMetadataStore.getState();
         for (let i = 0; i < state.tracks.length; i++) {
           const track = state.tracks[i];
-          const newArtists = track.artists
-            .split(/;\s*/)
-            .map((artist) => replacements[artist.trim()] || artist.trim())
-            .join("; ");
+          const newArtists = toSemicolonString(
+            fromSemicolonString(track.artists).map(
+              (artist) => replacements[artist.trim()] || artist.trim(),
+            ),
+          );
           state.updateTrack(i, "artists", newArtists);
         }
 

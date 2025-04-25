@@ -8,8 +8,8 @@ import {
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { formatDuration } from "~/lib/duration";
 import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
-import { EditableCell } from "./EditableCell";
 import { type StoreTrack, type StoreTrackUpdatable } from "../useMetadataStore";
+import { EditableCell } from "./EditableCell";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -121,6 +121,40 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
       hiddenByDefault: true,
     },
   }),
+  columnHelper.accessor("catalogNumber", {
+    header: "Catalog",
+    id: "catalogNumber",
+    cell: createEditableCellRenderer("catalogNumber"),
+    size: 48,
+    meta: {
+      hiddenByDefault: true,
+    },
+  }),
+  columnHelper.accessor("barcode", {
+    header: "Barcode",
+    id: "barcode",
+    cell: createEditableCellRenderer("barcode"),
+    size: 48,
+    meta: {
+      hiddenByDefault: true,
+    },
+  }),
+  columnHelper.accessor("albumSubtitle", {
+    header: "Album subtitle",
+    id: "albumSubtitle",
+    cell: createEditableCellRenderer("albumSubtitle"),
+    meta: {
+      hiddenByDefault: true,
+    },
+  }),
+  columnHelper.accessor("trackComment", {
+    header: "Track comment",
+    id: "trackComment",
+    cell: createEditableCellRenderer("trackComment"),
+    meta: {
+      hiddenByDefault: true,
+    },
+  }),
   columnHelper.accessor("duration", {
     header: "Duration",
     id: "duration",
@@ -218,6 +252,10 @@ export function useAlbumTableColumns(
       checkTagCardinality("date");
       checkTagCardinality("grouping");
       checkTagCardinality("container");
+      checkTagCardinality("catalogNumber");
+      checkTagCardinality("barcode");
+      checkTagCardinality("albumSubtitle");
+      checkTagCardinality("trackComment");
       checkTagCardinality("codec");
       checkTagCardinality("tagTypes");
 

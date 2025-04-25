@@ -7,7 +7,6 @@ import {
   useMetadataStore,
   type StoreAlbum,
 } from "~/components/album/useMetadataStore";
-import { Button } from "~/components/ui/button";
 import { useModelPicker } from "~/components/useModelPicker";
 import type { PriceUsage } from "~/lib/ai/aiProviders";
 import { useTRPC } from "~/lib/trpc";
@@ -17,6 +16,10 @@ import { ArtistAddButton } from "./replacements/ArtistAddButton";
 import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 import { MusicBrainzSearchDialogButton } from "./search/MusicBrainzSearchDialogButton";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
+import {
+  useAlbumLookupSettings,
+  type HandleLookupFn,
+} from "./useAlbumLookupSettings";
 
 interface Props {
   album: StoreAlbum | null;
@@ -43,6 +46,8 @@ export function AlbumLookupSection({
     updateAlbumArtist,
     updateAlbumYear,
     updateAlbumDate,
+    updateAlbumCatalogNumber,
+    updateAlbumBarcode,
     updateTracks,
     urlOrData,
     additionalInfo,
@@ -54,6 +59,8 @@ export function AlbumLookupSection({
       updateAlbumArtist: s.updateAlbumArtist,
       updateAlbumYear: s.updateAlbumYear,
       updateAlbumDate: s.updateAlbumDate,
+      updateAlbumCatalogNumber: s.updateAlbumCatalogNumber,
+      updateAlbumBarcode: s.updateAlbumBarcode,
       updateTracks: s.updateTracks,
       urlOrData: s.urlOrData,
       additionalInfo: s.additionalInfo,
@@ -62,7 +69,13 @@ export function AlbumLookupSection({
     })),
   );
 
-  const handleLookup = async () => {
+  const handleLookup: HandleLookupFn = async (
+    enableAI,
+    inheritYear,
+    inheritDate,
+    inheritCatalogNumber,
+    inheritBarcode,
+  ) => {
     if (!urlOrData.trim()) return;
 
     setUsage(null);
@@ -73,11 +86,22 @@ export function AlbumLookupSection({
 
       const result = await lookupMutation.mutateAsync({
         input: urlOrData,
-        additionalInfo: additionalInfo || undefined,
-        modelId: selectedModel,
         albumName: album?.name || "",
         albumArtist: album?.artist || "",
         tracks,
+        settings: {
+          enableAI,
+          aiSettings: {
+            modelId: selectedModel,
+            additionalInfo: additionalInfo || undefined,
+          },
+          inheritSupplementalFields: {
+            year: inheritYear,
+            date: inheritDate,
+            catalogNumber: inheritCatalogNumber,
+            barcode: inheritBarcode,
+          },
+        },
       });
 
       if (result.success && "promptTokens" in result) {
@@ -90,6 +114,9 @@ export function AlbumLookupSection({
         if (result.albumArtist) updateAlbumArtist(result.albumArtist);
         if (result.year) updateAlbumYear(result.year);
         if (result.date) updateAlbumDate(result.date);
+        if (result.catalogNumber)
+          updateAlbumCatalogNumber(result.catalogNumber);
+        if (result.barcode) updateAlbumBarcode(result.barcode);
 
         updateTracks(result.tracks);
       } else if (!result.success && "error" in result && result.error) {
@@ -99,6 +126,12 @@ export function AlbumLookupSection({
       console.error("Error during lookup:", error);
     }
   };
+
+  const lookupButton = useAlbumLookupSettings(
+    handleLookup,
+    urlOrData.trim() !== "",
+    lookupMutation.isPending,
+  );
 
   return (
     <div className={className}>
@@ -132,14 +165,8 @@ export function AlbumLookupSection({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleLookup}
-            disabled={!urlOrData.trim() || lookupMutation.isPending}
-          >
-            {lookupMutation.isPending ? "Processing..." : "Lookup"}
-          </Button>
+          {/* Lookup button & settings dropdown */}
+          {lookupButton}
 
           {lookupMutation.isError && (
             <div className="mt-2 text-sm text-red-500">

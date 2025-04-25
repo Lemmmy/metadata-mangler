@@ -3,12 +3,51 @@ import { readTrackFromFile, type WritableTags } from "./musicMetadata";
 import { writeFlacTags } from "./writeFlac";
 import { writeMp3Tags } from "./writeMp3";
 import { writeOggTags } from "./writeOgg";
+import { fromSemicolonString } from "./musicMetadataShared";
+import type { PickByValue } from "utility-types";
 
 export interface WriteResult {
   filePath: string;
   success: boolean;
   error?: string;
 }
+
+export type TagMapping = Record<keyof WritableTags, string>;
+
+export const DEFAULT_TAG_MAPPING: TagMapping = {
+  trackNumber: "TRACKNUMBER",
+  discNumber: "DISCNUMBER",
+  title: "TITLE",
+  artists: "ARTIST",
+  album: "ALBUM",
+  albumArtist: "ALBUMARTIST",
+  year: "YEAR",
+  date: "DATE",
+  grouping: "CONTENTGROUP",
+  catalogNumber: "CATALOGNUMBER",
+  barcode: "BARCODE",
+  albumSubtitle: "COMMENT2ALBUM",
+  trackComment: "COMMENT2TRACK",
+};
+
+const basicTags: (keyof PickByValue<WritableTags, string | number>)[] = [
+  "title",
+  "album",
+  "albumArtist",
+  "year",
+  "date",
+  "grouping",
+  "trackNumber",
+  "discNumber",
+  "albumSubtitle",
+  "trackComment",
+];
+
+const multiTags: (keyof PickByValue<WritableTags, string>)[] = [
+  "artists",
+  "catalogNumber",
+  "barcode",
+];
 
 /**
  * Writes metadata tags to a music file based on its format
@@ -100,93 +139,37 @@ export async function getChangedTags(
 
   // Mapping of WritableTags fields to tag names (default if not provided)
   const mapping: Record<keyof WritableTags, string> = {
-    title: tagMapping.title || "TITLE",
-    artists: tagMapping.artists || "ARTIST",
-    album: tagMapping.album || "ALBUM",
-    albumArtist: tagMapping.albumArtist || "ALBUMARTIST",
-    trackNumber: tagMapping.trackNumber || "TRACKNUMBER",
-    discNumber: tagMapping.discNumber || "DISCNUMBER",
-    year: tagMapping.year || "YEAR",
-    date: tagMapping.date || "DATE",
-    grouping: tagMapping.grouping || "CONTENTGROUP",
+    ...DEFAULT_TAG_MAPPING,
+    ...tagMapping,
   };
 
   // Only include tags that have changed
   const changedTags: Record<string, string | string[]> = {};
 
-  // Check each tag
-  if (newTags.title !== undefined && newTags.title !== existingTrack.title) {
-    changedTags[mapping.title] = singleValueTags
-      ? newTags.title
-      : [newTags.title];
-  }
+  // Helper function to process a tag if it has changed
+  const processTag = <K extends keyof WritableTags>(
+    key: K,
+    transform?: (value: WritableTags[K]) => string | string[],
+  ) => {
+    const newValue = newTags[key];
+    const existingValue = existingTrack[key];
 
-  if (
-    newTags.artists !== undefined &&
-    newTags.artists !== existingTrack.artists
-  ) {
-    // Split artists by semicolon
-    const artistArray = newTags.artists
-      .split(";")
-      .map((artist) => artist.trim())
-      .filter(Boolean);
+    if (newValue !== undefined && newValue !== existingValue) {
+      if (transform) {
+        changedTags[mapping[key]] = transform(newValue);
+      } else if (typeof newValue === "number") {
+        const strValue = newValue.toString();
+        changedTags[mapping[key]] = singleValueTags ? strValue : [strValue];
+      } else {
+        changedTags[mapping[key]] = singleValueTags ? newValue : [newValue];
+      }
+    }
+  };
 
-    changedTags[mapping.artists] = singleValueTags
-      ? artistArray.join("; ")
-      : artistArray;
-  }
-
-  if (newTags.album !== undefined && newTags.album !== existingTrack.album) {
-    changedTags[mapping.album] = singleValueTags
-      ? newTags.album
-      : [newTags.album];
-  }
-
-  if (
-    newTags.albumArtist !== undefined &&
-    newTags.albumArtist !== existingTrack.albumArtist
-  ) {
-    changedTags[mapping.albumArtist] = singleValueTags
-      ? newTags.albumArtist
-      : [newTags.albumArtist];
-  }
-
-  if (
-    newTags.trackNumber !== undefined &&
-    newTags.trackNumber !== existingTrack.trackNumber
-  ) {
-    const trackNumberStr = newTags.trackNumber.toString();
-    changedTags[mapping.trackNumber] = singleValueTags
-      ? trackNumberStr
-      : [trackNumberStr];
-  }
-
-  if (
-    newTags.discNumber !== undefined &&
-    newTags.discNumber !== existingTrack.discNumber
-  ) {
-    const discNumberStr = newTags.discNumber.toString();
-    changedTags[mapping.discNumber] = singleValueTags
-      ? discNumberStr
-      : [discNumberStr];
-  }
-
-  if (newTags.year !== undefined && newTags.year !== existingTrack.year) {
-    changedTags[mapping.year] = singleValueTags ? newTags.year : [newTags.year];
-  }
-
-  if (newTags.date !== undefined && newTags.date !== existingTrack.date) {
-    changedTags[mapping.date] = singleValueTags ? newTags.date : [newTags.date];
-  }
-
-  if (
-    newTags.grouping !== undefined &&
-    newTags.grouping !== existingTrack.grouping
-  ) {
-    changedTags[mapping.grouping] = singleValueTags
-      ? newTags.grouping
-      : [newTags.grouping];
-  }
+  basicTags.forEach((key) => processTag(key));
+  multiTags.forEach((key) =>
+    processTag(key, (value) => fromSemicolonString(value as string)),
+  );
 
   return changedTags;
 }

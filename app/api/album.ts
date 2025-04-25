@@ -27,7 +27,7 @@ const directorySchema = v.object({
 });
 
 // Schema for track metadata
-const trackMetadataSchema = v.object({
+const trackMetadataSchema = v.strictObject({
   filePath: v.string(),
   trackNumber: v.optional(v.number()),
   discNumber: v.optional(v.number()),
@@ -38,6 +38,10 @@ const trackMetadataSchema = v.object({
   year: v.optional(v.string()),
   date: v.optional(v.string()),
   grouping: v.optional(v.string()),
+  catalogNumber: v.optional(v.string()),
+  barcode: v.optional(v.string()),
+  albumSubtitle: v.optional(v.string()),
+  trackComment: v.optional(v.string()),
 });
 
 export const album = router({
@@ -59,6 +63,9 @@ export const album = router({
             year: getTagFromAnyTrack(tracks, "year") || "",
             date: getTagFromAnyTrack(tracks, "date") || "",
             grouping: getTagFromAnyTrack(tracks, "grouping") || "",
+            catalogNumber: getTagFromAnyTrack(tracks, "catalogNumber") || "",
+            barcode: getTagFromAnyTrack(tracks, "barcode") || "",
+            albumSubtitle: getTagFromAnyTrack(tracks, "albumSubtitle") || "",
           } satisfies StoreAlbum,
           tracks: tracks.map(cleanTrackForWeb),
         };
@@ -71,7 +78,7 @@ export const album = router({
   // Write metadata to album tracks
   writeTracks: publicProcedure
     .input(
-      v.object({
+      v.strictObject({
         tracks: v.pipe(v.array(trackMetadataSchema), v.minLength(1)),
       }),
     )

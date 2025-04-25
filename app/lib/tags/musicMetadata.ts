@@ -4,6 +4,11 @@ import { parseFile } from "music-metadata";
 import { stripLibraryPath } from "../paths";
 import { env } from "../env";
 import sharp from "sharp";
+import {
+  findNativeStringTag,
+  toJoinedString,
+  toSemicolonString,
+} from "./musicMetadataShared";
 
 /**
  * Represents a music track with metadata
@@ -22,6 +27,10 @@ export interface FileTrack {
   year: string;
   date: string;
   grouping: string;
+  catalogNumber: string; // semicolon separated
+  barcode: string; // semicolon separated
+  albumSubtitle: string; // lemmmy custom COMMENT2ALBUM
+  trackComment: string; // lemmmy custom COMMENT2TRACK
 
   duration: number;
   coverArt: Uint8Array | null;
@@ -44,6 +53,10 @@ export type WritableTags = Pick<
   | "year"
   | "grouping"
   | "date"
+  | "catalogNumber"
+  | "barcode"
+  | "albumSubtitle"
+  | "trackComment"
 >;
 
 export const supportedFileTypes = [".flac", ".mp3", ".ogg"];
@@ -60,7 +73,7 @@ export async function readTrackFromFile(
   coverArt: boolean,
 ): Promise<FileTrack> {
   try {
-    const metadata = await parseFile(filePath, {
+    const { common, native, format } = await parseFile(filePath, {
       duration,
       skipCovers: !coverArt,
     });
@@ -69,19 +82,12 @@ export async function readTrackFromFile(
     const directory = path.dirname(filePath);
     const filename = path.basename(filePath);
 
-    const trackInfo = metadata.common.track || { no: null, of: null };
+    const trackInfo = common.track || { no: null, of: null };
     const trackNumber = trackInfo.no || 0;
-    const discInfo = metadata.common.disk || { no: null, of: null };
+    const discInfo = common.disk || { no: null, of: null };
     const discNumber = discInfo.no || 1;
 
-    // Extract artists
-    // If we have an array of artists, join them with semicolons
-    // Otherwise use the artist field, or empty string if not available
-    const artistsArray = metadata.common.artists || [];
-    const artistString =
-      artistsArray.length > 0
-        ? artistsArray.join("; ")
-        : metadata.common.artist || "";
+    console.log(native);
 
     return {
       directory,
@@ -90,27 +96,29 @@ export async function readTrackFromFile(
       trackNumber,
       discNumber,
 
-      title: metadata.common.title || "",
-      artists: artistString,
-      album: metadata.common.album || "",
-      albumArtist: metadata.common.albumartist || "",
-      year: metadata.common.year?.toString() || metadata.common.date || "",
-      date: metadata.common.date || metadata.common.year?.toString() || "",
+      title: common.title || "",
+      artists: toSemicolonString(common.artists),
+      album: common.album || "",
+      albumArtist: common.albumartist || "",
+      year: common.year?.toString() || common.date || "",
+      date: common.date || common.year?.toString() || "",
 
       // music-metadata doesn't put vorbis CONTENTGROUP into common.grouping
       grouping:
-        metadata.common.grouping ||
-        metadata.native?.vorbis
-          ?.find((v) => v.id === "CONTENTGROUP")
-          ?.value?.toString() ||
-        "",
+        common.grouping || findNativeStringTag(native, "CONTENTGROUP") || "",
 
-      duration: metadata.format.duration || 0,
-      coverArt: metadata.common.picture?.[0]?.data || null,
+      catalogNumber: toSemicolonString(common.catalognumber),
+      barcode: toSemicolonString(common.barcode),
 
-      container: metadata.format.container || "",
-      codec: metadata.format.codec || "",
-      tagTypes: metadata.format.tagTypes || [],
+      albumSubtitle: findNativeStringTag(native, "COMMENT2ALBUM") || "",
+      trackComment: findNativeStringTag(native, "COMMENT2TRACK") || "",
+
+      duration: format.duration || 0,
+      coverArt: common.picture?.[0]?.data || null,
+
+      container: format.container || "",
+      codec: format.codec || "",
+      tagTypes: format.tagTypes || [],
     };
   } catch (error) {
     console.error(`Error reading metadata from ${filePath}:`, error);

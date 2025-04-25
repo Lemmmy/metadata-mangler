@@ -1,12 +1,12 @@
 import { LRUCache } from "lru-cache";
 import type { SupplementalDataSource } from "../ai/aiMetadata";
-import { fetchVgmdbAlbum, parseVgmdbReleaseDate } from "../fetch/vgmdb";
-import { cleanVgmdbAlbum } from "./vgmdbUtils";
 import {
-  getMusicBrainzRelease,
-  fetchDetailedMusicBrainzRelease,
   cleanMusicBrainzRelease,
+  fetchDetailedMusicBrainzRelease,
+  getMusicBrainzCatalogNumber,
 } from "../fetch/musicbrainz";
+import { fetchVgmdbAlbum, parseVgmdbReleaseDate } from "../fetch/vgmdb";
+import { cleanVgmdbAlbum, isBarcode } from "./vgmdbUtils";
 
 const URL_PATTERNS = {
   vgmdb: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/album\/(\d+)/i,
@@ -22,6 +22,8 @@ export interface SupplementalData {
   albumArtist?: string;
   year?: string;
   date?: string;
+  catalogNumber?: string;
+  barcode?: string;
 }
 
 export function parseSupplementalDataSource(
@@ -48,6 +50,7 @@ async function fetchSupplementalData(
       const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
       const cleanedAlbum = cleanVgmdbAlbum(vgmdbAlbum);
       const [year, date] = parseVgmdbReleaseDate(vgmdbAlbum.release_date);
+      const catalogIsBarcode = isBarcode(vgmdbAlbum.catalog);
 
       return {
         cleanRaw: JSON.stringify(cleanedAlbum),
@@ -55,23 +58,25 @@ async function fetchSupplementalData(
         albumName: cleanedAlbum.name,
         year,
         date,
+        catalogNumber: catalogIsBarcode ? undefined : vgmdbAlbum.catalog,
+        barcode: catalogIsBarcode ? vgmdbAlbum.catalog : undefined,
       };
     }
   } else if (source === "musicbrainz") {
     const match = input.match(URL_PATTERNS.musicbrainz);
     if (match && match[2]) {
       const releaseId = match[2];
-      const mbRelease = await getMusicBrainzRelease(releaseId);
       const detailedRelease = await fetchDetailedMusicBrainzRelease(releaseId);
-      const cleanedAlbum = cleanMusicBrainzRelease(detailedRelease, mbRelease);
+      const cleanedAlbum = cleanMusicBrainzRelease(detailedRelease);
 
       return {
         cleanRaw: JSON.stringify(cleanedAlbum),
         raw: detailedRelease,
         albumName: cleanedAlbum.albumName,
-        albumArtist: cleanedAlbum.albumArtist,
         year: detailedRelease.date?.split("-")[0],
         date: detailedRelease.date,
+        catalogNumber: getMusicBrainzCatalogNumber(detailedRelease),
+        barcode: detailedRelease.barcode,
       };
     }
   } else if (source === "bandcamp") {
