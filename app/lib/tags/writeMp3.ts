@@ -13,19 +13,19 @@ const execFileAsync = promisify(execFile);
 
 // MP3 tag name mapping (mid3v2 uses different argument names)
 const MP3_TAG_MAPPING: TagMapping = {
-  title: "--TIT2",
-  artists: "--TPE1",
-  album: "--TALB",
-  albumArtist: "--TPE2",
-  trackNumber: "--TRCK",
-  discNumber: "--TPOS",
-  year: "--TYER",
-  date: "--TDAT",
-  grouping: "--TIT1",
-  catalogNumber: "--TXXX:CATALOGNUMBER",
-  barcode: "--TXXX:BARCODE",
-  albumSubtitle: "--TXXX:COMMENT2ALBUM",
-  trackComment: "--TXXX:COMMENT2TRACK",
+  title: "TIT2",
+  artists: "TPE1",
+  album: "TALB",
+  albumArtist: "TPE2",
+  trackNumber: "TRCK",
+  discNumber: "TPOS",
+  year: "TYER",
+  date: "TDAT",
+  grouping: "TIT1",
+  catalogNumber: "TXXX:CATALOGNUMBER",
+  barcode: "TXXX:BARCODE",
+  albumSubtitle: "TXXX:COMMENT2ALBUM",
+  trackComment: "TXXX:COMMENT2TRACK",
 };
 
 /**
@@ -59,8 +59,15 @@ export async function writeMp3Tags(
     // Add each tag to the arguments, repeating the command argument for each value
     for (const [key, values] of Object.entries(changedTags)) {
       for (const value of values) {
-        args.push(key);
-        args.push(value);
+        if (key.startsWith("TXXX")) {
+          // Custom tags
+          const [namespace, tag] = key.split(":");
+          args.push(`--${namespace}`);
+          args.push(`${tag}:${value}`);
+        } else {
+          args.push(`--${key}`);
+          args.push(value);
+        }
       }
     }
 

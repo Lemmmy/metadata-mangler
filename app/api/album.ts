@@ -27,7 +27,7 @@ const directorySchema = v.object({
 });
 
 // Schema for track metadata
-const trackMetadataSchema = v.strictObject({
+const trackMetadataSchema = v.object({
   filePath: v.string(),
   trackNumber: v.optional(v.number()),
   discNumber: v.optional(v.number()),
