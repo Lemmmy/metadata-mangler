@@ -1,8 +1,10 @@
+import { Undo2 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import {
   useMetadataStore,
   type StoreTrackUpdatable,
 } from "~/components/album/useMetadataStore";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 interface EditableCellProps {
@@ -39,19 +41,41 @@ export function EditableCell({
     }
   };
 
+  const handleReset = () => {
+    updateTrack(index, field, originalValue);
+  };
+
   return (
     <div className="flex h-full w-full flex-col justify-items-start">
-      <input
-        type={type}
-        min={min}
-        className={cn(
-          "w-full flex-1 px-3 py-2",
-          "focus:ring-none focus:outline-2 focus:outline-white/50",
-          isUpdated && "bg-lime-600/20",
+      {/* Input row */}
+      <div className="flex w-full flex-1 items-center">
+        {/* Text input */}
+        <input
+          type={type}
+          min={min}
+          className={cn(
+            "w-full flex-1 px-3 py-2",
+            "focus:ring-none focus:outline-2 focus:outline-white/50",
+            isUpdated && "bg-lime-600/20",
+          )}
+          value={storeValue ?? value}
+          onChange={handleChange}
+        />
+
+        {/* Reset button */}
+        {isUpdated && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleReset}
+            className="h-full flex-shrink-0 rounded-none border-none"
+          >
+            <Undo2 />
+          </Button>
         )}
-        value={storeValue ?? value}
-        onChange={handleChange}
-      />
+      </div>
+
+      {/* Original value hint */}
       {isUpdated && originalValue && (
         <div className="mt-1 px-3 text-xs text-white/50">{originalValue}</div>
       )}
