@@ -75,12 +75,23 @@ export function useModelPicker(): UseModelPickerResult {
 
         mutateEstimate({
           input: urlOrData,
-          additionalInfo: additionalInfo || undefined,
-          modelId: selectedModel,
           albumName: album?.name || "",
           albumArtist: album?.artist || "",
           tracks,
           estimateOnly: true,
+          settings: {
+            enableAI: true,
+            aiSettings: {
+              modelId: selectedModel,
+              additionalInfo: additionalInfo || undefined,
+            },
+            inheritSupplementalFields: {
+              year: true,
+              date: true,
+              catalogNumber: true,
+              barcode: true,
+            },
+          },
         });
       } catch (error) {
         console.error("Error during lookup:", error);

@@ -16,6 +16,7 @@ import {
   trpcMiddleware,
 } from "~/lib/prefetch";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Toaster } from "./components/ui/sonner";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -63,6 +64,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
     <Providers>
       <HydrationBoundary state={loaderData}>
         <Outlet />
+        <Toaster />
       </HydrationBoundary>
     </Providers>
   );

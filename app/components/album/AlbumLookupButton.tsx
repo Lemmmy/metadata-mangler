@@ -1,5 +1,5 @@
 import { ChevronDown, Loader2, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -17,11 +17,17 @@ export type HandleLookupFn = (
   inheritBarcode: boolean,
 ) => Promise<void>;
 
-export function useAlbumLookupSettings(
-  handleLookup: HandleLookupFn,
-  canLookup: boolean,
-  isPending: boolean,
-) {
+interface Props {
+  handleLookup: HandleLookupFn;
+  canLookup: boolean;
+  isPending: boolean;
+}
+
+export function AlbumLookupButton({
+  handleLookup,
+  canLookup,
+  isPending,
+}: Props): ReactElement {
   const [enableAI, setEnableAI] = useState(true);
   const [inheritYear, setInheritYear] = useState(true);
   const [inheritDate, setInheritDate] = useState(true);
@@ -47,7 +53,7 @@ export function useAlbumLookupSettings(
         className="rounded-r-none"
       >
         {isPending && <Loader2 className="animate-spin" />}
-        {!isPending && enableAI && <Sparkles />}
+        {!isPending && enableAI && <Sparkles className="fill-current" />}
         {enableAI ? "AI Lookup" : "Lookup"}
       </Button>
 

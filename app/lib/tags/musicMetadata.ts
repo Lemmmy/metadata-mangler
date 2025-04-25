@@ -87,8 +87,6 @@ export async function readTrackFromFile(
     const discInfo = common.disk || { no: null, of: null };
     const discNumber = discInfo.no || 1;
 
-    console.log(native);
-
     return {
       directory,
       filename,

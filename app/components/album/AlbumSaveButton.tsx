@@ -1,13 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, Save, Undo2 } from "lucide-react";
+import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
+import { useMetadataStore } from "~/components/album/useMetadataStore";
 import { useTRPC } from "~/lib/trpc";
 import { Button } from "../ui/button";
-import { Save, Undo2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useMetadataStore } from "~/components/album/useMetadataStore";
 import type { StoreAlbum } from "./useMetadataStore";
-import { cn } from "~/lib/utils";
-import { useShallow } from "zustand/react/shallow";
 
 interface Props {
   album: StoreAlbum | null;
@@ -19,11 +17,6 @@ export function AlbumSaveButton({ album }: Props) {
   const writeTracksMutation = useMutation(
     trpc.album.writeTracks.mutationOptions(),
   );
-
-  const [saveMessage, setSaveMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
 
   const { hasUnsavedChanges, resetChanges } = useMetadataStore(
     useShallow((s) => ({
@@ -47,17 +40,12 @@ export function AlbumSaveButton({ album }: Props) {
         ...track,
       }));
 
-      setSaveMessage(null);
-
       const result = await writeTracksMutation.mutateAsync({
         tracks: tracksToSave,
       });
 
       if (result.success) {
-        setSaveMessage({
-          type: "success",
-          text: "All tracks saved successfully",
-        });
+        toast.success("All tracks saved successfully");
 
         // Invalidate the album query to reload the data
         if (album.directory) {
@@ -77,43 +65,17 @@ export function AlbumSaveButton({ album }: Props) {
           errorMessage = result.error;
         }
 
-        setSaveMessage({
-          type: "error",
-          text: errorMessage,
-        });
+        console.error("Error saving tracks:", errorMessage);
+        toast.error("Error saving tracks, see console for details");
       }
     } catch (error) {
       console.error("Error saving tracks:", error);
-      setSaveMessage({
-        type: "error",
-        text: error instanceof Error ? error.message : "Unknown error",
-      });
+      toast.error("Error saving tracks, see console for details");
     }
   };
 
-  // Clear save message after 10 seconds
-  useEffect(() => {
-    if (saveMessage) {
-      const timer = setTimeout(() => {
-        setSaveMessage(null);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [saveMessage]);
-
   return (
     <div className="flex items-center gap-2">
-      {saveMessage && (
-        <div
-          className={cn(
-            "text-sm",
-            saveMessage.type === "success" ? "text-green-500" : "text-red-500",
-          )}
-        >
-          {saveMessage.text}
-        </div>
-      )}
-
       <Button
         variant="outline"
         size="sm"
@@ -132,8 +94,12 @@ export function AlbumSaveButton({ album }: Props) {
         disabled={!album || writeTracksMutation.isPending}
         className="gap-1"
       >
-        <Save />
-        {writeTracksMutation.isPending ? "Saving..." : "Save changes"}
+        {writeTracksMutation.isPending ? (
+          <Loader2 className="spin" />
+        ) : (
+          <Save />
+        )}
+        Save changes
       </Button>
     </div>
   );

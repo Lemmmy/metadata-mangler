@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import type { VisibilityState } from "@tanstack/react-table";
 import { type Dispatch, type SetStateAction } from "react";
+import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
 import {
@@ -12,14 +13,11 @@ import type { PriceUsage } from "~/lib/ai/aiProviders";
 import { useTRPC } from "~/lib/trpc";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import { AlbumLookupButton, type HandleLookupFn } from "./AlbumLookupButton";
 import { ArtistAddButton } from "./replacements/ArtistAddButton";
 import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 import { MusicBrainzSearchDialogButton } from "./search/MusicBrainzSearchDialogButton";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
-import {
-  useAlbumLookupSettings,
-  type HandleLookupFn,
-} from "./useAlbumLookupSettings";
 
 interface Props {
   album: StoreAlbum | null;
@@ -121,17 +119,13 @@ export function AlbumLookupSection({
         updateTracks(result.tracks);
       } else if (!result.success && "error" in result && result.error) {
         console.error("Error from lookup:", result.error);
+        toast.error("Error during lookup, see console for details");
       }
     } catch (error) {
       console.error("Error during lookup:", error);
+      toast.error("Error during lookup, see console for details");
     }
   };
-
-  const lookupButton = useAlbumLookupSettings(
-    handleLookup,
-    urlOrData.trim() !== "",
-    lookupMutation.isPending,
-  );
 
   return (
     <div className={className}>
@@ -166,13 +160,11 @@ export function AlbumLookupSection({
 
         <div className="flex items-center gap-2">
           {/* Lookup button & settings dropdown */}
-          {lookupButton}
-
-          {lookupMutation.isError && (
-            <div className="mt-2 text-sm text-red-500">
-              Error: {lookupMutation.error?.message || "Unknown error"}
-            </div>
-          )}
+          <AlbumLookupButton
+            handleLookup={handleLookup}
+            canLookup={urlOrData.trim() !== ""}
+            isPending={lookupMutation.isPending}
+          />
 
           {modelPicker}
 
