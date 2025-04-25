@@ -20,6 +20,7 @@ export interface SupportedModel {
   outputUsdPer1Mil: number;
   estimateUsageFn?: (
     model: string,
+    system: string,
     prompt: string,
     tracks: AITrack[],
   ) => Promise<LanguageModelUsage>;

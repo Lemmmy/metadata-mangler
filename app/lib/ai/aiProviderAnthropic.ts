@@ -7,6 +7,7 @@ const anthropic = env.ANTHROPIC_API_KEY ? new Anthropic() : null;
 
 export async function estimateAnthropicTokenUsage(
   model: string,
+  system: string,
   prompt: string,
   tracks: AITrack[],
 ): Promise<LanguageModelUsage> {
@@ -16,6 +17,7 @@ export async function estimateAnthropicTokenUsage(
 
   const response = await anthropic.messages.countTokens({
     model,
+    system,
     messages: [
       {
         role: "user",

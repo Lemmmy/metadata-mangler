@@ -57,16 +57,16 @@ const AlbumSchema = v.object({
  * @param supplementalDataSource The source of the supplemental data
  * @param supplementalData The supplemental data from a third-party provider, stringified
  * @param userInstructions Optional user-provided instructions
- * @returns Promise resolving to a prompt string
+ * @returns A tuple containing the system prompt and user prompt
  */
-export async function generateImprovedMetadataPrompt(
+export function generateImprovedMetadataPrompt(
   albumName: string,
   albumArtist: string,
   tracks: AITrack[],
   supplementalDataSource: SupplementalDataSource,
   supplementalData: string,
   userInstructions?: string | null,
-): Promise<string> {
+): [string, string] {
   const tracksInfo = tracks.map((track) => ({
     baseDir: track.baseDir,
     filename: track.filename,
@@ -76,18 +76,9 @@ export async function generateImprovedMetadataPrompt(
     artists: track.artists,
   }));
 
-  return `
+  const systemPrompt = `
 You are a music metadata expert. Your task is to improve the metadata for a set of music tracks. You have been provided
 with the original track metadata, and supplemental album data from a third-party provider.
-
-ORIGINAL ALBUM NAME: ${albumName}
-ORIGINAL ALBUM ARTIST: ${albumArtist}
-ORIGINAL TRACK METADATA FROM FILES:
-<tracks>\n${JSON.stringify(tracksInfo, null, 2)}\n</tracks>
-
-SUPPLEMENTAL THIRD-PARTY ALBUM INFORMATION:
-${wrapSupplementalData(supplementalDataSource, supplementalData)}
-${userInstructions ? `\nIMPORTANT USER-PROVIDED INSTRUCTIONS:\n${wrapSupplementalData("user", userInstructions)}` : ""}
 
 Based on the third-party album information, please provide improved metadata for the album and each track.
 The album name should be provided in romaji where appropriate.
@@ -129,6 +120,17 @@ ROMANIZATION RULES:
 - All Japanese names MUST be romanized in Japanese order (Surname Forename). This includes artist names. For example:
   'Jun Maeda' is incorrect, but 'Maeda Jun' is correct.
 `;
+
+  const userPrompt = `ORIGINAL ALBUM NAME: ${albumName}
+ORIGINAL ALBUM ARTIST: ${albumArtist}
+ORIGINAL TRACK METADATA FROM FILES:
+<tracks>\n${JSON.stringify(tracksInfo, null, 2)}\n</tracks>
+
+SUPPLEMENTAL THIRD-PARTY ALBUM INFORMATION:
+${wrapSupplementalData(supplementalDataSource, supplementalData)}
+${userInstructions ? `\nIMPORTANT USER-PROVIDED INSTRUCTIONS:\n${wrapSupplementalData("user", userInstructions)}` : ""}`;
+
+  return [systemPrompt, userPrompt];
 }
 
 /**
@@ -158,18 +160,21 @@ export async function generateImprovedMetadata(
     : model.provider(model.id);
   const evaluating = import.meta.env.VITE_ENV === "test";
 
+  const [system, prompt] = generateImprovedMetadataPrompt(
+    albumName,
+    albumArtist,
+    tracks,
+    supplementalDataSource,
+    supplementalData,
+    userInstructions,
+  );
+
   try {
     const { object, usage, providerMetadata } = await generateObject({
       model: languageModel,
       schema: valibotSchema(AlbumSchema),
-      prompt: await generateImprovedMetadataPrompt(
-        albumName,
-        albumArtist,
-        tracks,
-        supplementalDataSource,
-        supplementalData,
-        userInstructions,
-      ),
+      system,
+      prompt,
       temperature: 0.6,
       maxTokens: 5000,
     });

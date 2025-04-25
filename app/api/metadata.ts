@@ -96,18 +96,16 @@ export const metadata = router({
             return { success: false };
           }
 
-          const usage = await estimateFn(
-            model.id,
-            await generateImprovedMetadataPrompt(
-              input.albumName,
-              input.albumArtist,
-              inputTracks,
-              supplementalDataSource,
-              supplementalData.cleanRaw,
-              input.settings.aiSettings.additionalInfo,
-            ),
+          const [system, prompt] = generateImprovedMetadataPrompt(
+            input.albumName,
+            input.albumArtist,
             inputTracks,
+            supplementalDataSource,
+            supplementalData.cleanRaw,
+            input.settings.aiSettings.additionalInfo,
           );
+
+          const usage = await estimateFn(model.id, system, prompt, inputTracks);
 
           return {
             success: true,
