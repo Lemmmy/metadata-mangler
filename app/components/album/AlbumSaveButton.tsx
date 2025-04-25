@@ -9,9 +9,10 @@ import type { StoreAlbum } from "./useMetadataStore";
 
 interface Props {
   album: StoreAlbum | null;
+  path: string;
 }
 
-export function AlbumSaveButton({ album }: Props) {
+export function AlbumSaveButton({ album, path }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const writeTracksMutation = useMutation(
@@ -48,13 +49,11 @@ export function AlbumSaveButton({ album }: Props) {
         toast.success("All tracks saved successfully");
 
         // Invalidate the album query to reload the data
-        if (album.directory) {
-          queryClient.invalidateQueries(
-            trpc.album.getFromDirectory.queryFilter({
-              path: album.directory,
-            }),
-          );
-        }
+        queryClient.invalidateQueries(
+          trpc.album.getFromDirectory.queryFilter({
+            path,
+          }),
+        );
       } else {
         // Handle error cases
         let errorMessage = "Unknown error";

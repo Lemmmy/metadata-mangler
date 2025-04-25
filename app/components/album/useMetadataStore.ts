@@ -55,6 +55,7 @@ export interface MetadataState {
     tracks: StoreTrack[],
     resetOriginal?: boolean,
   ) => void;
+  reset: () => void;
   updateAlbumField: (field: keyof AlbumUpdatable, value: any) => void;
   updateTrack: (
     index: number,
@@ -107,6 +108,7 @@ export const useMetadataStore = create<MetadataState>()(
     urlOrData: "",
     additionalInfo: "",
 
+    // Fields to be reset when the album updates (on page load *and* after saving)
     initialize: (album, tracks, resetOriginal = true) =>
       set((state) => {
         state.album = album;
@@ -116,6 +118,12 @@ export const useMetadataStore = create<MetadataState>()(
         if (resetOriginal)
           state.originalTracks = JSON.parse(JSON.stringify(tracks)); // Deep copy
         state.updatedFields = {};
+      }),
+
+    // Fields to be reset when the page/selected album changes
+    reset: () =>
+      set((state) => {
+        state.lockedAlbumFields = {};
         state.urlOrData = "";
         state.additionalInfo = "";
       }),

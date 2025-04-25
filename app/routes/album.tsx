@@ -77,11 +77,12 @@ export default function Home({
   loaderData: { path, pathBasename },
 }: Route.ComponentProps) {
   // Get state and actions from the metadata store
-  const { album, tracks, initialize } = useMetadataStore(
+  const { album, tracks, initialize, reset } = useMetadataStore(
     useShallow((s) => ({
       album: s.album,
       tracks: s.tracks,
       initialize: s.initialize,
+      reset: s.reset,
     })),
   );
 
@@ -102,6 +103,13 @@ export default function Home({
     }
   }, [data, initialize]);
 
+  // Reset the non-meta fields (e.g. user, additional info) when the path changes
+  useEffect(() => {
+    if (path) {
+      reset();
+    }
+  }, [path, reset]);
+
   const originalTracks = useMetadataStore(useShallow((s) => s.originalTracks));
   const { columnVisibility, setColumnVisibility } =
     useAlbumTableColumns(originalTracks);
@@ -114,7 +122,7 @@ export default function Home({
 
   return (
     <main className="text-foreground mx-auto box-border flex h-screen flex-col">
-      <AlbumHeader album={album} />
+      <AlbumHeader album={album} path={path} />
 
       <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-[auto_1fr]">
         <div className="flex-shrink-0">
