@@ -20,7 +20,7 @@ const MP3_TAG_MAPPING: TagMapping = {
   trackNumber: "TRCK",
   discNumber: "TPOS",
   year: "TYER",
-  date: "TDAT",
+  date: "TDRC",
   grouping: "TIT1",
   catalogNumber: "TXXX:CATALOGNUMBER",
   barcode: "TXXX:BARCODE",
@@ -64,6 +64,18 @@ export async function writeMp3Tags(
           const [namespace, tag] = key.split(":");
           args.push(`--${namespace}`);
           args.push(`${tag}:${value}`);
+        } else if (key === "TDRC") {
+          const [year, month, day] = value.split("-");
+
+          // ID3v2.4 https://id3.org/id3v2.4.0-frames https://id3.org/id3v2.4.0-structure
+          args.push(`--TDRC`);
+          args.push(value);
+
+          // ID3v2.3 https://id3.org/id3v2.3.0#Text_information_frames_-_details
+          args.push(`--TYER`);
+          args.push(year);
+          args.push(`--TDAT`);
+          args.push(`${day}${month}`);
         } else {
           args.push(`--${key}`);
           args.push(value);

@@ -1,3 +1,4 @@
+import { parseFile } from "music-metadata";
 import path from "path";
 import * as v from "valibot";
 import { publicProcedure, router } from "~/api/trpc";
@@ -17,6 +18,7 @@ import {
   parseSupplementalDataSource,
   type SupplementalData,
 } from "~/lib/fetch/supplementalFetch";
+import { rebasePath } from "~/lib/paths";
 
 export const metadata = router({
   lookup: publicProcedure
@@ -155,4 +157,13 @@ export const metadata = router({
         };
       }
     }),
+
+  dump: publicProcedure
+    .input(v.object({ filePath: v.string() }))
+    .mutation(({ input }) =>
+      parseFile(rebasePath(input.filePath), {
+        duration: true,
+        skipCovers: false,
+      }),
+    ),
 });

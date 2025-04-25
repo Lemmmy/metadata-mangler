@@ -1,14 +1,10 @@
 import * as fsp from "fs/promises";
-import * as path from "path";
 import { parseFile } from "music-metadata";
-import { stripLibraryPath } from "../paths";
-import { env } from "../env";
+import * as path from "path";
 import sharp from "sharp";
-import {
-  findNativeStringTag,
-  toJoinedString,
-  toSemicolonString,
-} from "./musicMetadataShared";
+import { env } from "../env";
+import { stripLibraryPath } from "../paths";
+import { findNativeStringTag, toSemicolonString } from "./musicMetadataShared";
 
 /**
  * Represents a music track with metadata

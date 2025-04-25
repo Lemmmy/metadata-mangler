@@ -10,6 +10,7 @@ import { formatDuration } from "~/lib/duration";
 import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
 import { type StoreTrack, type StoreTrackUpdatable } from "../useMetadataStore";
 import { EditableCell } from "./EditableCell";
+import { DebugButtons } from "./DebugButtons";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -197,6 +198,16 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
         </span>
       );
     },
+    size: 48,
+    meta: {
+      hiddenByDefault: true,
+      className: "px-3 py-2",
+    },
+  }),
+  columnHelper.display({
+    header: "Debug",
+    id: "debug",
+    cell: (ctx) => <DebugButtons track={ctx.row.original} />,
     size: 48,
     meta: {
       hiddenByDefault: true,
