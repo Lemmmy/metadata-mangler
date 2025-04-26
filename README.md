@@ -48,6 +48,7 @@ coded. Beware.
   - MusicBrainz
   - Bandcamp (TODO)
   - Any text input
+- Synced browser popup window that automatically shows the associated VGMdb/MusicBrainz page
 - Automatically highlights per-track differences in album-level tags
 - Automatically highlights suspicious container/tag combinations, such as ID3 in FLAC containers
 - Bulk artist name replacement tool, with memory of previous replacements
