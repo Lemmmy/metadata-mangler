@@ -69,6 +69,7 @@ export function EditableCell({
             size="icon"
             onClick={handleReset}
             className="h-full flex-shrink-0 rounded-none border-none"
+            tabIndex={-1}
           >
             <Undo2 />
           </Button>
