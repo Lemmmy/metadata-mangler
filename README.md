@@ -52,6 +52,7 @@ coded. Beware.
 - Automatically highlights per-track differences in album-level tags
 - Automatically highlights suspicious container/tag combinations, such as ID3 in FLAC containers
 - Bulk artist name replacement tool, with memory of previous replacements
+- MusicBee plugin to open selected tracks in Metadata Mangler
 
 ## Requirements
 
