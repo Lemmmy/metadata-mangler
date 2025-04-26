@@ -44,7 +44,6 @@ export function AlbumLookupSection({
   const {
     updateAlbumField,
     updateTracks,
-    lockedAlbumFields,
     urlOrData,
     additionalInfo,
     setUrlOrData,
@@ -53,7 +52,6 @@ export function AlbumLookupSection({
     useShallow((s) => ({
       updateAlbumField: s.updateAlbumField,
       updateTracks: s.updateTracks,
-      lockedAlbumFields: s.lockedAlbumFields,
       urlOrData: s.urlOrData,
       additionalInfo: s.additionalInfo,
       setUrlOrData: s.setUrlOrData,
@@ -109,7 +107,7 @@ export function AlbumLookupSection({
           value: any,
         ) {
           // update the album field if it changed and if it isn't locked
-          if (res[resultField] && !lockedAlbumFields[field]) {
+          if (res[resultField] && !bareState.lockedAlbumFields[field]) {
             updateAlbumField(field, value);
           }
         }
