@@ -19,6 +19,7 @@ import { ArtistAddButton } from "./replacements/ArtistAddButton";
 import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 import { MusicBrainzSearchDialogButton } from "./search/MusicBrainzSearchDialogButton";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
+import { AlbumSyncedBrowserButton } from "./AlbumSyncedBrowserButton";
 
 interface Props {
   album: StoreAlbum | null;
@@ -182,6 +183,7 @@ export function AlbumLookupSection({
             dirName={dirName}
             onConfirm={(url) => setUrlOrData(url)}
           />
+          <AlbumSyncedBrowserButton />
 
           {/* Spacer */}
           <div className="flex-1" />

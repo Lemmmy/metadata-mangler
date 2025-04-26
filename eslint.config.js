@@ -32,6 +32,7 @@ export default [
         {
           ignoreRestSiblings: true,
           argsIgnorePattern: "^_",
+          caughtErrors: "none",
         },
       ],
     },

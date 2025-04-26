@@ -3,6 +3,7 @@ import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { useState } from "react";
 import { getQueryClient, TRPCProvider } from "~/lib/trpc";
 import type { AppRouter } from "~/api/router";
+import { SyncedBrowserProvider } from "./SyncedBrowser";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
@@ -20,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        {children}
+        <SyncedBrowserProvider>{children}</SyncedBrowserProvider>
       </TRPCProvider>
     </QueryClientProvider>
   );
