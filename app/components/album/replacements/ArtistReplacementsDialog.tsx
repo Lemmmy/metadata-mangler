@@ -66,12 +66,15 @@ export function ArtistReplacementsDialog({
 
   const handleReplace = () => {
     saveReplacements({
-      replacements: Object.entries(replacements).map(
-        ([original, replacement]) => ({
+      replacements: Object.entries(replacements)
+        .filter(
+          ([original, replacement]) =>
+            replacement !== "" && original !== replacement,
+        )
+        .map(([original, replacement]) => ({
           original,
           replacement,
-        }),
-      ),
+        })),
     })
       .then(({ success }) => {
         if (!success) {
