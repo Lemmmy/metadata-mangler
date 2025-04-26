@@ -9,12 +9,14 @@ interface Props<T extends keyof AlbumUpdatable> {
   label: ReactNode;
   field: T;
   className?: string;
+  lockable?: boolean;
 }
 
 export function AlbumTagInput<T extends keyof AlbumUpdatable>({
   label,
   field,
   className,
+  lockable = true,
 }: Props<T>) {
   const {
     originalAlbum,
@@ -55,7 +57,7 @@ export function AlbumTagInput<T extends keyof AlbumUpdatable>({
           onReset={reset}
           isUpdated={isUpdated}
           locked={locked}
-          onLockChange={handleLockChange}
+          onLockChange={lockable ? handleLockChange : undefined}
         />
 
         {/* Original value */}

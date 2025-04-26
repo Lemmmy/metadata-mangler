@@ -25,6 +25,7 @@ export function AlbumInformationSection() {
           label="Grouping"
           field="grouping"
           className="col-span-2"
+          lockable={false}
         />
 
         {/* Subtitle */}
@@ -32,6 +33,7 @@ export function AlbumInformationSection() {
           label="Subtitle"
           field="albumSubtitle"
           className="col-span-2"
+          lockable={false}
         />
 
         {/* Year */}
