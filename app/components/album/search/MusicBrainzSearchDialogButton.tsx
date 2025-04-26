@@ -22,10 +22,11 @@ export function MusicBrainzSearchDialogButton({
 }) {
   const [open, setOpen] = useState(false);
 
-  const { albumName, albumArtist, tracks } = useMetadataStore(
+  const { albumName, albumArtist, catalogNumberTag, tracks } = useMetadataStore(
     useShallow((s) => ({
       albumName: s.album?.name || "",
       albumArtist: s.album?.artist || "",
+      catalogNumberTag: s.album?.catalogNumber || "",
       tracks: s.tracks,
     })),
   );
@@ -50,13 +51,16 @@ export function MusicBrainzSearchDialogButton({
           </VisuallyHidden>
         </DialogHeader>
 
-        <MusicBrainzSearchDialog
-          dirName={dirName}
-          onConfirm={onConfirm}
-          albumName={albumName}
-          albumArtist={albumArtist}
-          tracks={tracks}
-        />
+        {open && (
+          <MusicBrainzSearchDialog
+            onConfirm={onConfirm}
+            albumName={albumName}
+            albumArtist={albumArtist}
+            dirName={dirName}
+            catalogNumberTag={catalogNumberTag}
+            tracks={tracks}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

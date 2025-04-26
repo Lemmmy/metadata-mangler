@@ -27,11 +27,16 @@ export const search = router({
     .input(
       v.object({
         query: v.string(),
+        searchType: v.picklist(["release", "catno"]),
         artistFilter: v.optional(v.string()),
       }),
     )
     .query(async ({ input }) => {
-      return await searchMusicBrainzReleases(input.query, input.artistFilter);
+      return await searchMusicBrainzReleases(
+        input.searchType,
+        input.query,
+        input.artistFilter,
+      );
     }),
 
   // Searches MusicBrainz for recordings and returns associated releases

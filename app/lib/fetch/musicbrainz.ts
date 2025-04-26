@@ -67,23 +67,24 @@ export function escapeLuceneQuery(query: string): string {
 
 // Build a Lucene query for MusicBrainz
 export function buildMusicBrainzQuery(
-  searchType: "release" | "recording",
+  searchType: "release" | "recording" | "catno",
   searchTerm: string,
   artistFilter?: string,
 ): string {
   const escapedTerm = escapeLuceneQuery(searchTerm.trim());
   let query = `${searchType}:"${escapedTerm}"`;
 
-  if (artistFilter && artistFilter.trim()) {
+  if (searchType !== "catno" && artistFilter && artistFilter.trim()) {
     const escapedArtist = escapeLuceneQuery(artistFilter.trim());
     query = `artist:"${escapedArtist}" AND ${query}`;
   }
 
-  return `query=${query}`;
+  return query;
 }
 
 // Search for releases
 export async function searchMusicBrainzReleases(
+  searchType: "release" | "catno",
   searchTerm: string,
   artistFilter?: string,
 ) {
@@ -91,7 +92,7 @@ export async function searchMusicBrainzReleases(
   const cachedResults = releasesSearchCache.get(cacheKey);
   if (cachedResults) return cachedResults;
 
-  const query = buildMusicBrainzQuery("release", searchTerm, artistFilter);
+  const query = buildMusicBrainzQuery(searchType, searchTerm, artistFilter);
   const response = await mbApi.search("release", { query, limit: 50 });
   const results = response.releases.map(processReleaseResult);
   releasesSearchCache.set(cacheKey, results);

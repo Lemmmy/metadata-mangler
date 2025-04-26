@@ -6,7 +6,8 @@ import {
   getMusicBrainzCatalogNumber,
 } from "../fetch/musicbrainz";
 import { fetchVgmdbAlbum, parseVgmdbReleaseDate } from "../fetch/vgmdb";
-import { cleanVgmdbAlbum, isBarcode } from "./vgmdbUtils";
+import { cleanVgmdbAlbum } from "./vgmdbUtils";
+import { isBarcode } from "./metadataUtils";
 
 const URL_PATTERNS = {
   vgmdb: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/album\/(\d+)/i,
@@ -59,7 +60,9 @@ async function fetchSupplementalData(
         year,
         date,
         catalogNumber: catalogIsBarcode ? undefined : vgmdbAlbum.catalog,
-        barcode: catalogIsBarcode ? vgmdbAlbum.catalog : undefined,
+        barcode:
+          vgmdbAlbum.barcode ||
+          (catalogIsBarcode ? vgmdbAlbum.catalog : undefined),
       };
     }
   } else if (source === "musicbrainz") {

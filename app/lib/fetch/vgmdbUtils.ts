@@ -40,18 +40,3 @@ export function cleanVgmdbAlbum(album: VgmdbAlbum): CleanVgmdbAlbum {
     release_date: album.release_date,
   };
 }
-
-/**
- * Searches for a catalog number (e.g. CPNL-0004) in the input string (e.g. a directory name)
- * @param input
- */
-export function parseCatalogNumber(input: string): string | null {
-  const match = input.match(
-    /\b([A-Z]{2,5}[-–—]\d{3,5}R?)(?:[-–—~～][A-Z0-9]{1,3})?\b/,
-  );
-  return match ? match[1] : null;
-}
-
-export function isBarcode(input: string): boolean {
-  return /^\d{6,}R?$/.test(input);
-}

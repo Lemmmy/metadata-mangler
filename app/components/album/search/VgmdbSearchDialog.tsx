@@ -3,15 +3,22 @@ import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
+import { parseCatalogNumber } from "~/lib/fetch/metadataUtils";
+import type { VgmdbAlbumSearchResult } from "~/lib/fetch/vgmdb";
 import { useTRPC } from "~/lib/trpc";
 import { VgmdbSearchResults } from "./VgmdbSearchResults";
-import { parseCatalogNumber } from "~/lib/fetch/vgmdbUtils";
-import type { VgmdbAlbumSearchResult } from "~/lib/fetch/vgmdb";
 
 export interface VgmdbSearchDialogProps {
-  dirName: string;
   albumName: string;
+  dirName: string;
+  catalogNumberTag: string;
   onConfirm: (id: string) => void;
 }
 
@@ -21,8 +28,9 @@ export interface ProcessedVgmdbAlbumSearchResult
 }
 
 export function VgmdbSearchDialog({
-  dirName,
   albumName,
+  dirName,
+  catalogNumberTag,
   onConfirm,
 }: VgmdbSearchDialogProps) {
   const [search, setSearch] = useState(albumName);
@@ -46,14 +54,22 @@ export function VgmdbSearchDialog({
   }, [albumName]);
 
   const albums = searchQuery.data?.results?.albums;
-  const catalogNumber = parseCatalogNumber(dirName);
+  const catalogNumbers = useMemo(() => {
+    return new Set([
+      ...parseCatalogNumber(dirName),
+      ...parseCatalogNumber(catalogNumberTag),
+    ]);
+  }, [dirName, catalogNumberTag]);
+
   const sortedResults = useMemo(() => {
     if (!albums) return [];
 
     const out: ProcessedVgmdbAlbumSearchResult[] = [];
 
     for (const result of albums) {
-      const catalogNumberMatched = result.catalog === catalogNumber;
+      const catalogNumberMatched =
+        !!result.catalog && catalogNumbers.has(result.catalog);
+
       if (catalogNumberMatched) {
         // If there's a catalog number match in the results, it should be pushed to the top of the list.
         out.unshift({
@@ -69,7 +85,7 @@ export function VgmdbSearchDialog({
     }
 
     return out;
-  }, [albums, catalogNumber]);
+  }, [albums, catalogNumbers]);
 
   return (
     <>
@@ -78,6 +94,7 @@ export function VgmdbSearchDialog({
         search={search}
         setSearch={setSearch}
         dirName={dirName}
+        catalogNumbers={catalogNumbers}
         albumName={albumName}
         onRefresh={() => searchQuery.refetch()}
         isPending={searchQuery.isPending}
@@ -106,6 +123,7 @@ function VgmdbSearchControls({
   search,
   setSearch,
   dirName,
+  catalogNumbers,
   albumName,
   onRefresh,
   isPending,
@@ -113,6 +131,7 @@ function VgmdbSearchControls({
   search: string;
   setSearch: (search: string) => void;
   dirName: string;
+  catalogNumbers: Set<string>;
   albumName: string;
   onRefresh: () => void;
   isPending: boolean;
@@ -123,6 +142,23 @@ function VgmdbSearchControls({
       <Input value={search} onChange={(e) => setSearch(e.target.value)} />
 
       {/* Query shortcuts */}
+      {catalogNumbers.size > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary">Catalog</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {Array.from(catalogNumbers).map((catalogNumber) => (
+              <DropdownMenuItem
+                key={catalogNumber}
+                onClick={() => setSearch(catalogNumber)}
+              >
+                {catalogNumber}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
       {dirName && (
         <Button variant="secondary" onClick={() => setSearch(dirName)}>
           Dir

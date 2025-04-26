@@ -14,7 +14,8 @@ export function ArtistReplacementsDialogButton() {
           Replace artists
         </Button>
       </DialogTrigger>
-      <ArtistReplacementsDialog onClose={onClose} />
+
+      {open && <ArtistReplacementsDialog onClose={onClose} />}
     </Dialog>
   );
 }

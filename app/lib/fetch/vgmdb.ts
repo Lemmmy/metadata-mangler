@@ -75,7 +75,8 @@ export interface VgmdbMeta {
 
 export interface VgmdbAlbum {
   arrangers: VgmdbArtist[];
-  catalog: string;
+  barcode?: string;
+  catalog?: string;
   categories: string[];
   category: string;
   classification: string;

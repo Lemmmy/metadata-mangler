@@ -10,51 +10,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { parseCatalogNumber } from "~/lib/fetch/metadataUtils";
 import { useTRPCClient } from "~/lib/trpc";
 import { MusicBrainzSearchResults } from "./MusicBrainzSearchResults";
+import type { MusicBrainzReleaseResult } from "~/lib/fetch/musicbrainz";
 
 export interface MusicBrainzSearchDialogProps {
-  dirName: string;
   albumName: string;
   albumArtist: string;
+  dirName: string;
+  catalogNumberTag: string;
   tracks: { title: string }[];
   onConfirm: (id: string) => void;
 }
 
+export interface ProcessedMusicBrainzReleaseResult
+  extends MusicBrainzReleaseResult {
+  catalogNumberMatched: boolean;
+}
+
 type SearchType =
   | { type: "release"; query: string; custom?: boolean }
+  | { type: "catno"; query: string; custom?: boolean }
   | { type: "track"; query: string; custom?: boolean };
 
 export function MusicBrainzSearchDialog({
-  dirName,
   albumName,
   albumArtist,
+  dirName,
+  catalogNumberTag,
   tracks,
   onConfirm,
 }: MusicBrainzSearchDialogProps) {
-  // Search type selection state
   const [searchType, setSearchType] = useState<SearchType>({
     type: "release",
     query: albumName,
   });
-
-  // Custom search input state for when "Custom" is selected
   const [customSearch, setCustomSearch] = useState("");
-
-  // Artist filter state
   const [artistFilter, setArtistFilter] = useState(albumArtist);
 
-  // Track options for the select dropdown
+  // Track options for the select dropdown. Deduplicate track titles
   const trackOptions = useMemo(() => {
-    // Deduplicate track titles
     const uniqueTitles = Array.from(new Set(tracks.map((t) => t.title)));
     return uniqueTitles;
   }, [tracks]);
 
-  // Whether to show the custom search input
-  const showCustomInput = searchType.custom;
+  const showCustomInput = searchType.custom; // Whether to show the custom search input
 
-  // The actual query to use for searching
   const query = useMemo(() => {
     if (searchType.custom) {
       return customSearch;
@@ -62,22 +64,16 @@ export function MusicBrainzSearchDialog({
     return searchType.query;
   }, [searchType, customSearch]);
 
-  // Throttle the search to avoid excessive API calls
   const [throttledQuery] = useThrottledValue(query, {
     wait: 1000,
     leading: true,
   });
-
-  // Throttle the artist filter to avoid excessive API calls
   const [throttledArtistFilter] = useThrottledValue(artistFilter, {
     wait: 1000,
     leading: true,
   });
 
-  // Set up tRPC client
   const trpcClient = useTRPCClient();
-
-  // Perform the search query based on search type
   const searchQuery = useQuery({
     queryKey: [
       "musicbrainz",
@@ -89,6 +85,13 @@ export function MusicBrainzSearchDialog({
       if (searchType.type === "release") {
         return await trpcClient.search.musicBrainzReleases.query({
           query: throttledQuery,
+          searchType: "release",
+          artistFilter: throttledArtistFilter,
+        });
+      } else if (searchType.type === "catno") {
+        return await trpcClient.search.musicBrainzReleases.query({
+          query: throttledQuery,
+          searchType: "catno",
           artistFilter: throttledArtistFilter,
         });
       } else {
@@ -101,9 +104,7 @@ export function MusicBrainzSearchDialog({
     enabled: !!throttledQuery,
   });
 
-  // Handle search type change
   const handleSearchTypeChange = (value: string) => {
-    // Parse the value to determine search type and query
     if (value.startsWith("release:")) {
       if (value === "release:custom") {
         setSearchType({ type: "release", query: "", custom: true });
@@ -111,6 +112,14 @@ export function MusicBrainzSearchDialog({
         setSearchType({ type: "release", query: albumName });
       } else if (value === "release:directory") {
         setSearchType({ type: "release", query: dirName });
+      }
+    } else if (value.startsWith("catno:")) {
+      if (value === "catno:custom") {
+        setSearchType({ type: "catno", query: "", custom: true });
+      } else {
+        // Extract catalog number from the value (e.g., "catno:1234567890" -> "1234567890")
+        const catalogNumber = value.substring(6);
+        setSearchType({ type: "catno", query: catalogNumber });
       }
     } else if (value.startsWith("track:")) {
       if (value === "track:custom") {
@@ -122,6 +131,40 @@ export function MusicBrainzSearchDialog({
       }
     }
   };
+
+  const catalogNumbers = useMemo(() => {
+    return new Set([
+      ...parseCatalogNumber(dirName),
+      ...parseCatalogNumber(catalogNumberTag),
+    ]);
+  }, [dirName, catalogNumberTag]);
+
+  const rawResults = searchQuery.data;
+  const sortedResults = useMemo(() => {
+    if (!rawResults) return [];
+
+    const out: ProcessedMusicBrainzReleaseResult[] = [];
+
+    for (const result of rawResults) {
+      const catalogNumberMatched =
+        !!result.catalog && catalogNumbers.has(result.catalog);
+
+      if (catalogNumberMatched) {
+        // If there's a catalog number match in the results, it should be pushed to the top of the list.
+        out.unshift({
+          ...result,
+          catalogNumberMatched,
+        });
+      } else {
+        out.push({
+          ...result,
+          catalogNumberMatched,
+        });
+      }
+    }
+
+    return out;
+  }, [rawResults, catalogNumbers]);
 
   return (
     <>
@@ -144,6 +187,18 @@ export function MusicBrainzSearchDialog({
                 Release: {dirName}
               </SelectItem>
               <SelectItem value="release:custom">Release: Custom</SelectItem>
+
+              {[...catalogNumbers].map((catalogNumber) => (
+                <SelectItem
+                  key={catalogNumber}
+                  value={`catno:${catalogNumber}`}
+                >
+                  Catalog Number: {catalogNumber}
+                </SelectItem>
+              ))}
+              <SelectItem value="catno:custom">
+                Catalog Number: Custom
+              </SelectItem>
 
               {trackOptions.map((track) => (
                 <SelectItem key={track} value={`track:${track}`}>
@@ -187,14 +242,12 @@ export function MusicBrainzSearchDialog({
       )}
 
       {/* Search results */}
-      {searchQuery.data && (
-        <MusicBrainzSearchResults
-          results={searchQuery.data}
-          onConfirm={onConfirm}
-          isLoading={searchQuery.isLoading}
-          searchType={searchType.type}
-        />
-      )}
+      <MusicBrainzSearchResults
+        results={sortedResults}
+        onConfirm={onConfirm}
+        isLoading={searchQuery.isLoading}
+        searchType={searchType.type}
+      />
     </>
   );
 }

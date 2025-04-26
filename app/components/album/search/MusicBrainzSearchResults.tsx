@@ -1,13 +1,13 @@
 import { Globe } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import type { MusicBrainzReleaseResult } from "~/lib/fetch/musicbrainz";
 import { cn } from "~/lib/utils";
+import type { ProcessedMusicBrainzReleaseResult } from "./MusicBrainzSearchDialog";
 
 interface Props {
-  results: MusicBrainzReleaseResult[];
+  results: ProcessedMusicBrainzReleaseResult[];
   onConfirm: (id: string) => void;
   isLoading: boolean;
-  searchType: "release" | "track";
+  searchType: "release" | "catno" | "track";
 }
 
 export function MusicBrainzSearchResults({
@@ -81,7 +81,7 @@ function MusicBrainzSearchResult({
   onConfirm,
   showTrackColumn,
 }: {
-  result: MusicBrainzReleaseResult;
+  result: ProcessedMusicBrainzReleaseResult;
   onConfirm: (url: string) => void;
   showTrackColumn: boolean;
 }) {
@@ -111,7 +111,12 @@ function MusicBrainzSearchResult({
   return (
     <>
       {/* Catalog number */}
-      <Cell className="px-2 whitespace-nowrap tabular-nums">
+      <Cell
+        className={cn(
+          "px-2 whitespace-nowrap tabular-nums",
+          result.catalogNumberMatched && "text-primary font-semibold",
+        )}
+      >
         {result.catalog}
       </Cell>
 

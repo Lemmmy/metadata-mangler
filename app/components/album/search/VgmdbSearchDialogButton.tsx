@@ -22,9 +22,10 @@ export function VgmdbSearchDialogButton({
 }) {
   const [open, setOpen] = useState(false);
 
-  const { albumName } = useMetadataStore(
+  const { albumName, catalogNumberTag } = useMetadataStore(
     useShallow((s) => ({
       albumName: s.album?.name || "",
+      catalogNumberTag: s.album?.catalogNumber || "",
     })),
   );
 
@@ -48,11 +49,14 @@ export function VgmdbSearchDialogButton({
           </VisuallyHidden>
         </DialogHeader>
 
-        <VgmdbSearchDialog
-          dirName={dirName}
-          onConfirm={onConfirm}
-          albumName={albumName}
-        />
+        {open && (
+          <VgmdbSearchDialog
+            onConfirm={onConfirm}
+            albumName={albumName}
+            dirName={dirName}
+            catalogNumberTag={catalogNumberTag}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
