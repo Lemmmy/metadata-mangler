@@ -142,23 +142,31 @@ function VgmdbSearchControls({
       <Input value={search} onChange={(e) => setSearch(e.target.value)} />
 
       {/* Query shortcuts */}
-      {catalogNumbers.size > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary">Catalog</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {Array.from(catalogNumbers).map((catalogNumber) => (
-              <DropdownMenuItem
-                key={catalogNumber}
-                onClick={() => setSearch(catalogNumber)}
-              >
-                {catalogNumber}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+      {catalogNumbers.size > 0 &&
+        (catalogNumbers.size > 1 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">Catalog</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {Array.from(catalogNumbers).map((catalogNumber) => (
+                <DropdownMenuItem
+                  key={catalogNumber}
+                  onClick={() => setSearch(catalogNumber)}
+                >
+                  {catalogNumber}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            variant="secondary"
+            onClick={() => setSearch(Array.from(catalogNumbers)[0])}
+          >
+            {Array.from(catalogNumbers)[0]}
+          </Button>
+        ))}
       {dirName && (
         <Button variant="secondary" onClick={() => setSearch(dirName)}>
           Dir
