@@ -51,7 +51,10 @@ async function fetchSupplementalData(
       const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
       const cleanedAlbum = cleanVgmdbAlbum(vgmdbAlbum);
       const [year, date] = parseVgmdbReleaseDate(vgmdbAlbum.release_date);
-      const catalogIsBarcode = isBarcode(vgmdbAlbum.catalog);
+
+      const catalog =
+        vgmdbAlbum.catalog !== "N/A" ? vgmdbAlbum.catalog : undefined;
+      const catalogIsBarcode = isBarcode(catalog);
 
       return {
         cleanRaw: JSON.stringify(cleanedAlbum),
@@ -59,10 +62,8 @@ async function fetchSupplementalData(
         albumName: cleanedAlbum.name,
         year,
         date,
-        catalogNumber: catalogIsBarcode ? undefined : vgmdbAlbum.catalog,
-        barcode:
-          vgmdbAlbum.barcode ||
-          (catalogIsBarcode ? vgmdbAlbum.catalog : undefined),
+        catalogNumber: catalogIsBarcode ? undefined : catalog,
+        barcode: vgmdbAlbum.barcode || (catalogIsBarcode ? catalog : undefined),
       };
     }
   } else if (source === "musicbrainz") {
