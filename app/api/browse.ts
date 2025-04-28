@@ -6,7 +6,50 @@ import { publicProcedure, router } from "~/api/trpc";
 import { rebasePath } from "~/lib/paths";
 import { isSupportedMusicFile } from "~/lib/tags/musicMetadata";
 
+// Schema for path jump input validation
+const pathJumpInput = v.object({
+  path: v.string(),
+});
+
 export const browse = router({
+  // Normalizes and validates a path for jumping to an album
+  pathJump: publicProcedure.input(pathJumpInput).query(({ input }) => {
+    try {
+      const { path: inputPath } = input;
+
+      // Handle client-side path roots if configured
+      const clientRoots = env.CLIENT_PATH_ROOTS?.split("|") ?? [];
+      for (const clientRoot of clientRoots) {
+        if (inputPath.startsWith(clientRoot)) {
+          // Remove the client root prefix and normalize separators
+          const relativePath = inputPath
+            .slice(clientRoot.length)
+            .replace(/^[/\\]+/, "") // Remove leading slashes
+            .replace(/\\/g, "/");
+          return { success: true, path: relativePath };
+        }
+      }
+
+      // If it's an absolute path, rebase it
+      if (path.isAbsolute(inputPath)) {
+        const rebased = rebasePath(inputPath);
+        return { success: true, path: rebased };
+      }
+
+      // For relative paths, just normalize the separators
+      const normalizedPath = inputPath
+        .replace(/\\/g, "/")
+        .replace(/^[/\\]+/, ""); // Remove leading slashes
+      return { success: true, path: normalizedPath };
+    } catch (error) {
+      console.error("Error processing path jump:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }),
+
   // Checks how many valid track files are in a subdirectory before attempting to recursively open it as an album.
   // Refuses if it's greater than the limit (512 by default).
   albumPrecheck: publicProcedure
