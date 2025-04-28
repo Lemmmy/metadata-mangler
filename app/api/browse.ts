@@ -16,13 +16,14 @@ export const browse = router({
   pathJump: publicProcedure.input(pathJumpInput).query(({ input }) => {
     try {
       const { path: inputPath } = input;
+      const cleanPath = inputPath.replace(/^"(.+)"$/, "$1"); // Remove paired Windows 'Copy as Sidewalk' quotes
 
       // Handle client-side path roots if configured
       const clientRoots = env.CLIENT_PATH_ROOTS?.split("|") ?? [];
       for (const clientRoot of clientRoots) {
-        if (inputPath.startsWith(clientRoot)) {
+        if (cleanPath.startsWith(clientRoot)) {
           // Remove the client root prefix and normalize separators
-          const relativePath = inputPath
+          const relativePath = cleanPath
             .slice(clientRoot.length)
             .replace(/^[/\\]+/, "") // Remove leading slashes
             .replace(/\\/g, "/");
@@ -31,13 +32,13 @@ export const browse = router({
       }
 
       // If it's an absolute path, rebase it
-      if (path.isAbsolute(inputPath)) {
-        const rebased = rebasePath(inputPath);
+      if (path.isAbsolute(cleanPath)) {
+        const rebased = rebasePath(cleanPath);
         return { success: true, path: rebased };
       }
 
       // For relative paths, just normalize the separators
-      const normalizedPath = inputPath
+      const normalizedPath = cleanPath
         .replace(/\\/g, "/")
         .replace(/^[/\\]+/, ""); // Remove leading slashes
       return { success: true, path: normalizedPath };
