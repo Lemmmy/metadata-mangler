@@ -11,6 +11,7 @@ import { isSupportedMusicFile } from "~/lib/tags/musicMetadata";
 import type { Route } from "./+types/browse";
 import { prefetch } from "~/lib/prefetch";
 import { ClientOnly } from "remix-utils/client-only";
+import { PathJump } from "~/components/browse/PathJump";
 
 const DirectoryList = lazy(() => import("~/components/browse/DirectoryList"));
 
@@ -100,7 +101,12 @@ export default function Browse({
 }: Route.ComponentProps) {
   return (
     <main className="mx-auto flex h-screen w-full max-w-6xl flex-col p-2">
-      <BreadcrumbMenu className="mb-2" />
+      <div className="flex items-center justify-between">
+        <BreadcrumbMenu className="mb-2" />
+        <div className="max-w-[300px] flex-1">
+          <PathJump />
+        </div>
+      </div>
 
       <ClientOnly fallback={<DirectorySkeleton />}>
         {() => (
