@@ -5,17 +5,29 @@ import {
   type RowData,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  useEffect,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { formatDuration } from "~/lib/duration";
 import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
-import { type StoreTrack, type StoreTrackUpdatable } from "../useMetadataStore";
-import { EditableCell } from "./EditableCell";
+import {
+  useMetadataStore,
+  type StoreTrack,
+  type StoreTrackUpdatable,
+} from "../useMetadataStore";
 import { DebugButtons } from "./DebugButtons";
+import { EditableCell } from "./EditableCell";
+import { Button } from "~/components/ui/button";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
     className?: string;
     classNameFn?: (ctx: CellContext<TData, TValue>) => string;
+    headerExtra?: () => ReactNode;
     hiddenByDefault?: boolean;
   }
 }
@@ -77,6 +89,29 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Artists",
     id: "artists",
     cell: createEditableCellRenderer("artists"),
+  }),
+  columnHelper.accessor("displayArtist", {
+    header: "Display artist",
+    id: "displayArtist",
+    cell: createEditableCellRenderer("displayArtist"),
+    meta: {
+      hiddenByDefault: true,
+      className: "text-red-500",
+      headerExtra: () => (
+        <Button
+          variant="link"
+          className="h-auto py-0"
+          onClick={() => {
+            const store = useMetadataStore.getState();
+            for (let i = 0; i < store.tracks.length; i++) {
+              store.updateTrack(i, "displayArtist", "");
+            }
+          }}
+        >
+          Remove all
+        </Button>
+      ),
+    },
   }),
   columnHelper.accessor("album", {
     header: "Album",
@@ -245,11 +280,31 @@ export function useAlbumTableColumns(
       }
 
       // If there's more than one value for album-specific tags, show that tag's column
-      function checkTagCardinality(tag: keyof StoreTrackUpdatable) {
-        const uniqueValues = new Set(
-          originalTracks.map((t) => normalizeTag(t[tag])).filter(Boolean),
-        );
-        if (uniqueValues.size > 1) {
+      function checkTagCardinality(
+        tag: keyof StoreTrackUpdatable,
+        justExistence: boolean = false,
+      ) {
+        const uniqueValues = new Set();
+
+        let found = false;
+        for (let i = 0; i < originalTracks.length; i++) {
+          const value = normalizeTag(originalTracks[i][tag]);
+          if (value) {
+            if (justExistence) {
+              found = true;
+              break;
+            }
+
+            uniqueValues.add(value);
+
+            if (uniqueValues.size > 1) {
+              found = true;
+              break;
+            }
+          }
+        }
+
+        if (found) {
           setColumnVisibility((prev) => ({
             ...prev,
             [tag]: true,
@@ -259,6 +314,7 @@ export function useAlbumTableColumns(
 
       checkTagCardinality("album");
       checkTagCardinality("albumArtist");
+      checkTagCardinality("displayArtist", true);
       checkTagCardinality("year");
       checkTagCardinality("date");
       checkTagCardinality("grouping");

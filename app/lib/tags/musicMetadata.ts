@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { env } from "../env";
 import { stripLibraryPath } from "../paths";
 import { findNativeStringTag, toSemicolonString } from "./musicMetadataShared";
+import * as v from "valibot";
 
 /**
  * Represents a music track with metadata
@@ -17,14 +18,18 @@ export interface FileTrack {
   discNumber: number;
 
   title: string;
-  artists: string; // semicolon separated
   album: string;
+  artists: string; // semicolon separated
   albumArtist: string;
+  displayArtist: string;
   year: string;
   date: string;
+
   grouping: string;
+
   catalogNumber: string; // semicolon separated
   barcode: string; // semicolon separated
+
   albumSubtitle: string; // lemmmy custom COMMENT2ALBUM
   trackComment: string; // lemmmy custom COMMENT2TRACK
 
@@ -38,21 +43,32 @@ export interface FileTrack {
 
 export type WebTrack = Omit<FileTrack, "coverArt">;
 
+export const trackMetadataSchema = v.object({
+  filePath: v.string(),
+
+  trackNumber: v.optional(v.number()),
+  discNumber: v.optional(v.number()),
+
+  title: v.optional(v.string()),
+  album: v.optional(v.string()),
+  artists: v.optional(v.string()),
+  albumArtist: v.optional(v.string()),
+  displayArtist: v.optional(v.string()),
+  year: v.optional(v.string()),
+  date: v.optional(v.string()),
+
+  grouping: v.optional(v.string()),
+
+  catalogNumber: v.optional(v.string()),
+  barcode: v.optional(v.string()),
+
+  albumSubtitle: v.optional(v.string()),
+  trackComment: v.optional(v.string()),
+});
+
 export type WritableTags = Pick<
   FileTrack,
-  | "trackNumber"
-  | "discNumber"
-  | "title"
-  | "artists"
-  | "album"
-  | "albumArtist"
-  | "year"
-  | "grouping"
-  | "date"
-  | "catalogNumber"
-  | "barcode"
-  | "albumSubtitle"
-  | "trackComment"
+  keyof FileTrack & keyof v.InferInput<typeof trackMetadataSchema>
 >;
 
 export const supportedFileTypes = [".flac", ".mp3", ".ogg"];
@@ -91,9 +107,10 @@ export async function readTrackFromFile(
       discNumber,
 
       title: common.title || "",
-      artists: toSemicolonString(common.artists),
       album: common.album || "",
+      artists: toSemicolonString(common.artists),
       albumArtist: common.albumartist || "",
+      displayArtist: findNativeStringTag(native, "DISPLAY ARTIST") || "",
       year: common.year?.toString() || common.date || "",
       date: common.date || common.year?.toString() || "",
 

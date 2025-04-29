@@ -28,6 +28,7 @@ export const DEFAULT_TAG_MAPPING: TagMapping = {
   barcode: "BARCODE",
   albumSubtitle: "COMMENT2ALBUM",
   trackComment: "COMMENT2TRACK",
+  displayArtist: "DISPLAY ARTIST",
 };
 
 const basicTags: (keyof PickByValue<WritableTags, string | number>)[] = [
@@ -41,6 +42,7 @@ const basicTags: (keyof PickByValue<WritableTags, string | number>)[] = [
   "discNumber",
   "albumSubtitle",
   "trackComment",
+  "displayArtist",
 ];
 
 const multiTags: (keyof PickByValue<WritableTags, string>)[] = [

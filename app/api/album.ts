@@ -17,6 +17,7 @@ import {
   getCoverArtUrl,
   getTagFromAnyTrack,
   readTracksFromDirectory,
+  trackMetadataSchema,
   type WritableTags,
 } from "~/lib/tags/musicMetadata";
 import { writeTagsToFiles, type WriteResult } from "~/lib/tags/writeMetadata";
@@ -24,24 +25,6 @@ import { writeTagsToFiles, type WriteResult } from "~/lib/tags/writeMetadata";
 // Schema for validating the directory path
 const directorySchema = v.object({
   path: v.pipe(v.string(), v.minLength(1)),
-});
-
-// Schema for track metadata
-const trackMetadataSchema = v.object({
-  filePath: v.string(),
-  trackNumber: v.optional(v.number()),
-  discNumber: v.optional(v.number()),
-  title: v.optional(v.string()),
-  artists: v.optional(v.string()),
-  album: v.optional(v.string()),
-  albumArtist: v.optional(v.string()),
-  year: v.optional(v.string()),
-  date: v.optional(v.string()),
-  grouping: v.optional(v.string()),
-  catalogNumber: v.optional(v.string()),
-  barcode: v.optional(v.string()),
-  albumSubtitle: v.optional(v.string()),
-  trackComment: v.optional(v.string()),
 });
 
 export const album = router({
