@@ -16,6 +16,7 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { AlbumLookupButton, type HandleLookupFn } from "./AlbumLookupButton";
 import { ArtistAddButton } from "./replacements/ArtistAddButton";
+import { ArtistRemoveButton } from "./replacements/ArtistRemoveButton";
 import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 import { MusicBrainzSearchDialogButton } from "./search/MusicBrainzSearchDialogButton";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
@@ -187,6 +188,7 @@ export function AlbumLookupSection({
           <div className="flex-1" />
 
           <ArtistAddButton />
+          <ArtistRemoveButton />
 
           <ArtistReplacementsDialogButton />
 
