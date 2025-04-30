@@ -40,6 +40,8 @@ coded. Beware.
     - Disc Number (`DISCNUMBER`/`TPOS`)
     - Title (`TITLE`/`TIT2`)
     - Artists, semi-colon separated in the UI for convenience (`ARTIST`/`TPE1`)
+    - Display Artist (`DISPLAY ARTIST`/`TXXX:DISPLAY ARTIST`). Generally considered a garbage tag, so the UI highlights
+      it in red and will offer to remove it from all tracks.
 - Japanese-capable romaji directory searching powered by [kuroshiro](https://github.com/hexenq/kuroshiro) and
   [kuromoji.js](https://github.com/takuyaa/kuromoji.js)
 - Search VGMdb and MusicBrainz directly from the interface

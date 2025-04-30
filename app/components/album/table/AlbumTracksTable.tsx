@@ -102,6 +102,12 @@ export function AlbumTracksTable({
                         header.getContext(),
                       )}
 
+                  {header.column.columnDef.meta?.headerExtra &&
+                    flexRender(
+                      header.column.columnDef.meta.headerExtra,
+                      header.getContext(),
+                    )}
+
                   {/* Resize handle */}
                   {header.column.getCanResize() && (
                     <div

@@ -51,6 +51,10 @@ export async function writeFlacTags(
     // Then add each tag to the command
     for (const [key, values] of Object.entries(changedTags)) {
       for (const value of values as string[]) {
+        if (!value) {
+          continue;
+        }
+
         args.push(`--set-tag=${key}=${value}`);
       }
     }

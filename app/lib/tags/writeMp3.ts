@@ -17,6 +17,7 @@ const MP3_TAG_MAPPING: TagMapping = {
   artists: "TPE1",
   album: "TALB",
   albumArtist: "TPE2",
+  displayArtist: "TXXX:DISPLAY ARTIST",
   trackNumber: "TRCK",
   discNumber: "TPOS",
   year: "TYER",
