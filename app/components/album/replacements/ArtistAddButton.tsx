@@ -28,6 +28,7 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { useTRPC } from "~/lib/trpc";
 import { useMetadataStore } from "../useMetadataStore";
 import { fromSemicolonString } from "~/lib/tags/musicMetadataShared";
+import { pluralN } from "~/lib/utils";
 
 type ArtistAddMode = "prepend" | "append";
 
@@ -65,10 +66,12 @@ function ArtistAddPopover({
   });
 
   // Get all existing artists from the album and tracks
-  const { album, tracks } = useMetadataStore(
+  const { album, tracks, selectedTrackCount } = useMetadataStore(
     useShallow((s) => ({
       album: s.album,
       tracks: s.tracks,
+      selectedTrackCount: Object.values(s.selectedTracks).filter((v) => v)
+        .length,
     })),
   );
 
@@ -120,8 +123,19 @@ function ArtistAddPopover({
 
     // Update the metadata store
     const state = useMetadataStore.getState();
+    const hasSelectedTracks = Object.values(state.selectedTracks).some(
+      (v) => !!v,
+    );
+
     for (let i = 0; i < state.tracks.length; i++) {
       const track = state.tracks[i];
+      if (
+        hasSelectedTracks &&
+        !state.selectedTracks?.[`${track.directory}/${track.filename}`]
+      ) {
+        continue;
+      }
+
       const artists = fromSemicolonString(track.artists);
       const trimmedArtist = artist.trim();
 
@@ -149,9 +163,13 @@ function ArtistAddPopover({
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
-        <h4 className="leading-none font-medium">Add artist to all tracks</h4>
+        <h4 className="leading-none font-medium">Add artist to tracks</h4>
         <p className="text-muted-foreground text-sm">
-          Add an artist to all tracks in the album.
+          Add an artist to{" "}
+          {selectedTrackCount
+            ? pluralN(selectedTrackCount, "selected track")
+            : "all tracks"}
+          .
         </p>
       </div>
 

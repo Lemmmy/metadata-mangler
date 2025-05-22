@@ -77,10 +77,9 @@ export default function Home({
   loaderData: { path, pathBasename },
 }: Route.ComponentProps) {
   // Get state and actions from the metadata store
-  const { album, tracks, initialize, reset } = useMetadataStore(
+  const { album, initialize, reset } = useMetadataStore(
     useShallow((s) => ({
       album: s.album,
-      tracks: s.tracks,
       initialize: s.initialize,
       reset: s.reset,
     })),
@@ -117,9 +116,6 @@ export default function Home({
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  // Use albumData.data?.tracks as fallback if store tracks are empty
-  const displayTracks = tracks.length > 0 ? tracks : albumDataTracks;
-
   return (
     <main className="text-foreground mx-auto box-border flex h-screen flex-col">
       <AlbumHeader album={album} path={path} />
@@ -142,7 +138,6 @@ export default function Home({
       </div>
 
       <AlbumTracksTable
-        tracks={displayTracks}
         columnVisibility={columnVisibility}
         setColumnVisibility={setColumnVisibility}
       />

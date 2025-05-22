@@ -1,6 +1,5 @@
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -10,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { useMetadataStore } from "../useMetadataStore";
 import { MusicBrainzSearchDialog } from "./MusicBrainzSearchDialog";
 
 export function MusicBrainzSearchDialogButton({
@@ -21,15 +19,6 @@ export function MusicBrainzSearchDialogButton({
   dirName: string;
 }) {
   const [open, setOpen] = useState(false);
-
-  const { albumName, albumArtist, catalogNumberTag, tracks } = useMetadataStore(
-    useShallow((s) => ({
-      albumName: s.album?.name || "",
-      albumArtist: s.album?.artist || "",
-      catalogNumberTag: s.album?.catalogNumber || "",
-      tracks: s.tracks,
-    })),
-  );
 
   const onConfirm = (url: string) => {
     rawOnConfirm(url);
@@ -52,14 +41,7 @@ export function MusicBrainzSearchDialogButton({
         </DialogHeader>
 
         {open && (
-          <MusicBrainzSearchDialog
-            onConfirm={onConfirm}
-            albumName={albumName}
-            albumArtist={albumArtist}
-            dirName={dirName}
-            catalogNumberTag={catalogNumberTag}
-            tracks={tracks}
-          />
+          <MusicBrainzSearchDialog onConfirm={onConfirm} dirName={dirName} />
         )}
       </DialogContent>
     </Dialog>

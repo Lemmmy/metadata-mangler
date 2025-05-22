@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import type { WebTrack, WritableTags } from "~/lib/tags/musicMetadata";
 import type { AITrack } from "../../lib/ai/aiMetadata";
+import type { RowSelectionState, Updater } from "@tanstack/react-table";
 
 enableMapSet();
 
@@ -46,6 +47,7 @@ export interface MetadataState {
   originalTracks: StoreTrack[];
   updatedFields: Record<number, Record<string, boolean>>;
   lockedAlbumFields: Record<string, boolean>;
+  selectedTracks: RowSelectionState;
 
   urlOrData: string;
   additionalInfo: string;
@@ -65,6 +67,7 @@ export interface MetadataState {
   updateTracks: (tracks: AITrack[]) => void;
   setAlbumFieldLocked: (field: keyof StoreAlbum, locked: boolean) => void;
   resetChanges: () => void;
+  setSelectedTracks: (updater: Updater<RowSelectionState>) => void;
 
   setUrlOrData: (urlOrData: string) => void;
   setAdditionalInfo: (additionalInfo: string) => void;
@@ -107,6 +110,7 @@ export const useMetadataStore = create<MetadataState>()(
     lockedAlbumFields: {},
     urlOrData: "",
     additionalInfo: "",
+    selectedTracks: {},
 
     // Fields to be reset when the album updates (on page load *and* after saving)
     initialize: (album, tracks, resetOriginal = true) =>
@@ -118,6 +122,7 @@ export const useMetadataStore = create<MetadataState>()(
         if (resetOriginal)
           state.originalTracks = JSON.parse(JSON.stringify(tracks)); // Deep copy
         state.updatedFields = {};
+        state.selectedTracks = {};
       }),
 
     // Fields to be reset when the page/selected album changes
@@ -126,6 +131,7 @@ export const useMetadataStore = create<MetadataState>()(
         state.lockedAlbumFields = {};
         state.urlOrData = "";
         state.additionalInfo = "";
+        state.selectedTracks = {};
       }),
 
     updateAlbumField: (field, value) =>
@@ -142,11 +148,13 @@ export const useMetadataStore = create<MetadataState>()(
           }
 
           // Update the track field
-          (state.tracks[index] as any)[field] = value;
+          if (state.tracks[index][field] !== value) {
+            (state.tracks[index] as any)[field] = value;
 
-          // Mark this field as updated
-          const set = (state.updatedFields[index] ||= {});
-          set[field] = true;
+            // Mark this field as updated
+            const set = (state.updatedFields[index] ||= {});
+            set[field] = true;
+          }
         } else {
           console.warn(
             "Invalid index for updateTrack:",
@@ -189,6 +197,18 @@ export const useMetadataStore = create<MetadataState>()(
         state.tracks = JSON.parse(JSON.stringify(state.originalTracks)); // Deep copy
         state.album = JSON.parse(JSON.stringify(state.originalAlbum)); // Deep copy
         state.updatedFields = {};
+      }),
+
+    setSelectedTracks: (updater: Updater<RowSelectionState>) =>
+      set((state) => {
+        if (typeof updater === "function") {
+          console.log("invoking updater", updater);
+          state.selectedTracks = updater(state.selectedTracks);
+          console.log("updated", state.selectedTracks);
+        } else {
+          console.log("setting value", updater);
+          state.selectedTracks = updater;
+        }
       }),
 
     setUrlOrData: (urlOrData: string) =>

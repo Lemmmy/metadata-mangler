@@ -5,7 +5,7 @@ import { useShallow } from "zustand/react/shallow";
 export function AlbumCodecs(): ReactElement {
   const { tracks } = useMetadataStore(
     useShallow((s) => ({
-      tracks: s.tracks,
+      tracks: s.originalTracks,
     })),
   );
 

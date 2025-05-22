@@ -22,6 +22,7 @@ import {
 import { DebugButtons } from "./DebugButtons";
 import { EditableCell } from "./EditableCell";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -29,6 +30,7 @@ declare module "@tanstack/react-table" {
     classNameFn?: (ctx: CellContext<TData, TValue>) => string;
     headerExtra?: () => ReactNode;
     hiddenByDefault?: boolean;
+    alwaysVisible?: boolean;
   }
 }
 
@@ -53,6 +55,29 @@ function createEditableCellRenderer(
 const columnHelper = createColumnHelper<StoreTrack>();
 
 export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
+  columnHelper.display({
+    id: "select-col",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllRowsSelected()}
+        indeterminate={table.getIsSomeRowsSelected()}
+        onClick={table.getToggleAllRowsSelectedHandler()}
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
+        onClick={row.getToggleSelectedHandler()}
+      />
+    ),
+    size: 40,
+    enableResizing: false,
+    meta: {
+      className: "leading-none items-center justify-center",
+      alwaysVisible: true,
+    },
+  }),
   columnHelper.accessor("filename", {
     header: "Filename",
     id: "filename",
@@ -64,7 +89,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Disc #",
     id: "discNumber",
     cell: createEditableCellRenderer("discNumber", "number", 1),
-    size: 32,
+    size: 64,
     enableResizing: false,
     meta: {
       className: "tabular-nums",
@@ -74,7 +99,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Track #",
     id: "trackNumber",
     cell: createEditableCellRenderer("trackNumber", "number", 1),
-    size: 32,
+    size: 64,
     enableResizing: false,
     meta: {
       className: "tabular-nums",
@@ -84,11 +109,13 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Title",
     id: "title",
     cell: createEditableCellRenderer("title"),
+    size: 500,
   }),
   columnHelper.accessor("artists", {
     header: "Artists",
     id: "artists",
     cell: createEditableCellRenderer("artists"),
+    size: 500,
   }),
   columnHelper.accessor("displayArtist", {
     header: "Display artist",
@@ -133,7 +160,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Year",
     id: "year",
     cell: createEditableCellRenderer("year"),
-    size: 48,
+    size: 72,
     meta: {
       hiddenByDefault: true,
       className: "tabular-nums",
@@ -143,7 +170,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Date",
     id: "date",
     cell: createEditableCellRenderer("date"),
-    size: 48,
+    size: 128,
     meta: {
       hiddenByDefault: true,
       className: "tabular-nums",
@@ -161,7 +188,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Catalog",
     id: "catalogNumber",
     cell: createEditableCellRenderer("catalogNumber"),
-    size: 48,
+    size: 128,
     meta: {
       hiddenByDefault: true,
     },
@@ -170,7 +197,7 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     header: "Barcode",
     id: "barcode",
     cell: createEditableCellRenderer("barcode"),
-    size: 48,
+    size: 128,
     meta: {
       hiddenByDefault: true,
     },

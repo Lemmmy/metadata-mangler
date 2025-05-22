@@ -31,7 +31,7 @@ export function ColumnVisibilityDropdown({
     return albumTableColumns.reduce(
       (acc, column) => {
         const id = column.id;
-        if (!id) return acc;
+        if (!id || column.meta?.alwaysVisible) return acc;
 
         const header = column.header;
         acc[id] = typeof header === "string" ? header : id;

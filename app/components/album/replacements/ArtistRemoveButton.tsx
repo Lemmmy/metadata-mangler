@@ -26,6 +26,7 @@ import {
   fromSemicolonString,
   toSemicolonString,
 } from "~/lib/tags/musicMetadataShared";
+import { pluralN } from "~/lib/utils";
 
 export function ArtistRemoveButton() {
   const [open, setOpen] = useState(false);
@@ -55,9 +56,11 @@ function ArtistRemovePopover({
   const [selectedArtist, setSelectedArtist] = useState("");
 
   // Get all existing artists from the tracks only
-  const { tracks } = useMetadataStore(
+  const { tracks, selectedTrackCount } = useMetadataStore(
     useShallow((s) => ({
       tracks: s.tracks,
+      selectedTrackCount: Object.values(s.selectedTracks).filter((v) => v)
+        .length,
     })),
   );
 
@@ -82,8 +85,19 @@ function ArtistRemovePopover({
 
     // Update the metadata store
     const state = useMetadataStore.getState();
+    const hasSelectedTracks = Object.values(state.selectedTracks).some(
+      (v) => !!v,
+    );
+
     for (let i = 0; i < state.tracks.length; i++) {
       const track = state.tracks[i];
+      if (
+        hasSelectedTracks &&
+        !state.selectedTracks?.[`${track.directory}/${track.filename}`]
+      ) {
+        continue;
+      }
+
       const artists = fromSemicolonString(track.artists);
 
       // Skip if the artist doesn't exist in the list
@@ -104,11 +118,13 @@ function ArtistRemovePopover({
   return (
     <div className="grid gap-4">
       <div className="space-y-2">
-        <h4 className="leading-none font-medium">
-          Remove artist from all tracks
-        </h4>
+        <h4 className="leading-none font-medium">Remove artist from tracks</h4>
         <p className="text-muted-foreground text-sm">
-          Remove an artist from all tracks in the album.
+          Remove an artist from{" "}
+          {selectedTrackCount
+            ? pluralN(selectedTrackCount, "selected track")
+            : "all tracks"}
+          .
         </p>
       </div>
 

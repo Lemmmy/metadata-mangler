@@ -1,4 +1,5 @@
 import { Undo2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
   useMetadataStore,
@@ -45,6 +46,12 @@ export function EditableCell({
     updateTrack(index, field, originalValue);
   };
 
+  const [inputValue, setInputValue] = useState(value ?? storeValue);
+  const internallyUpdated = inputValue !== (value ?? storeValue);
+  useEffect(() => {
+    setInputValue(value ?? storeValue);
+  }, [value, storeValue]);
+
   return (
     <div className="flex h-full w-full flex-col justify-items-start">
       {/* Input row */}
@@ -56,14 +63,28 @@ export function EditableCell({
           className={cn(
             "w-full flex-1 px-3 py-2",
             "focus:ring-none focus:outline-2 focus:outline-white/50",
-            isUpdated && "bg-lime-600/20",
+            internallyUpdated
+              ? "bg-red-600/20"
+              : isUpdated
+                ? "bg-lime-600/20"
+                : "",
           )}
-          value={storeValue ?? value}
-          onChange={handleChange}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+          }}
+          onBlur={(e) => {
+            handleChange(e);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === "Escape") {
+              (e.currentTarget as HTMLInputElement).blur();
+            }
+          }}
         />
 
         {/* Reset button */}
-        {isUpdated && (
+        {(isUpdated || internallyUpdated) && (
           <Button
             variant="outline"
             size="icon"
@@ -77,7 +98,7 @@ export function EditableCell({
       </div>
 
       {/* Original value hint */}
-      {isUpdated && originalValue && (
+      {(isUpdated || internallyUpdated) && originalValue && (
         <div className="mt-1 px-3 text-xs text-white/50">{originalValue}</div>
       )}
     </div>

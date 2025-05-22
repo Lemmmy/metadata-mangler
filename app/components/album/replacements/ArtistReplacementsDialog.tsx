@@ -18,6 +18,7 @@ import {
   fromSemicolonString,
   toSemicolonString,
 } from "~/lib/tags/musicMetadataShared";
+import { pluralN } from "~/lib/utils";
 
 export interface ArtistReplacementsDialogProps {
   onClose: () => void;
@@ -28,7 +29,13 @@ export function ArtistReplacementsDialog({
 }: ArtistReplacementsDialogProps) {
   const [replacements, setReplacements] = useState<Record<string, string>>({});
 
-  const tracks = useMetadataStore(useShallow((s) => s.tracks));
+  const { tracks, selectedTrackCount } = useMetadataStore(
+    useShallow((s) => ({
+      tracks: s.tracks,
+      selectedTrackCount: Object.values(s.selectedTracks).filter((v) => v)
+        .length,
+    })),
+  );
   const initialReplacements = useMemo(
     () =>
       Object.fromEntries(
@@ -83,8 +90,19 @@ export function ArtistReplacementsDialog({
 
         // Update the metadata store
         const state = useMetadataStore.getState();
+        const hasSelectedTracks = Object.values(state.selectedTracks).some(
+          (v) => !!v,
+        );
+
         for (let i = 0; i < state.tracks.length; i++) {
           const track = state.tracks[i];
+          if (
+            hasSelectedTracks &&
+            !state.selectedTracks?.[`${track.directory}/${track.filename}`]
+          ) {
+            continue;
+          }
+
           const newArtists = toSemicolonString(
             fromSemicolonString(track.artists).map(
               (artist) => replacements[artist.trim()] || artist.trim(),
@@ -102,12 +120,16 @@ export function ArtistReplacementsDialog({
     <DialogContent className="w-full min-w-[480px] md:max-w-[640px]">
       <DialogHeader>
         <DialogTitle>Replace artists</DialogTitle>
-        <VisuallyHidden asChild>
-          <DialogDescription>Replace artist names in bulk</DialogDescription>
-        </VisuallyHidden>
+        <DialogDescription>
+          Replace artist names in{" "}
+          {selectedTrackCount
+            ? pluralN(selectedTrackCount, "selected track")
+            : "all tracks"}
+          .
+        </DialogDescription>
       </DialogHeader>
 
-      <div className="grid max-h-[480px] grid-cols-2 gap-x-2 gap-y-1 overflow-y-scroll">
+      <div className="grid max-h-[480px] grid-cols-2 gap-x-2 gap-y-1 overflow-y-auto">
         {Object.entries(replacements).map(([original, replacement]) => (
           <React.Fragment key={original}>
             <ResettableInput

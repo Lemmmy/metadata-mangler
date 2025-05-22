@@ -14,13 +14,11 @@ import { parseCatalogNumber } from "~/lib/fetch/metadataUtils";
 import { useTRPCClient } from "~/lib/trpc";
 import { MusicBrainzSearchResults } from "./MusicBrainzSearchResults";
 import type { MusicBrainzReleaseResult } from "~/lib/fetch/musicbrainz";
+import { useMetadataStore } from "../useMetadataStore";
+import { useShallow } from "zustand/react/shallow";
 
 export interface MusicBrainzSearchDialogProps {
-  albumName: string;
-  albumArtist: string;
   dirName: string;
-  catalogNumberTag: string;
-  tracks: { title: string }[];
   onConfirm: (id: string) => void;
 }
 
@@ -35,13 +33,18 @@ type SearchType =
   | { type: "track"; query: string; custom?: boolean };
 
 export function MusicBrainzSearchDialog({
-  albumName,
-  albumArtist,
   dirName,
-  catalogNumberTag,
-  tracks,
   onConfirm,
 }: MusicBrainzSearchDialogProps) {
+  const { albumName, albumArtist, catalogNumberTag, tracks } = useMetadataStore(
+    useShallow((s) => ({
+      albumName: s.album?.name || "",
+      albumArtist: s.album?.artist || "",
+      catalogNumberTag: s.album?.catalogNumber || "",
+      tracks: s.tracks,
+    })),
+  );
+
   const [searchType, setSearchType] = useState<SearchType>({
     type: "release",
     query: albumName,
