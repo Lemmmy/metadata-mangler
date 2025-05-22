@@ -67,3 +67,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+!bin/Release/mb_MetadataMangler.dll

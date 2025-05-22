@@ -176,7 +176,7 @@ namespace MusicBeePlugin
 
             // Get the Mangler URL from settings
             string manglerUrl = GetSettingValue(SETTING_MANGLER_URL, "http://localhost:5173");
-            string url = $"{manglerUrl.TrimEnd('/')}/album/{encodedPath}";
+            string url = $"{manglerUrl.TrimEnd('/')}/open/album/{encodedPath}";
 
             // Open in browser
             try

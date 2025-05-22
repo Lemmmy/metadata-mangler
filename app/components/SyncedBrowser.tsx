@@ -1,5 +1,9 @@
 import React, { useEffect } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router";
+import { useShallow } from "zustand/react/shallow";
+import { useMetadataStore } from "./album/useMetadataStore";
+import { OPEN_ALBUM_CHANNEL_NAME } from "~/routes/open/album";
 
 interface SyncedBrowserContextType {
   openUrl: (url: string, automatic?: boolean) => void;
@@ -18,6 +22,16 @@ export function SyncedBrowserProvider({
   children: React.ReactNode;
 }) {
   const [windowHandle, setWindowHandle] = React.useState<Window | null>(null);
+  const navigate = useNavigate();
+
+  // Check if there are unsaved changes
+  const { hasUnsavedChanges } = useMetadataStore(
+    useShallow((s) => ({
+      hasUnsavedChanges: Object.values(s.updatedFields).some((set) =>
+        Object.values(set).some((v) => v),
+      ),
+    })),
+  );
 
   const openUrl = (url: string, automatic = false) => {
     console.log(windowHandle?.closed);
@@ -56,6 +70,40 @@ export function SyncedBrowserProvider({
 
     return () => clearInterval(interval);
   }, [windowHandle]);
+
+  // Listen for broadcast messages from /open/album tabs
+  useEffect(() => {
+    const channel = new BroadcastChannel(OPEN_ALBUM_CHANNEL_NAME);
+
+    const handleMessage = (event: MessageEvent) => {
+      // Handle album open requests
+      if (event.data?.type === "album-open-request") {
+        const { path, messageId } = event.data;
+
+        // Only respond if this tab has the Synced Browser open and no unsaved changes
+        if (windowHandle?.closed === false && !hasUnsavedChanges) {
+          // Respond to the request to indicate we'll handle it
+          channel.postMessage({
+            type: "album-open-response",
+            messageId: messageId,
+          });
+
+          // Focus this window/tab
+          window.focus();
+
+          // Navigate to the requested album path
+          navigate(`/album/${path}`);
+        }
+      }
+    };
+
+    channel.addEventListener("message", handleMessage);
+
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+    };
+  }, [windowHandle, hasUnsavedChanges, navigate]);
 
   return (
     <SyncedBrowserContext.Provider
