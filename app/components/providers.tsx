@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getQueryClient, TRPCProvider } from "~/lib/trpc";
 import type { AppRouter } from "~/api/router";
 import { SyncedBrowserProvider } from "./SyncedBrowser";
+import { UnsavedChangesHandler } from "./UnsavedChangesHandler";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
@@ -21,7 +22,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        <SyncedBrowserProvider>{children}</SyncedBrowserProvider>
+        <SyncedBrowserProvider>
+          <UnsavedChangesHandler />
+          {children}
+        </SyncedBrowserProvider>
       </TRPCProvider>
     </QueryClientProvider>
   );
