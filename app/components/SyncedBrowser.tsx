@@ -34,8 +34,6 @@ export function SyncedBrowserProvider({
   );
 
   const openUrl = (url: string, automatic = false) => {
-    console.log(windowHandle?.closed);
-
     if (windowHandle?.closed === false && automatic) {
       windowHandle.focus();
       // eslint-disable-next-line react-compiler/react-compiler

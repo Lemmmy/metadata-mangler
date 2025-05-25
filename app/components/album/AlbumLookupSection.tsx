@@ -3,24 +3,25 @@ import type { VisibilityState } from "@tanstack/react-table";
 import { type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
-import { ColumnVisibilityDropdown } from "~/components/album/table/ColumnVisibilityDropdown";
 import {
   useMetadataStore,
   type AlbumUpdatable,
   type StoreAlbum,
 } from "~/components/album/useMetadataStore";
+import { ColumnVisibilityDropdown } from "~/components/table/ColumnVisibilityDropdown";
 import { useModelPicker } from "~/components/useModelPicker";
 import type { PriceUsage } from "~/lib/ai/aiProviders";
 import { useTRPC } from "~/lib/trpc";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { AlbumLookupButton, type HandleLookupFn } from "./AlbumLookupButton";
+import { AlbumSyncedBrowserButton } from "./AlbumSyncedBrowserButton";
 import { ArtistAddButton } from "./replacements/ArtistAddButton";
 import { ArtistRemoveButton } from "./replacements/ArtistRemoveButton";
 import { ArtistReplacementsDialogButton } from "./replacements/ArtistReplacementsDialogButton";
 import { MusicBrainzSearchDialogButton } from "./search/MusicBrainzSearchDialogButton";
 import { VgmdbSearchDialogButton } from "./search/VgmdbSearchDialogButton";
-import { AlbumSyncedBrowserButton } from "./AlbumSyncedBrowserButton";
+import { albumTableColumns } from "./table/useAlbumTableColumns";
 
 interface Props {
   album: StoreAlbum | null;
@@ -193,6 +194,7 @@ export function AlbumLookupSection({
           <ArtistReplacementsDialogButton />
 
           <ColumnVisibilityDropdown
+            columns={albumTableColumns}
             columnVisibility={columnVisibility}
             setColumnVisibility={setColumnVisibility}
           />

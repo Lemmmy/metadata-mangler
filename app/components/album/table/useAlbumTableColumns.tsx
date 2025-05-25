@@ -2,16 +2,12 @@ import {
   createColumnHelper,
   type CellContext,
   type ColumnDef,
-  type RowData,
   type VisibilityState,
 } from "@tanstack/react-table";
-import {
-  useEffect,
-  useState,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from "react";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useTableColumnVisibility } from "~/components/table/useTableColumnVisibility";
+import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import { formatDuration } from "~/lib/duration";
 import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
 import {
@@ -21,18 +17,6 @@ import {
 } from "../useMetadataStore";
 import { DebugButtons } from "./DebugButtons";
 import { EditableCell } from "./EditableCell";
-import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-
-declare module "@tanstack/react-table" {
-  interface ColumnMeta<TData extends RowData, TValue> {
-    className?: string;
-    classNameFn?: (ctx: CellContext<TData, TValue>) => string;
-    headerExtra?: () => ReactNode;
-    hiddenByDefault?: boolean;
-    alwaysVisible?: boolean;
-  }
-}
 
 function createEditableCellRenderer(
   field: keyof StoreTrackUpdatable,
@@ -75,19 +59,19 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     enableResizing: false,
     meta: {
       className: "leading-none items-center justify-center",
-      alwaysVisible: true,
+      visibility: "always",
     },
   }),
   columnHelper.accessor("filename", {
-    header: "Filename",
     id: "filename",
+    header: "Filename",
     meta: {
       className: "px-3 py-2 text-xs tabular-nums",
     },
   }),
   columnHelper.accessor("discNumber", {
-    header: "Disc #",
     id: "discNumber",
+    header: "Disc #",
     cell: createEditableCellRenderer("discNumber", "number", 1),
     size: 64,
     enableResizing: false,
@@ -96,8 +80,8 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
   }),
   columnHelper.accessor("trackNumber", {
-    header: "Track #",
     id: "trackNumber",
+    header: "Track #",
     cell: createEditableCellRenderer("trackNumber", "number", 1),
     size: 64,
     enableResizing: false,
@@ -106,23 +90,23 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
   }),
   columnHelper.accessor("title", {
-    header: "Title",
     id: "title",
+    header: "Title",
     cell: createEditableCellRenderer("title"),
     size: 500,
   }),
   columnHelper.accessor("artists", {
-    header: "Artists",
     id: "artists",
+    header: "Artists",
     cell: createEditableCellRenderer("artists"),
     size: 500,
   }),
   columnHelper.accessor("displayArtist", {
-    header: "Display artist",
     id: "displayArtist",
+    header: "Display artist",
     cell: createEditableCellRenderer("displayArtist"),
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfExists",
       className: "text-red-500",
       headerExtra: () => (
         <Button
@@ -141,86 +125,86 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
   }),
   columnHelper.accessor("album", {
-    header: "Album",
     id: "album",
+    header: "Album",
     cell: createEditableCellRenderer("album"),
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
     },
   }),
   columnHelper.accessor("albumArtist", {
-    header: "Album artist",
     id: "albumArtist",
+    header: "Album artist",
     cell: createEditableCellRenderer("albumArtist"),
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
     },
   }),
   columnHelper.accessor("year", {
-    header: "Year",
     id: "year",
+    header: "Year",
     cell: createEditableCellRenderer("year"),
     size: 72,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
       className: "tabular-nums",
     },
   }),
   columnHelper.accessor("date", {
-    header: "Date",
     id: "date",
+    header: "Date",
     cell: createEditableCellRenderer("date"),
     size: 128,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
       className: "tabular-nums",
     },
   }),
   columnHelper.accessor("grouping", {
-    header: "Grouping",
     id: "grouping",
+    header: "Grouping",
     cell: createEditableCellRenderer("grouping"),
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
     },
   }),
   columnHelper.accessor("catalogNumber", {
-    header: "Catalog",
     id: "catalogNumber",
+    header: "Catalog",
     cell: createEditableCellRenderer("catalogNumber"),
     size: 128,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
     },
   }),
   columnHelper.accessor("barcode", {
-    header: "Barcode",
     id: "barcode",
+    header: "Barcode",
     cell: createEditableCellRenderer("barcode"),
     size: 128,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
     },
   }),
   columnHelper.accessor("albumSubtitle", {
-    header: "Album subtitle",
     id: "albumSubtitle",
+    header: "Album subtitle",
     cell: createEditableCellRenderer("albumSubtitle"),
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
     },
   }),
   columnHelper.accessor("trackComment", {
-    header: "Track comment",
     id: "trackComment",
+    header: "Track comment",
     cell: createEditableCellRenderer("trackComment"),
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfExists",
     },
   }),
   columnHelper.accessor("duration", {
-    header: "Duration",
     id: "duration",
+    header: "Duration",
     cell: (ctx) => formatDuration(ctx.getValue() * 1000),
     size: 36,
     enableResizing: false,
@@ -229,26 +213,26 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
   }),
   columnHelper.accessor("container", {
-    header: "Container",
     id: "container",
+    header: "Container",
     size: 48,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
       className: "px-3 py-2",
     },
   }),
   columnHelper.accessor("codec", {
-    header: "Codec",
     id: "codec",
+    header: "Codec",
     size: 48,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
       className: "px-3 py-2",
     },
   }),
   columnHelper.accessor("tagTypes", {
-    header: "Tag types",
     id: "tagTypes",
+    header: "Tag types",
     cell: (ctx) => {
       const sus = isTagSuspicious(
         ctx.row.original.container,
@@ -262,17 +246,17 @@ export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
     },
     size: 48,
     meta: {
-      hiddenByDefault: true,
+      visibility: "showIfDiffers",
       className: "px-3 py-2",
     },
   }),
   columnHelper.display({
-    header: "Debug",
     id: "debug",
+    header: "Debug",
     cell: (ctx) => <DebugButtons track={ctx.row.original} />,
     size: 48,
     meta: {
-      hiddenByDefault: true,
+      visibility: "hiddenByDefault",
       className: "px-3 py-2",
     },
   }),
@@ -283,89 +267,32 @@ interface UseAlbumTableColumnsReturn {
   setColumnVisibility: Dispatch<SetStateAction<VisibilityState>>;
 }
 
+function normalizeTag(tag: any): string {
+  return Array.isArray(tag) ? [...tag].sort().join(",") : tag;
+}
+
 export function useAlbumTableColumns(
   originalTracks: StoreTrack[],
 ): UseAlbumTableColumnsReturn {
-  // Initialize column visibility - all visible except album by default
-  const [columnVisibility, setColumnVisibility] = useState<
-    Record<string, boolean>
-  >(() => {
-    const out: Record<string, boolean> = {};
-    albumTableColumns.forEach((column) => {
-      const id = column.id;
-      if (!id) return;
-      out[id] = !column.meta?.hiddenByDefault;
-    });
-    return out;
-  });
+  const { columnVisibility, setColumnVisibility } = useTableColumnVisibility(
+    albumTableColumns,
+    originalTracks,
+    normalizeTag,
+  );
 
   // Show some of the hidden-by-default columns under certain conditions
   useEffect(() => {
-    if (originalTracks.length > 0) {
-      function normalizeTag(tag: any) {
-        return Array.isArray(tag) ? [...tag].sort().join(",") : tag;
-      }
+    if (originalTracks.length === 0) return;
 
-      // If there's more than one value for album-specific tags, show that tag's column
-      function checkTagCardinality(
-        tag: keyof StoreTrackUpdatable,
-        justExistence: boolean = false,
-      ) {
-        const uniqueValues = new Set();
-
-        let found = false;
-        for (let i = 0; i < originalTracks.length; i++) {
-          const value = normalizeTag(originalTracks[i][tag]);
-          if (value) {
-            if (justExistence) {
-              found = true;
-              break;
-            }
-
-            uniqueValues.add(value);
-
-            if (uniqueValues.size > 1) {
-              found = true;
-              break;
-            }
-          }
-        }
-
-        if (found) {
-          setColumnVisibility((prev) => ({
-            ...prev,
-            [tag]: true,
-          }));
-        }
-      }
-
-      checkTagCardinality("album");
-      checkTagCardinality("albumArtist");
-      checkTagCardinality("displayArtist", true);
-      checkTagCardinality("year");
-      checkTagCardinality("date");
-      checkTagCardinality("grouping");
-      checkTagCardinality("container");
-      checkTagCardinality("catalogNumber");
-      checkTagCardinality("barcode");
-      checkTagCardinality("albumSubtitle");
-      checkTagCardinality("trackComment");
-      checkTagCardinality("codec");
-      checkTagCardinality("tagTypes");
-
-      // If the track has a suspicious container/tag combination, show the container and tag types columns
-      const suspicious = originalTracks.some((t) =>
-        isTagSuspicious(t.container, t.tagTypes),
-      );
-      if (suspicious) {
-        setColumnVisibility((prev) => ({
-          ...prev,
-          container: true,
-          tagTypes: true,
-        }));
-      }
+    // If the track has a suspicious container/tag combination, show the container and tag types columns
+    if (originalTracks.some((t) => isTagSuspicious(t.container, t.tagTypes))) {
+      setColumnVisibility((prev) => ({
+        ...prev,
+        container: true,
+        tagTypes: true,
+      }));
     }
-  }, [originalTracks]);
+  }, [originalTracks, setColumnVisibility]);
 
   return {
     columnVisibility,

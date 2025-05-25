@@ -1,7 +1,7 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { lazy, Suspense } from "react";
-import { Await } from "react-router";
+import { Await, Link } from "react-router";
 import { Breadcrumb, type BreadcrumbHandle } from "~/components/Breadcrumb";
 import { BreadcrumbMenu } from "~/components/BreadcrumbMenu";
 import { DirectorySkeleton } from "~/components/browse/DirectorySkeleton";
@@ -12,6 +12,7 @@ import type { Route } from "./+types/browse";
 import { prefetch } from "~/lib/prefetch";
 import { ClientOnly } from "remix-utils/client-only";
 import { PathJump } from "~/components/browse/PathJump";
+import { Button } from "~/components/ui/button";
 
 const DirectoryList = lazy(() => import("~/components/browse/DirectoryList"));
 
@@ -101,11 +102,14 @@ export default function Browse({
 }: Route.ComponentProps) {
   return (
     <main className="mx-auto flex h-screen w-full max-w-6xl flex-col p-2">
-      <div className="flex items-center justify-between">
-        <BreadcrumbMenu className="mb-2" />
+      <div className="mb-2 flex items-center gap-2">
+        <BreadcrumbMenu outerClassName="flex flex-1" />
         <div className="max-w-[300px] flex-1">
           <PathJump />
         </div>
+        <Link to="/discographies">
+          <Button variant="outline">Discographies</Button>
+        </Link>
       </div>
 
       <ClientOnly fallback={<DirectorySkeleton />}>

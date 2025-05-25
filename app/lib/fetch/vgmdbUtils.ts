@@ -40,3 +40,82 @@ export function cleanVgmdbAlbum(album: VgmdbAlbum): CleanVgmdbAlbum {
     release_date: album.release_date,
   };
 }
+
+export const vgmdbUrlPatterns = {
+  vgmdbArtist: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/artist\/(\d+)/i,
+  vgmdbAlbum: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/album\/(\d+)/i,
+} as const;
+
+export function parseVgmdbArtistUrl(url: string): number | null {
+  const match = url.match(vgmdbUrlPatterns.vgmdbArtist);
+  if (match && match[3]) {
+    return parseInt(match[3], 10);
+  }
+  return null;
+}
+
+export function parseVgmdbAlbumUrl(url: string): number | null {
+  const match = url.match(vgmdbUrlPatterns.vgmdbAlbum);
+  if (match && match[3]) {
+    return parseInt(match[3], 10);
+  }
+  return null;
+}
+
+export function convertVgmdbArtistIdToUrl(artistId: number): string {
+  return `https://vgmdb.net/artist/${artistId}`;
+}
+
+export function convertVgmdbAlbumIdToUrl(albumId: number): string {
+  return `https://vgmdb.net/album/${albumId}`;
+}
+
+export const ignoredVgmdbRoles = [
+  // non-music roles
+  "director",
+  "planner",
+  "project planner",
+  "writer",
+  "lyricist",
+  "talk editor",
+  "designer",
+  "graphic designer",
+  "illustrator",
+  // engineering roles
+  "recording engineer",
+  "mixing engineer",
+  "mastering engineer",
+  "vocal recording engineer",
+];
+
+export function cleanVgmdbRole(role: string): string {
+  return role
+    .replace(/(?: \(as .+?\))?/g, "")
+    .replace(/\*$/, "")
+    .trim();
+}
+
+export function cleanVgmdbRoles(roles: string, includeIgnored = false): string {
+  return roles
+    .split(", ")
+    .map((role) => {
+      const cleanRole = cleanVgmdbRole(role);
+      if (
+        !includeIgnored &&
+        ignoredVgmdbRoles.includes(cleanRole.toLowerCase())
+      ) {
+        return null;
+      }
+      return cleanRole;
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
+export function areAllRolesIgnored(roles: string): boolean {
+  if (!roles) return false;
+  return roles
+    .split(", ")
+    .map(cleanVgmdbRole)
+    .every((role) => ignoredVgmdbRoles.includes(role.toLowerCase()));
+}

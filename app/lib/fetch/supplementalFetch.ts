@@ -3,17 +3,27 @@ import type { SupplementalDataSource } from "../ai/aiMetadata";
 import {
   cleanMusicBrainzRelease,
   fetchDetailedMusicBrainzRelease,
-  getMusicBrainzCatalogNumber,
 } from "../fetch/musicbrainz";
 import { fetchVgmdbAlbum, parseVgmdbReleaseDate } from "../fetch/vgmdb";
-import { cleanVgmdbAlbum } from "./vgmdbUtils";
+import {
+  cleanVgmdbAlbum,
+  parseVgmdbAlbumUrl,
+  vgmdbUrlPatterns,
+} from "./vgmdbUtils";
 import { isBarcode } from "./metadataUtils";
+import {
+  getMusicBrainzCatalogNumber,
+  parseMusicBrainzReleaseUrl,
+} from "./musicbrainzUtils";
+import { musicBrainzUrlPatterns } from "./musicbrainzUtils";
 
-const URL_PATTERNS = {
-  vgmdb: /^https?:\/\/(www\.)?vgmdb\.(net|info)\/album\/(\d+)/i,
-  musicbrainz:
-    /^https?:\/\/((?:www|beta)\.)?musicbrainz\.org\/release\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i,
-  bandcamp: /^https?:\/\/.*\.bandcamp\.com\/(album|track)\/[a-zA-Z0-9-]+/i,
+export const SUPPLEMENTAL_DATA_SOURCE_PATTERNS: Record<
+  Exclude<SupplementalDataSource, "user">,
+  RegExp
+> = {
+  vgmdb: vgmdbUrlPatterns.vgmdbAlbum,
+  musicbrainz: musicBrainzUrlPatterns.musicbrainzRelease,
+  bandcamp: /^https?:\/\/.*\.bandcamp\.com\/(album|track)\/[a-zA-Z0-9-]+/i, // TODO
 };
 
 export interface SupplementalData {
@@ -30,7 +40,9 @@ export interface SupplementalData {
 export function parseSupplementalDataSource(
   input: string,
 ): SupplementalDataSource {
-  for (const [source, pattern] of Object.entries(URL_PATTERNS)) {
+  for (const [source, pattern] of Object.entries(
+    SUPPLEMENTAL_DATA_SOURCE_PATTERNS,
+  )) {
     if (pattern.test(input)) {
       return source as SupplementalDataSource;
     }
@@ -45,9 +57,8 @@ async function fetchSupplementalData(
   if (source === "user") {
     return { cleanRaw: input, raw: input };
   } else if (source === "vgmdb") {
-    const match = input.match(URL_PATTERNS.vgmdb);
-    if (match && match[3]) {
-      const albumId = parseInt(match[3], 10);
+    const albumId = parseVgmdbAlbumUrl(input);
+    if (albumId) {
       const vgmdbAlbum = await fetchVgmdbAlbum(albumId);
       const cleanedAlbum = cleanVgmdbAlbum(vgmdbAlbum);
       const [year, date] = parseVgmdbReleaseDate(vgmdbAlbum.release_date);
@@ -67,9 +78,8 @@ async function fetchSupplementalData(
       };
     }
   } else if (source === "musicbrainz") {
-    const match = input.match(URL_PATTERNS.musicbrainz);
-    if (match && match[2]) {
-      const releaseId = match[2];
+    const releaseId = parseMusicBrainzReleaseUrl(input);
+    if (releaseId) {
       const detailedRelease = await fetchDetailedMusicBrainzRelease(releaseId);
       const cleanedAlbum = cleanMusicBrainzRelease(detailedRelease);
 
@@ -84,12 +94,8 @@ async function fetchSupplementalData(
       };
     }
   } else if (source === "bandcamp") {
-    const match = input.match(URL_PATTERNS.bandcamp);
-    if (match && match[1]) {
-      const releaseId = match[1];
-      // TODO: Implement bandcamp data fetching
-      return null;
-    }
+    // TODO: Implement bandcamp data fetching
+    return null;
   }
 
   return null;
@@ -132,19 +138,11 @@ export async function getBestCoverFromSourceUrl(
       null
     );
   } else if (source === "musicbrainz") {
-    const match = input.match(URL_PATTERNS.musicbrainz);
-    if (match && match[1]) {
-      const releaseId = match[1];
-      // TODO: Implement musicbrainz data fetching
-      return null;
-    }
+    // TODO: Implement musicbrainz data fetching
+    return null;
   } else if (source === "bandcamp") {
-    const match = input.match(URL_PATTERNS.bandcamp);
-    if (match && match[1]) {
-      const releaseId = match[1];
-      // TODO: Implement bandcamp data fetching
-      return null;
-    }
+    // TODO: Implement bandcamp data fetching
+    return null;
   }
 
   return null;

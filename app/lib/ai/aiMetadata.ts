@@ -94,7 +94,8 @@ A SINGLE album artist should be provided.
 <instructions area="track">
 For each track, match it with the corresponding track based on track number and disc number.
 Track titles with instrumental suffixes such as 'Instrumental', 'Karaoke', 'Off-Vocal', should be normalized to
-  just ' (Instrumental)' with all other suffix punctuation cleaned up.
+  just ' (Instrumental)' with all other suffix punctuation cleaned up. 'Rearrange', 'Remix', and other 'version'
+  suffixes should be kept as-is.
 The track artist field should be replaced with a per-track semicolon-separated artist list in the following order:
   - Featured vocalists/performers
   - Composer

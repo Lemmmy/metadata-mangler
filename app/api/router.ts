@@ -5,10 +5,12 @@ import { models } from "./models";
 import { router } from "./trpc";
 import { search } from "./search";
 import { replacements } from "./replacements";
+import { discography } from "./discography";
 
 export const appRouter = router({
   album,
   browse,
+  discography,
   metadata,
   models,
   replacements,

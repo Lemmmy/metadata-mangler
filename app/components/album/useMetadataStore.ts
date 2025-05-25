@@ -202,11 +202,8 @@ export const useMetadataStore = create<MetadataState>()(
     setSelectedTracks: (updater: Updater<RowSelectionState>) =>
       set((state) => {
         if (typeof updater === "function") {
-          console.log("invoking updater", updater);
           state.selectedTracks = updater(state.selectedTracks);
-          console.log("updated", state.selectedTracks);
         } else {
-          console.log("setting value", updater);
           state.selectedTracks = updater;
         }
       }),

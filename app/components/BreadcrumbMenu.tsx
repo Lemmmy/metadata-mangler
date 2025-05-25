@@ -7,9 +7,13 @@ type BreadcrumbMatch = UIMatch<unknown, BreadcrumbHandle<unknown>>;
 
 interface Props {
   className?: string;
+  outerClassName?: string;
 }
 
-export function BreadcrumbMenu({ className }: Props): ReactElement | null {
+export function BreadcrumbMenu({
+  className,
+  outerClassName,
+}: Props): ReactElement | null {
   const rawMatches = useMatches();
 
   // Look for a breadcrumb handle on each matched route
@@ -49,7 +53,7 @@ export function BreadcrumbMenu({ className }: Props): ReactElement | null {
   if (matches.length === 0) return null;
 
   return (
-    <nav aria-label="Breadcrumb">
+    <nav aria-label="Breadcrumb" className={outerClassName}>
       <ol className={cn("flex list-none flex-wrap", className)}>
         {/* Render each breadcrumb component */}
         {crumbs.map((match, i) => (

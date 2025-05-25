@@ -1,3 +1,4 @@
+/* eslint-disable react-compiler/react-compiler */
 import {
   flexRender,
   getCoreRowModel,
@@ -6,29 +7,28 @@ import {
   type RowSelectionState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import {
-  memo,
-  useEffect,
-  useMemo,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { memo, type Dispatch, type SetStateAction } from "react";
 import isEqual from "react-fast-compare";
+import { useShallow } from "zustand/react/shallow";
 import {
   useMetadataStore,
   type StoreTrack,
 } from "~/components/album/useMetadataStore";
-import { noop } from "~/lib/noop";
+import { useTableResize } from "~/components/table/useTableResize";
 import { cn } from "~/lib/utils";
 import { albumTableColumns } from "./useAlbumTableColumns";
-import { useMeasure } from "@uidotdev/usehooks";
-import { useShallow } from "zustand/react/shallow";
 
 interface Props {
   columnVisibility: VisibilityState;
   setColumnVisibility: Dispatch<SetStateAction<VisibilityState>>;
 }
+
+const getRowId = (row: StoreTrack) => `${row.directory}/${row.filename}`;
+const defaultColumn = {
+  size: 300,
+  minSize: 20,
+  maxSize: Number.MAX_VALUE,
+} as const;
 
 export function AlbumTracksTable({
   columnVisibility,
@@ -43,11 +43,8 @@ export function AlbumTracksTable({
     })),
   );
 
-  // Measure width for column sizing
-  const [tableRef, { width }] = useMeasure();
-
   const table = useReactTable<StoreTrack>({
-    getRowId: (row) => `${row.directory}/${row.filename}`,
+    getRowId,
     data: tracks,
     columns: albumTableColumns,
     getCoreRowModel: getCoreRowModel(),
@@ -60,93 +57,10 @@ export function AlbumTracksTable({
     },
     onRowSelectionChange: setSelectedTracks,
     onColumnVisibilityChange: setColumnVisibility,
-    defaultColumn: {
-      size: 300,
-      minSize: 20,
-      maxSize: Number.MAX_VALUE,
-    },
+    defaultColumn,
   });
 
-  const columnSizingInfo = table.getState().columnSizingInfo;
-  const columnSizing = table.getState().columnSizing;
-
-  const resetColumnSizing = table.resetColumnSizing;
-  const getFlatHeaders = table.getFlatHeaders;
-
-  useEffect(() => {
-    resetColumnSizing();
-  }, [columnVisibility, resetColumnSizing]);
-
-  // https://tanstack.com/table/v8/docs/framework/react/examples/column-resizing-performant
-  const columnSizeVars = useMemo(() => {
-    const headers = getFlatHeaders();
-    const colSizes: { [key: string]: number } = {};
-
-    // We need these in the dependency array to re-render the table body
-    noop(columnSizingInfo, columnSizing, columnVisibility, selectedTracks);
-
-    // Calculate total width of all columns
-    let totalWidth = 0;
-    const resizableHeaders: typeof headers = [];
-    const fixedHeaders: typeof headers = [];
-
-    // First pass: separate fixed and resizable columns, calculate total width
-    for (let i = 0; i < headers.length; i++) {
-      const header = headers[i]!;
-      const canResize = header.column.getCanResize();
-
-      if (canResize) {
-        resizableHeaders.push(header);
-      } else {
-        fixedHeaders.push(header);
-      }
-
-      totalWidth += header.getSize();
-    }
-
-    // Calculate width of fixed columns
-    const fixedWidth = fixedHeaders.reduce(
-      (sum, header) => sum + header.getSize(),
-      0,
-    );
-
-    // Calculate scaling factor if needed
-    let scalingFactor = 1;
-    if (width && totalWidth > width && resizableHeaders.length > 0) {
-      // Calculate how much width we have for resizable columns
-      const availableWidth = width - fixedWidth;
-      const resizableWidth = totalWidth - fixedWidth;
-
-      // Calculate scaling factor to fit all columns
-      scalingFactor = Math.max(0.3, availableWidth / resizableWidth);
-    }
-
-    // Apply sizes with scaling if needed
-    for (let i = 0; i < headers.length; i++) {
-      const header = headers[i]!;
-      const canResize = header.column.getCanResize();
-
-      // Apply scaling only to resizable columns
-      const size = canResize
-        ? Math.max(
-            header.column.columnDef.minSize || 48,
-            Math.floor(header.getSize() * scalingFactor),
-          )
-        : header.getSize();
-
-      colSizes[`--header-${header.id}-size`] = size;
-      colSizes[`--col-${header.column.id}-size`] = size;
-    }
-
-    return colSizes;
-  }, [
-    columnSizingInfo,
-    columnSizing,
-    columnVisibility,
-    selectedTracks,
-    getFlatHeaders,
-    width,
-  ]);
+  const { tableRef, columnSizeVars } = useTableResize(table, columnVisibility);
 
   return (
     <div

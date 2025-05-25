@@ -10,10 +10,12 @@ export interface VgmdbNames {
   [key: string]: string | undefined;
 }
 
-export interface VgmdbArtist {
-  link: string;
+export interface VgmdbLinkedName {
+  link?: string;
   names: VgmdbNames;
 }
+
+export type VgmdbArtist = VgmdbLinkedName;
 
 export interface VgmdbCover {
   full: string;
@@ -33,34 +35,30 @@ export interface VgmdbDisc {
   tracks: VgmdbTrack[];
 }
 
-export interface VgmdbOrganization {
-  names: VgmdbNames;
-  role: string;
+export interface VgmdbOrganization extends VgmdbLinkedName {
+  role?: string;
 }
+export type VgmdbStudio = VgmdbOrganization;
+export type VgmdbUnit = VgmdbOrganization;
 
 export interface VgmdbReleasePrice {
   currency: string;
   price: number;
 }
 
-export interface VgmdbReleaseEvent {
-  link: string;
-  name: string;
+export interface VgmdbReleaseEvent extends VgmdbLinkedName {
   shortname: string;
 }
 
-export interface VgmdbStore {
-  link: string;
-  name: string;
-}
-
-export interface VgmdbWebsite {
-  link: string;
-  name: string;
-}
+export type VgmdbStore = VgmdbLinkedName;
+export type VgmdbWebsite = VgmdbLinkedName;
 
 export interface VgmdbWebsites {
   Official?: VgmdbWebsite[];
+  Commercial?: VgmdbWebsite[];
+  Fansite?: VgmdbWebsite[];
+  Personal?: VgmdbWebsite[];
+  Reference?: VgmdbWebsite[];
   [key: string]: VgmdbWebsite[] | undefined;
 }
 
@@ -150,6 +148,64 @@ export interface VgmdbAlbumSearchResult {
   media_format: string;
   release_date: string;
   titles: VgmdbNames;
+}
+
+export interface VgmdbArtistResult {
+  link: string;
+  vgmdb_link: string;
+  birthdate?: string;
+  birthplace?: string;
+  name?: string;
+  name_real?: string;
+  name_trans?: string;
+  notes?: string;
+  picture_full?: string;
+  picture_small?: string;
+  picture_thumb?: string;
+  type?: "Individual" | "Unit" | "Studio" | string;
+  sex?: string;
+  discography?: VgmdbArtistDiscographyEntry[];
+  featured_on?: VgmdbArtistDiscographyEntry[];
+  info: {
+    Birthdate?: string;
+    Birthplace?: string;
+    Bloodtype?: string;
+    "Credited works"?: string[];
+    Credits?: string[];
+    Organizations?: VgmdbOrganization[];
+    Studios?: VgmdbStudio[];
+    Units?: VgmdbUnit[];
+    Variations?: { names: VgmdbNames }[];
+    Formed?: string;
+    Members?: VgmdbArtist[];
+    "Former Members"?: VgmdbArtist[];
+  };
+  meta: VgmdbMeta;
+  members?: VgmdbArtist[];
+  organizations?: VgmdbOrganization[];
+  studios?: VgmdbStudio[];
+  units?: VgmdbUnit[];
+  twitter_names?: string[];
+  websites: VgmdbWebsites;
+}
+
+export interface VgmdbArtistDiscographyEntry {
+  link: string;
+  catalog?: string;
+  date?: string;
+  reprint?: boolean;
+  roles?: string[];
+  titles: VgmdbNames;
+  type:
+    | "live"
+    | "anime"
+    | "bonus"
+    | "game"
+    | "works"
+    | "doujin"
+    | "live"
+    | "other"
+    | string;
 }
 
 /**
@@ -248,4 +304,15 @@ export function parseVgmdbReleaseDate(
   if (!date) return [undefined, undefined];
   const [year] = date.split("-", 1);
   return [year, date];
+}
+
+export async function fetchVgmdbArtist(id: number): Promise<VgmdbArtistResult> {
+  try {
+    const response = await makeVgmdbApiRequest(`/artist/${id}?format=json`);
+    const data: VgmdbArtistResult = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching artist ${id} from VGMDB:`, error);
+    throw error;
+  }
 }
