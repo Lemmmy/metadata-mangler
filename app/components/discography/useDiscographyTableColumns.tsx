@@ -12,6 +12,7 @@ import {
 import { useTableColumnVisibility } from "../table/useTableColumnVisibility";
 import { RolesCell, StatusCell } from "./DiscographyReleasesTable";
 import { convertVgmdbAlbumIdToUrl } from "~/lib/fetch/vgmdbUtils";
+import { getSelectionColumn } from "../table/SelectionColumn";
 
 const columnHelper = createColumnHelper<WebDiscographyRelease>();
 
@@ -95,6 +96,8 @@ const musicBrainzNameAccessor = (
 
 export const discographyTableColumns: ColumnDef<WebDiscographyRelease, any>[] =
   [
+    getSelectionColumn(columnHelper),
+
     columnHelper.accessor("releaseDate", {
       id: "releaseDate",
       header: "Release date",

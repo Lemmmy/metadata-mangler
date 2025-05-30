@@ -1,16 +1,8 @@
-import { useLocalStorage } from "@uidotdev/usehooks";
-import {
-  createContext,
-  type Dispatch,
-  type SetStateAction,
-  useContext,
-} from "react";
+import { createContext, useContext } from "react";
 
 interface DiscographyContextType {
   discographyId: string;
   onDataChange: () => void;
-  includeIgnoredVgmdbRoles: boolean;
-  setIncludeIgnoredVgmdbRoles: Dispatch<SetStateAction<boolean>>;
 }
 
 export const DiscographyContext = createContext<DiscographyContextType | null>(
@@ -38,17 +30,11 @@ export function DiscographyContextProvider({
   onDataChange,
   children,
 }: DiscographyContextProviderProps) {
-  const ignoredRolesKey = `includeIgnoredVgmdbRoles-${discographyId}`;
-  const [includeIgnoredVgmdbRoles, setIncludeIgnoredVgmdbRoles] =
-    useLocalStorage<boolean>(ignoredRolesKey, false);
-
   return (
     <DiscographyContext.Provider
       value={{
         discographyId,
         onDataChange,
-        includeIgnoredVgmdbRoles,
-        setIncludeIgnoredVgmdbRoles,
       }}
     >
       {children}

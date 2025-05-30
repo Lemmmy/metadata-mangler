@@ -5,13 +5,28 @@ import {
   getSortedRowModel,
   useReactTable,
   type Row,
+  type RowSelectionState,
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
+import {
+  useVirtualizer,
+  Virtualizer,
+  type VirtualItem,
+} from "@tanstack/react-virtual";
 import { ArrowDownNarrowWide, ArrowDownWideNarrow } from "lucide-react";
-import { memo, useEffect, useMemo, useState } from "react";
+import {
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import isEqual from "react-fast-compare";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import type { WebDiscographyRelease } from "~/api/discography";
 import {
   Select,
@@ -25,7 +40,7 @@ import { areAllRolesIgnored, cleanVgmdbRoles } from "~/lib/fetch/vgmdbUtils";
 import { useTRPC } from "~/lib/trpc";
 import { cn } from "~/lib/utils";
 import { useTableResize } from "../table/useTableResize";
-import { useDiscographyContext } from "./DiscographyContext";
+import { useDiscographyStore } from "./useDiscographyStore";
 import {
   discographyTableColumns,
   type UseDiscographyTableColumnsReturn,
@@ -51,7 +66,17 @@ export function DiscographyReleasesTable({
   // eslint-disable-next-line react-compiler/react-compiler
   "use no memo";
   const [sorting, setSorting] = useState<SortingState>(defaultSorting);
-  const { includeIgnoredVgmdbRoles } = useDiscographyContext();
+  const {
+    includeIgnoredVgmdbRoles,
+    selectedReleaseIds,
+    setSelectedReleaseIds,
+  } = useDiscographyStore(
+    useShallow((s) => ({
+      includeIgnoredVgmdbRoles: s.includeIgnoredVgmdbRoles[s.discographyId],
+      selectedReleaseIds: s.selectedReleaseIds,
+      setSelectedReleaseIds: s.setSelectedReleaseIds,
+    })),
+  );
 
   // If includeIgnoredVgmdbRoles is false, hide all the rows that only contain ignored roles
   const filteredData = useMemo(() => {
@@ -68,22 +93,30 @@ export function DiscographyReleasesTable({
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode: "onChange",
     enableColumnResizing: true,
+    enableRowSelection: true,
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     state: {
       sorting,
       columnVisibility,
+      rowSelection: selectedReleaseIds,
     },
+    onRowSelectionChange: setSelectedReleaseIds,
     onColumnVisibilityChange: setColumnVisibility,
     defaultColumn,
   });
 
+  const tableContainerRef = useRef<HTMLDivElement>(null);
   const { tableRef, columnSizeVars } = useTableResize(table, columnVisibility);
+  useImperativeHandle(
+    tableRef,
+    () => tableContainerRef.current as HTMLDivElement,
+  );
 
   return (
     <div
-      ref={tableRef}
-      className="border-border flex h-full min-h-[320px] flex-col overflow-auto border shadow-md"
+      ref={tableContainerRef}
+      className="border-border flex min-h-[320px] flex-col overflow-auto border shadow-md"
       style={columnSizeVars}
     >
       {/* Header */}
@@ -130,16 +163,23 @@ export function DiscographyReleasesTable({
         rows={table.getRowModel().rows}
         data={table.options.data}
         columnVisibility={table.getState().columnVisibility}
+        selectedReleaseIds={selectedReleaseIds}
         sorting={sorting}
+        tableRef={tableContainerRef}
       />
     </div>
   );
 }
 
 export function RolesCell({ value }: { value: string | null }) {
-  const { includeIgnoredVgmdbRoles } = useDiscographyContext();
+  const { includeIgnoredVgmdbRoles } = useDiscographyStore(
+    useShallow((s) => ({
+      includeIgnoredVgmdbRoles: s.includeIgnoredVgmdbRoles[s.discographyId],
+    })),
+  );
+
   return (
-    <div className="line-clamp-2">
+    <div className="line-clamp-2" title={value ?? ""}>
       {value ? cleanVgmdbRoles(value, includeIgnoredVgmdbRoles) : null}
     </div>
   );
@@ -177,7 +217,13 @@ export const StatusCell = memo(function StatusCell({
 
   return (
     <Select value={internalValue} onValueChange={handleStatusChange}>
-      <SelectTrigger className="w-full flex-1 rounded-none border-0">
+      <SelectTrigger
+        className={cn("w-full flex-1 rounded-none border-0", {
+          "!bg-lime-500/30": internalValue === "obtained_lossless",
+          "!bg-red-500/30": internalValue === "obtained_lossy",
+          "!bg-black/30": internalValue === "skipped",
+        })}
+      >
         <SelectValue placeholder="Select status" />
       </SelectTrigger>
       <SelectContent>
@@ -193,36 +239,57 @@ export const StatusCell = memo(function StatusCell({
 const TableBody = memo(
   function TableBody({
     rows,
+    selectedReleaseIds,
+    tableRef,
   }: {
     rows: Row<WebDiscographyRelease>[];
     data: WebDiscographyRelease[];
     columnVisibility: VisibilityState;
     sorting: SortingState;
+    selectedReleaseIds: RowSelectionState;
+    tableRef: RefObject<HTMLDivElement | null>;
   }) {
     // eslint-disable-next-line react-compiler/react-compiler
     "use no memo";
+
+    // Add state to force re-render after initial height calculation
+    const [heightInitialized, setHeightInitialized] = useState(false);
+
+    const rowVirtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
+      count: rows.length,
+      estimateSize: () => 36,
+      getScrollElement: () => tableRef.current,
+      measureElement:
+        typeof window !== "undefined" &&
+        navigator.userAgent.indexOf("Firefox") === -1
+          ? (element) => element?.getBoundingClientRect().height
+          : undefined,
+      overscan: 5,
+    });
+
+    // Force a re-render after the height is first populated
+    const totalSize = rowVirtualizer.getTotalSize();
+    useEffect(() => {
+      if (!heightInitialized && totalSize > 0) {
+        setHeightInitialized(true);
+      }
+    }, [totalSize, heightInitialized, rowVirtualizer]);
+
     return (
-      <div className="divide-border bg-card flex flex-col divide-y">
-        {rows.map((row) => (
-          <div key={row.id} className="hover:bg-muted/50 flex w-full">
-            {row.getVisibleCells().map((cell) => (
-              <div
-                key={cell.id}
-                className={cn(
-                  "text-card-foreground border-l-border flex items-center border-l px-2 py-1 text-xs",
-                  cell.column.columnDef.meta?.className,
-                  cell.column.columnDef.meta?.classNameFn?.(cell.getContext()),
-                )}
-                style={{
-                  width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
-                  flexShrink: 0,
-                  flexGrow: 0,
-                }}
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </div>
-            ))}
-          </div>
+      <div
+        className="divide-border relative flex flex-col divide-y"
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+        }}
+      >
+        {rowVirtualizer.getVirtualItems().map((row) => (
+          <TableBodyRow
+            key={row.key}
+            row={rows[row.index]}
+            virtualRow={row}
+            rowVirtualizer={rowVirtualizer}
+            selectedReleaseIds={selectedReleaseIds}
+          />
         ))}
       </div>
     );
@@ -231,5 +298,50 @@ const TableBody = memo(
     prev.rows.length === next.rows.length &&
     prev.data === next.data &&
     isEqual(prev.columnVisibility, next.columnVisibility) &&
-    isEqual(prev.sorting, next.sorting),
+    isEqual(prev.sorting, next.sorting) &&
+    isEqual(prev.selectedReleaseIds, next.selectedReleaseIds),
 );
+
+function TableBodyRow({
+  row,
+  virtualRow,
+  rowVirtualizer,
+}: {
+  row: Row<WebDiscographyRelease>;
+  virtualRow: VirtualItem;
+  rowVirtualizer: Virtualizer<HTMLDivElement, HTMLDivElement>;
+  selectedReleaseIds: RowSelectionState;
+}) {
+  // eslint-disable-next-line react-compiler/react-compiler
+  "use no memo";
+
+  return (
+    <div
+      data-index={virtualRow.index}
+      ref={(node) => rowVirtualizer.measureElement(node)}
+      key={row.id}
+      className="bg-card hover:bg-muted/50 absolute flex w-full"
+      style={{
+        transform: `translateY(${virtualRow.start}px)`,
+      }}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <div
+          key={cell.id}
+          className={cn(
+            "text-card-foreground border-l-border flex items-center border-l px-2 py-1 text-xs",
+            cell.column.columnDef.meta?.className,
+            cell.column.columnDef.meta?.classNameFn?.(cell.getContext()),
+          )}
+          style={{
+            width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
+            flexShrink: 0,
+            flexGrow: 0,
+          }}
+        >
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </div>
+      ))}
+    </div>
+  );
+}

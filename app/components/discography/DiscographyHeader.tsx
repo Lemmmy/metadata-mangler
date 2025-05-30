@@ -3,9 +3,10 @@ import { BreadcrumbMenu } from "../BreadcrumbMenu";
 import { ColumnVisibilityDropdown } from "../table/ColumnVisibilityDropdown";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { useDiscographyContext } from "./DiscographyContext";
 import { discographyTableColumns } from "./useDiscographyTableColumns";
 import type { UseDiscographyTableColumnsReturn } from "./useDiscographyTableColumns";
+import { useDiscographyStore } from "./useDiscographyStore";
+import { useShallow } from "zustand/react/shallow";
 
 interface Props extends UseDiscographyTableColumnsReturn {
   edit: () => void;
@@ -21,7 +22,12 @@ export function DiscographyHeader({
   setColumnVisibility,
 }: Props) {
   const { includeIgnoredVgmdbRoles, setIncludeIgnoredVgmdbRoles } =
-    useDiscographyContext();
+    useDiscographyStore(
+      useShallow((s) => ({
+        includeIgnoredVgmdbRoles: s.includeIgnoredVgmdbRoles[s.discographyId],
+        setIncludeIgnoredVgmdbRoles: s.setIncludeIgnoredVgmdbRoles,
+      })),
+    );
 
   return (
     <div className="border-b-border flex items-center border-b px-4 py-3">

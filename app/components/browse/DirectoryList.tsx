@@ -118,6 +118,14 @@ function DirectoryListItem({
   basePath: string;
   className?: string;
 } & HTMLProps<HTMLDivElement>) {
+  const encodedBasePath = basePath
+    ? basePath.split("/").map(encodeURIComponent).join("/")
+    : "";
+  const encodedItemName = item.name
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+
   return (
     <div
       {...props}
@@ -135,7 +143,7 @@ function DirectoryListItem({
       <NavLink
         to={
           item.isDirectory
-            ? `${basePath ? `/browse/${encodeURIComponent(basePath)}` : "/browse"}/${item.name}`
+            ? `${encodedBasePath ? `/browse/${encodedBasePath}` : "/browse"}/${encodedItemName}`
             : "#"
         }
         end

@@ -5,9 +5,9 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { getSelectionColumn } from "~/components/table/SelectionColumn";
 import { useTableColumnVisibility } from "~/components/table/useTableColumnVisibility";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import { formatDuration } from "~/lib/duration";
 import { isTagSuspicious } from "~/lib/tags/musicMetadataShared";
 import {
@@ -39,29 +39,7 @@ function createEditableCellRenderer(
 const columnHelper = createColumnHelper<StoreTrack>();
 
 export const albumTableColumns: ColumnDef<StoreTrack, any>[] = [
-  columnHelper.display({
-    id: "select-col",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllRowsSelected()}
-        indeterminate={table.getIsSomeRowsSelected()}
-        onClick={table.getToggleAllRowsSelectedHandler()}
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        disabled={!row.getCanSelect()}
-        onClick={row.getToggleSelectedHandler()}
-      />
-    ),
-    size: 40,
-    enableResizing: false,
-    meta: {
-      className: "leading-none items-center justify-center",
-      visibility: "always",
-    },
-  }),
+  getSelectionColumn(columnHelper),
   columnHelper.accessor("filename", {
     id: "filename",
     header: "Filename",

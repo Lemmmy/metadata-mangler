@@ -92,15 +92,20 @@ export function useTableColumnVisibility<T extends RowData>(
       const id = column.id as keyof T;
       if (!id) return;
 
-      const hidden = column.meta?.visibility;
-      if (hidden === "showIfDiffers" || hidden === "showIfExists") {
+      const vis = column.meta?.visibility;
+      if (vis === "always") {
+        setColumnVisibility((prev) => ({
+          ...prev,
+          [id]: true,
+        }));
+      } else if (vis === "showIfDiffers" || vis === "showIfExists") {
         checkColumnCardinality(
           setColumnVisibility,
           data,
           "accessorFn" in column ? column.accessorFn : (row) => row[id],
           normalizeFn,
           id,
-          hidden === "showIfExists",
+          vis === "showIfExists",
         );
       }
     });

@@ -20,6 +20,8 @@ export function OpenAsAlbum({
 }: Props) {
   const navigate = useNavigate();
 
+  const encodedDir = directory.split("/").map(encodeURIComponent).join("/");
+
   const trpc = useTRPC();
   const precheck = useQuery(
     trpc.browse.albumPrecheck.queryOptions(
@@ -36,7 +38,7 @@ export function OpenAsAlbum({
     if (directory) {
       precheck.refetch().then(({ data }) => {
         if (data?.success) {
-          navigate(`/album/${encodeURIComponent(directory)}`);
+          navigate(`/album/${encodedDir}`);
         }
       });
     }
