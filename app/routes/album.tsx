@@ -17,6 +17,7 @@ import { useTRPC } from "~/lib/trpc";
 import type { Route } from "./+types/album";
 import { Breadcrumb, type BreadcrumbHandle } from "~/components/Breadcrumb";
 import { AlbumArt } from "~/components/album/AlbumArt";
+import { DuplicateTrackNumberWarning } from "~/components/album/table/DuplicateTrackNumberWarning";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const safePath = rebasePath(params["*"] || "");
@@ -136,6 +137,8 @@ export default function Home({
           />
         </div>
       </div>
+
+      <DuplicateTrackNumberWarning />
 
       <AlbumTracksTable
         columnVisibility={columnVisibility}
