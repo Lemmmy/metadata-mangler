@@ -27,7 +27,7 @@ export const env = v.parse(
       OPENROUTER_API_KEY: v.optional(v.string()),
       ANTHROPIC_API_KEY: v.optional(v.string()),
       OPENAI_API_KEY: v.optional(v.string()),
-      GOOGLE_API_KEY: v.optional(v.string()),
+      GOOGLE_GENERATIVE_AI_API_KEY: v.optional(v.string()),
 
       DEFAULT_WEB_MODEL: v.optional(
         v.string(),
@@ -57,7 +57,7 @@ export const env = v.parse(
           env.OPENROUTER_API_KEY ||
           env.ANTHROPIC_API_KEY ||
           env.OPENAI_API_KEY ||
-          env.GOOGLE_API_KEY
+          env.GOOGLE_GENERATIVE_AI_API_KEY
         ),
       "At least one API key is required",
     ),

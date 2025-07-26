@@ -11,7 +11,7 @@ import { env } from "../env";
 const hasAnthropic = () => !!env.ANTHROPIC_API_KEY;
 const hasOpenRouter = () => !!env.OPENROUTER_API_KEY;
 const hasOpenAI = () => !!env.OPENAI_API_KEY;
-const hasGoogle = () => !!env.GOOGLE_API_KEY;
+const hasGoogle = () => !!env.GOOGLE_GENERATIVE_AI_API_KEY;
 
 export interface SupportedModel {
   id: string;
