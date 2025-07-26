@@ -1,6 +1,7 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import type { LanguageModel, LanguageModelUsage } from "ai";
 import * as v from "valibot";
 import type { AITrack } from "./aiMetadata";
@@ -10,6 +11,7 @@ import { env } from "../env";
 const hasAnthropic = () => !!env.ANTHROPIC_API_KEY;
 const hasOpenRouter = () => !!env.OPENROUTER_API_KEY;
 const hasOpenAI = () => !!env.OPENAI_API_KEY;
+const hasGoogle = () => !!env.GOOGLE_API_KEY;
 
 export interface SupportedModel {
   id: string;
@@ -130,6 +132,24 @@ export const supportedModels: SupportedModel[] = [
     provider: openai,
     inputUsdPer1Mil: 0.15,
     outputUsdPer1Mil: 0.6,
+  },
+
+  // Models from Google
+  {
+    id: "gemini-2.5-pro",
+    name: "Google Gemini 2.5 Pro",
+    isAvailable: hasGoogle,
+    provider: google,
+    inputUsdPer1Mil: 1.25,
+    outputUsdPer1Mil: 10.0,
+  },
+  {
+    id: "gemini-2.5-flash",
+    name: "Google Gemini 2.5 Flash",
+    isAvailable: hasGoogle,
+    provider: google,
+    inputUsdPer1Mil: 0.3,
+    outputUsdPer1Mil: 2.5,
   },
 ];
 
