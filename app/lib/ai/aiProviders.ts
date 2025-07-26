@@ -151,6 +151,14 @@ export const supportedModels: SupportedModel[] = [
     inputUsdPer1Mil: 0.3,
     outputUsdPer1Mil: 2.5,
   },
+  {
+    id: "gemini-2.0-flash",
+    name: "Google Gemini 2.0 Flash",
+    isAvailable: hasGoogle,
+    provider: google,
+    inputUsdPer1Mil: 0,
+    outputUsdPer1Mil: 0,
+  },
 ];
 
 export const supportedModelLut: Record<string, SupportedModel> =
