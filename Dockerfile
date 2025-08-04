@@ -1,4 +1,4 @@
-FROM node:23-alpine AS pnpm
+FROM node:24-alpine AS pnpm
 COPY ./package.json pnpm-lock.yaml /app/
 WORKDIR /app
 RUN corepack enable
@@ -16,7 +16,7 @@ COPY . /app/
 COPY --from=development-dependencies-env /app/node_modules /app/node_modules
 RUN pnpm run build
 
-FROM node:23-bookworm
+FROM node:24-bookworm
 
 RUN apt-get update && apt-get install -y flac vorbis-tools python3 python3-pip icu-devtools
 RUN pip3 install --break-system-packages mutagen
